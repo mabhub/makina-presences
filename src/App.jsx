@@ -21,6 +21,7 @@ import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { RemoveCircle, ExposureOutlined, AddCircle } from '@material-ui/icons';
 
 import usePresences from './hooks/usePresences';
+import useHolidays from './hooks/useHolidays';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -51,8 +52,14 @@ const useStyles = makeStyles(theme => ({
   week: {
     textAlign: 'right',
   },
+  holidayCard: {
+    opacity: 0.25,
+  },
   avatar: {
-    backgroundColor: theme.palette.grey[300],
+    background: theme.palette.grey[400],
+  },
+  holidayAvatar: {
+    background: theme.palette.grey[200],
   },
   today: {
     backgroundColor: emphasize(theme.palette.primary.main, 0.75),
@@ -64,6 +71,11 @@ const useStyles = makeStyles(theme => ({
     background: '#f5f5f5',
     fontSize: theme.typography.pxToRem(10),
     // textAlign: 'center',
+  },
+  holiday: {
+    textAlign: 'center',
+    fontSize: '1rem',
+    fontStyle: 'italic',
   },
   moment: {
     color: theme.palette.grey[500],
@@ -88,6 +100,7 @@ function App () {
   const classes = useStyles();
   const [tri, setTri] = useTriState('xyz');
   const { presences, createRow, updateRow, deleteRow } = usePresences();
+  const holidays = useHolidays();
 
   const dayAdd = (
     date,
@@ -135,6 +148,8 @@ function App () {
           {days.map((_, index) => {
             const currentDay = today.day(index);
             const dayIndex = currentDay.day();
+            const isoDay = currentDay.format('YYYY-MM-DD');
+            const holiday = holidays[isoDay];
 
             const dayname = Days[(index) % 7];
             const dayInitial = dayname[0].toUpperCase();
@@ -155,23 +170,25 @@ function App () {
               );
             }
 
-            const todayPresences = presences.filter(({ [DATE]: d }) => (
-              d === currentDay.format('YYYY-MM-DD')
-            ));
+            const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
 
             return (
               <Grid item xs={2} key={currentDay.toString()}>
-                <Card>
+                <Card className={clsx({ [classes.holidayCard]: holiday })}>
                   <CardHeader
                     avatar={(
-                      <Avatar className={classes.avatar}>
+                      <Avatar
+                        className={clsx(classes.avatar, { [classes.holidayAvatar]: holiday })}
+                      >
                         {dayInitial}
                       </Avatar>
                     )}
                     title={dayname}
                     subheader={date}
                     action={(
-                      <IconButton onClick={dayAdd(currentDay)}><ExposureOutlined /></IconButton>
+                      <IconButton disabled={Boolean(holiday)} onClick={dayAdd(currentDay)}>
+                        <ExposureOutlined />
+                      </IconButton>
                     )}
                     className={clsx(
                       classes.cardHeader,
@@ -181,7 +198,14 @@ function App () {
 
                   <CardContent className={classes.cardContent}>
                     <Grid container>
-                      {[MATIN, MIDI, APREM].map(moment => {
+                      {holiday && (
+                        <Grid item xs={12} className={classes.holiday}>
+                          Jour férié<br />
+                          ({holiday})
+                        </Grid>
+                      )}
+
+                      {!holiday && [MATIN, MIDI, APREM].map(moment => {
                         const isPresent = todayPresences.some(
                           ({ [moment]: m, [TRI]: t }) => (m && t === tri),
                         );
