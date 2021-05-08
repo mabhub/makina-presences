@@ -97,7 +97,7 @@ function App () {
   const [tri, setTri] = useTriState('xyz');
   const queryClient = useQueryClient();
 
-  const { data: { results: records = [] } = {} } = useQuery(
+  const { data: { results: presences = [] } = {} } = useQuery(
     'presences',
     async () => {
       const response = await fetch(
@@ -130,7 +130,7 @@ function App () {
     changes,
   ) => () => {
     const isoDate = date.format('YYYY-MM-DD');
-    const existing = records.find(({ [KEY]: key }) => (key === `${isoDate}-${tri}`));
+    const existing = presences.find(({ [KEY]: key }) => (key === `${isoDate}-${tri}`));
 
     if (!changes) {
       if (existing) {
@@ -191,7 +191,7 @@ function App () {
               );
             }
 
-            const todayPresences = records.filter(({ [DATE]: d }) => (
+            const todayPresences = presences.filter(({ [DATE]: d }) => (
               d === currentDay.format('YYYY-MM-DD')
             ));
 
