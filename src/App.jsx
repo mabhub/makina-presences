@@ -158,13 +158,27 @@ function App () {
 
             if (dayIndex === 6) {
               return (
-                <Grid item xs={1} key={currentDay.toString()} className={classes.week} />
+                <Grid
+                  item
+                  xs={12}
+                  lg={1}
+                  key={currentDay.toString()}
+                  className={classes.week}
+                />
               );
             }
 
             if (dayIndex === 0) {
               return (
-                <Grid item xs={1} key={currentDay.toString()} className={classes.week}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={1}
+                  key={currentDay.toString()}
+                  className={classes.week}
+                >
                   {currentDay.day(1).isoWeek()}
                 </Grid>
               );
@@ -173,7 +187,7 @@ function App () {
             const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
 
             return (
-              <Grid item xs={2} key={currentDay.toString()}>
+              <Grid item xs={12} sm={6} md={4} lg={2} key={currentDay.toString()}>
                 <Card className={clsx({ [classes.holidayCard]: holiday })}>
                   <CardHeader
                     avatar={(
