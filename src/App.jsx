@@ -20,12 +20,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { RemoveCircle, ExposureOutlined, AddCircle } from '@material-ui/icons';
 
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import usePresences from './hooks/usePresences';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
-
-const { VITE_DATA_TOKEN, VITE_DATA_TABLE } = import.meta.env;
 
 const KEY = 'field_90299';
 const DATE = 'field_99443';
@@ -43,12 +41,6 @@ const labels = {
   field_99447: 'tri',
 };
 
-const headers = {
-  Authorization: `Token ${VITE_DATA_TOKEN}`,
-  'Content-Type': 'application/json',
-};
-
-const basePath = `https://api.baserow.io/api/database/rows/table/${VITE_DATA_TABLE}/`;
 const Days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const Months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 // const colors = ['#97e3d5', '#61cdbb', '#e8a838', '#f1e15b', '#f47560', '#e8c1a0'];
@@ -95,35 +87,7 @@ const useStyles = makeStyles(theme => ({
 function App () {
   const classes = useStyles();
   const [tri, setTri] = useTriState('xyz');
-  const queryClient = useQueryClient();
-
-  const { data: { results: presences = [] } = {} } = useQuery(
-    'presences',
-    async () => {
-      const response = await fetch(
-        basePath,
-        { headers: { Authorization: `Token ${VITE_DATA_TOKEN}` } },
-      );
-
-      return response.json();
-    },
-    { staleTime: 60000, refetchInterval: 60000 },
-  );
-
-  const createRow = useMutation(record => fetch(
-    basePath,
-    { headers, method: 'POST', body: JSON.stringify(record) },
-  ), { onSettled: () => queryClient.invalidateQueries('presences') });
-
-  const updateRow = useMutation(record => fetch(
-    `${basePath}${record.id}/`,
-    { headers, method: 'PATCH', body: JSON.stringify(record) },
-  ), { onSettled: () => queryClient.invalidateQueries('presences') });
-
-  const deleteRow = useMutation(record => fetch(
-    `${basePath}${record.id}/`,
-    { headers, method: 'DELETE' },
-  ), { onSettled: () => queryClient.invalidateQueries('presences') });
+  const { presences, createRow, updateRow, deleteRow } = usePresences();
 
   const dayAdd = (
     date,
