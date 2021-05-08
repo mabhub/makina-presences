@@ -227,7 +227,7 @@ function App () {
 
                         return (
                           <Grid item xs={12} className={classes.moment} key={moment}>
-                            {`${labels[moment]} : `}<br />
+                            {`${labels[moment]} (${todayMomentPresences.length}) : `}<br />
 
                             {todayMomentPresences
                               .map(({ id, [TRI]: t }) => (
