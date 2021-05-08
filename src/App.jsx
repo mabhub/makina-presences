@@ -250,6 +250,7 @@ function App () {
                                 variant="outlined"
                                 className={classes.tri}
                                 deleteIcon={<AddCircle />}
+                                onClick={dayAdd(currentDay, { [moment]: true })}
                                 onDelete={dayAdd(currentDay, { [moment]: true })}
                               />
                             )}
