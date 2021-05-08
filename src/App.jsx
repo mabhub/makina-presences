@@ -248,7 +248,7 @@ function App () {
                             {!isPresent && (
                               <Chip
                                 size="small"
-                                label={tri}
+                                // label={tri}
                                 variant="outlined"
                                 className={classes.tri}
                                 deleteIcon={<AddCircle />}
