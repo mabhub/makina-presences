@@ -51,7 +51,7 @@ const headers = {
 const basePath = `https://api.baserow.io/api/database/rows/table/${VITE_DATA_TABLE}/`;
 const Days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const Months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-const colors = ['#97e3d5', '#61cdbb', '#e8a838', '#f1e15b', '#f47560', '#e8c1a0'];
+// const colors = ['#97e3d5', '#61cdbb', '#e8a838', '#f1e15b', '#f47560', '#e8c1a0'];
 
 const useTriState = createPersistedState('tri');
 
@@ -60,7 +60,7 @@ const useStyles = makeStyles(theme => ({
     textAlign: 'right',
   },
   avatar: {
-    backgroundColor: 'red',
+    backgroundColor: theme.palette.grey[300],
   },
   today: {
     backgroundColor: emphasize(theme.palette.primary.main, 0.75),
@@ -200,7 +200,7 @@ function App () {
                 <Card>
                   <CardHeader
                     avatar={(
-                      <Avatar className={classes.avatar} style={{ background: colors[dayIndex] }}>
+                      <Avatar className={classes.avatar}>
                         {dayInitial}
                       </Avatar>
                     )}
