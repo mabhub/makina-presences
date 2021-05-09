@@ -224,7 +224,8 @@ function App () {
                           ({ [moment]: m, [TRI]: t }) => (m && t === tri),
                         );
 
-                        const dayAddMoment = dayAdd(currentDay, { [moment]: false });
+                        const removeMoment = dayAdd(currentDay, { [moment]: false });
+                        const addMoment = dayAdd(currentDay, { [moment]: true });
                         const todayMomentPresences = todayPresences.filter(({ [moment]: m }) => m);
 
                         return (
@@ -241,7 +242,7 @@ function App () {
                                   className={classes.tri}
                                   onClick={() => setTri(t)}
                                   deleteIcon={<RemoveCircle />}
-                                  onDelete={t === tri ? dayAddMoment : undefined}
+                                  onDelete={t === tri ? removeMoment : undefined}
                                 />
                               ))}
 
@@ -252,8 +253,8 @@ function App () {
                                 variant="outlined"
                                 className={classes.tri}
                                 deleteIcon={<AddCircle />}
-                                onClick={dayAdd(currentDay, { [moment]: true })}
-                                onDelete={dayAdd(currentDay, { [moment]: true })}
+                                onClick={addMoment}
+                                onDelete={addMoment}
                               />
                             )}
                           </Grid>
