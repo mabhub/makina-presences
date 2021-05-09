@@ -17,7 +17,7 @@ import {
   TextField,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { emphasize } from '@material-ui/core/styles/colorManipulator';
+import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
 import { RemoveCircle, ExposureOutlined, AddCircle } from '@material-ui/icons';
 
 import usePresences from './hooks/usePresences';
@@ -69,8 +69,12 @@ const useStyles = makeStyles(theme => ({
   },
   cardContent: {
     background: '#f5f5f5',
+    textAlign: 'center',
     fontSize: theme.typography.pxToRem(10),
-    // textAlign: 'center',
+    padding: theme.spacing(1),
+    '&:last-child': {
+      paddingBottom: theme.spacing(1),
+    },
   },
   holiday: {
     textAlign: 'center',
@@ -79,7 +83,13 @@ const useStyles = makeStyles(theme => ({
   },
   moment: {
     color: theme.palette.grey[500],
-    marginTop: theme.spacing(1),
+  },
+  matin: {
+    background: fade(theme.palette.primary.main, 0.15),
+  },
+  midi: {},
+  aprem: {
+    background: fade(theme.palette.primary.main, 0.15),
   },
   tri: {
     margin: theme.spacing(0.25),
@@ -211,7 +221,7 @@ function App () {
                   />
 
                   <CardContent className={classes.cardContent}>
-                    <Grid container>
+                    <Grid container spacing={1}>
                       {holiday && (
                         <Grid item xs={12} className={classes.holiday}>
                           Jour férié<br />
@@ -229,7 +239,15 @@ function App () {
                         const todayMomentPresences = todayPresences.filter(({ [moment]: m }) => m);
 
                         return (
-                          <Grid item xs={4} className={classes.moment} key={moment}>
+                          <Grid
+                            item
+                            xs={4}
+                            className={clsx(
+                              classes.moment,
+                              classes[labels[moment]],
+                            )}
+                            key={moment}
+                          >
                             {`${labels[moment]} (${todayMomentPresences.length}) : `}<br />
 
                             {todayMomentPresences
