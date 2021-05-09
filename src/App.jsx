@@ -228,7 +228,7 @@ function App () {
                         const todayMomentPresences = todayPresences.filter(({ [moment]: m }) => m);
 
                         return (
-                          <Grid item xs={12} className={classes.moment} key={moment}>
+                          <Grid item xs={4} className={classes.moment} key={moment}>
                             {`${labels[moment]} (${todayMomentPresences.length}) : `}<br />
 
                             {todayMomentPresences
