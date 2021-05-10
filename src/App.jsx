@@ -35,6 +35,11 @@ const usePlaceState = createPersistedState('place');
 const useStyles = makeStyles(theme => ({
   placeButtons: {
     marginRight: theme.spacing(2),
+
+    '& .Mui-selected': {
+      background: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+    },
   },
   week: {
     textAlign: 'right',
