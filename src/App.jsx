@@ -165,7 +165,12 @@ function App () {
   return (
     <div className="App">
       <Container style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <TextField label="Trigramme" value={tri} onChange={handleTriChange} />
+        <TextField
+          label="Trigramme"
+          helperText="(tip: cliquer sur un trigramme le défini comme trigramme courant)"
+          value={tri}
+          onChange={handleTriChange}
+        />
       </Container>
 
       <Container style={{ marginTop: '2rem' }}>
