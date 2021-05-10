@@ -59,7 +59,14 @@ const usePresences = () => {
   const deleteRow = useMutation(record => fetch(
     `${basePath}${record.id}/`,
     { headers, method: 'DELETE' },
-  ), { onSettled: () => queryClient.invalidateQueries('presences') });
+  ), {
+    onMutate: async record => {
+      queryClient.setQueryData('presences', ({ results = [] }) => ({
+        results: results.filter(result => (result.id !== record.id)),
+      }));
+    },
+    onSettled: () => queryClient.invalidateQueries('presences'),
+  });
 
   return {
     presences,
