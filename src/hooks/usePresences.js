@@ -28,7 +28,17 @@ const usePresences = () => {
   const createRow = useMutation(record => fetch(
     basePath,
     { headers, method: 'POST', body: JSON.stringify(record) },
-  ), { onSettled: () => queryClient.invalidateQueries('presences') });
+  ), {
+    onMutate: async record => {
+      queryClient.setQueryData('presences', previous => ({
+        results: [
+          ...previous.results,
+          { ...record, fake: true, id: record.field_90299 },
+        ],
+      }));
+    },
+    onSettled: () => queryClient.invalidateQueries('presences'),
+  });
 
   const updateRow = useMutation(record => fetch(
     `${basePath}${record.id}/`,

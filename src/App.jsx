@@ -251,23 +251,26 @@ function App () {
                             {`${labels[moment]} (${todayMomentPresences.length}) : `}<br />
 
                             {todayMomentPresences
-                              .map(({ id, [TRI]: t }) => (
-                                <Chip
-                                  key={id}
-                                  size="small"
-                                  label={t}
-                                  color={t === tri ? 'primary' : undefined}
-                                  className={classes.tri}
-                                  onClick={() => setTri(t)}
-                                  deleteIcon={<RemoveCircle />}
-                                  onDelete={t === tri ? removeMoment : undefined}
-                                />
-                              ))}
+                              .map(({ id, [TRI]: t, fake }) => {
+                                const color = fake ? 'secondary' : 'primary';
+
+                                return (
+                                  <Chip
+                                    key={id}
+                                    size="small"
+                                    label={t}
+                                    color={t === tri ? color : undefined}
+                                    className={classes.tri}
+                                    onClick={() => setTri(t)}
+                                    deleteIcon={<RemoveCircle />}
+                                    onDelete={t === tri ? removeMoment : undefined}
+                                  />
+                                );
+                              })}
 
                             {!isPresent && (
                               <Chip
                                 size="small"
-                                // label={tri}
                                 variant="outlined"
                                 className={classes.tri}
                                 deleteIcon={<AddCircle />}
