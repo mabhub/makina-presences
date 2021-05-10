@@ -19,7 +19,7 @@ import {
 import { Alert, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
-import { RemoveCircle, ExposureOutlined, AddCircle } from '@material-ui/icons';
+import { AddCircle, AddCircleOutline, RemoveCircle, RemoveCircleOutline } from '@material-ui/icons';
 
 import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
@@ -110,6 +110,13 @@ const useStyles = makeStyles(theme => ({
   },
   currentTri: {
     fontWeight: 'bold',
+  },
+  addMoment: {
+    fontSize: '0.5rem',
+    '& .MuiSvgIcon-root': {
+      width: '0.7em',
+      height: '0.7em',
+    },
   },
 }));
 
@@ -244,6 +251,10 @@ function App () {
             }
 
             const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
+            const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => t === tri) || {};
+            const dayLongPresence = currentTodayPresences[MATIN]
+              && currentTodayPresences[MIDI]
+              && currentTodayPresences[APREM];
 
             return (
               <Grid
@@ -273,7 +284,7 @@ function App () {
                     subheader={date}
                     action={(
                       <IconButton disabled={Boolean(holiday)} onClick={dayAdd(currentDay)}>
-                        <ExposureOutlined />
+                        {dayLongPresence ? <RemoveCircleOutline /> : <AddCircleOutline />}
                       </IconButton>
                     )}
                     className={clsx(
@@ -331,14 +342,13 @@ function App () {
                               })}
 
                             {!isPresent && (
-                              <Chip
-                                size="small"
-                                variant="outlined"
-                                className={classes.tri}
-                                deleteIcon={<AddCircle />}
+                              <IconButton
                                 onClick={addMoment}
-                                onDelete={addMoment}
-                              />
+                                className={classes.addMoment}
+                                size="small"
+                              >
+                                <AddCircle />
+                              </IconButton>
                             )}
                           </Grid>
                         );
