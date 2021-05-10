@@ -283,7 +283,7 @@ function App () {
                   />
 
                   <CardContent className={classes.cardContent}>
-                    <Grid container spacing={1}>
+                    <Grid container spacing={2}>
                       {holiday && (
                         <Grid item xs={12} className={classes.holiday}>
                           Jour férié<br />
