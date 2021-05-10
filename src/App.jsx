@@ -16,6 +16,7 @@ import {
   IconButton,
   TextField,
 } from '@material-ui/core';
+import { Alert, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
 import { RemoveCircle, ExposureOutlined, AddCircle } from '@material-ui/icons';
@@ -47,8 +48,12 @@ const Months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet'
 // const colors = ['#97e3d5', '#61cdbb', '#e8a838', '#f1e15b', '#f47560', '#e8c1a0'];
 
 const useTriState = createPersistedState('tri');
+const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
+  placeButtons: {
+    marginRight: theme.spacing(2),
+  },
   week: {
     textAlign: 'right',
     fontStyle: 'italic',
@@ -123,7 +128,8 @@ const useStyles = makeStyles(theme => ({
 
 function App () {
   const classes = useStyles();
-  const [tri, setTri] = useTriState('xyz');
+  const [tri, setTri] = useTriState('');
+  const [place, setPlace] = usePlaceState();
   const { presences, createRow, updateRow, deleteRow } = usePresences();
   const holidays = useHolidays();
 
@@ -161,10 +167,23 @@ function App () {
   const today = dayjs();
   const days = [...Array(21)];
   const handleTriChange = event => setTri(event.target.value);
+  const handlePlaceChange = (event, newPlace) => setPlace(newPlace);
 
   return (
     <div className="App">
       <Container style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <ToggleButtonGroup
+          orientation="vertical"
+          size="small"
+          className={classes.placeButtons}
+          onChange={handlePlaceChange}
+          exclusive
+          value={place}
+        >
+          <ToggleButton value="nantes">Nantes</ToggleButton>
+          <ToggleButton value="toulouse">Toulouse</ToggleButton>
+        </ToggleButtonGroup>
+
         <TextField
           label="Trigramme"
           helperText="(tip: cliquer sur un trigramme le défini comme trigramme courant)"
@@ -173,9 +192,21 @@ function App () {
         />
       </Container>
 
+      {(!place || tri.length < 3) && (
+        <Container style={{ marginTop: '1rem' }}>
+          <Grid container justify="center">
+            <Grid item xs={10}>
+              <Alert severity="info">
+                Choisir un lieu et saisir un trigramme pour pouvoir remplir les présences.
+              </Alert>
+            </Grid>
+          </Grid>
+        </Container>
+      )}
+
       <Container style={{ marginTop: '2rem' }}>
         <Grid container spacing={2}>
-          {days.map((_, index) => {
+          {(tri.length >= 3) && days.map((_, index) => {
             const currentDay = today.day(index);
             const dayIndex = currentDay.day();
             const isoDay = currentDay.format('YYYY-MM-DD');
