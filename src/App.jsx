@@ -51,6 +51,9 @@ const useTriState = createPersistedState('tri');
 const useStyles = makeStyles(theme => ({
   week: {
     textAlign: 'right',
+    fontStyle: 'italic',
+    fontSize: '0.8em',
+    alignSelf: 'center',
   },
   holidayCard: {
     opacity: 0.85,
@@ -185,7 +188,6 @@ function App () {
                   xs={12}
                   lg={1}
                   key={currentDay.toString()}
-                  className={classes.week}
                 />
               );
             }
@@ -201,7 +203,7 @@ function App () {
                   key={currentDay.toString()}
                   className={classes.week}
                 >
-                  {currentDay.day(1).isoWeek()}
+                  s<strong>{currentDay.day(1).isoWeek()}</strong>
                 </Grid>
               );
             }
