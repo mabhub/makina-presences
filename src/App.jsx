@@ -53,13 +53,21 @@ const useStyles = makeStyles(theme => ({
     textAlign: 'right',
   },
   holidayCard: {
-    opacity: 0.25,
+    opacity: 0.85,
   },
   avatar: {
     background: theme.palette.grey[400],
   },
   holidayAvatar: {
     background: theme.palette.grey[200],
+  },
+  day: {
+    display: 'flex',
+  },
+  dayCard: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
   },
   today: {
     backgroundColor: emphasize(theme.palette.primary.main, 0.75),
@@ -68,6 +76,9 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2, 2, 1),
   },
   cardContent: {
+    flex: 1,
+    display: 'flex',
+
     background: '#f5f5f5',
     textAlign: 'center',
     fontSize: theme.typography.pxToRem(10),
@@ -80,6 +91,7 @@ const useStyles = makeStyles(theme => ({
     textAlign: 'center',
     fontSize: '1rem',
     fontStyle: 'italic',
+    alignSelf: 'center',
   },
   moment: {
     color: theme.palette.grey[500],
@@ -197,8 +209,21 @@ function App () {
             const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
 
             return (
-              <Grid item xs={12} sm={6} md={4} lg={2} key={currentDay.toString()}>
-                <Card className={clsx({ [classes.holidayCard]: holiday })}>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                lg={2}
+                key={currentDay.toString()}
+                className={classes.day}
+              >
+                <Card
+                  className={clsx({
+                    [classes.dayCard]: true,
+                    [classes.holidayCard]: holiday,
+                  })}
+                >
                   <CardHeader
                     avatar={(
                       <Avatar
@@ -248,7 +273,7 @@ function App () {
                             )}
                             key={moment}
                           >
-                            {`${labels[moment]} (${todayMomentPresences.length}) : `}<br />
+                            {labels[moment]}<br />
 
                             {todayMomentPresences
                               .map(({ id, [TRI]: t, fake }) => {
