@@ -43,7 +43,18 @@ const usePresences = () => {
   const updateRow = useMutation(record => fetch(
     `${basePath}${record.id}/`,
     { headers, method: 'PATCH', body: JSON.stringify(record) },
-  ), { onSettled: () => queryClient.invalidateQueries('presences') });
+  ), {
+    onMutate: async record => {
+      queryClient.setQueryData('presences', ({ results = [] }) => ({
+        results: results.map(result => (
+          result.id === record.id
+            ? { ...result, ...record, fake: true }
+            : result
+        )),
+      }));
+    },
+    onSettled: () => queryClient.invalidateQueries('presences'),
+  });
 
   const deleteRow = useMutation(record => fetch(
     `${basePath}${record.id}/`,
