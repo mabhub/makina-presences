@@ -1,19 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { fieldMap, placesId } from '../settings';
 
-const { VITE_DATA_TOKEN, VITE_DATA_TABLE } = import.meta.env;
+const { VITE_DATA_TOKEN } = import.meta.env;
 
 const headers = {
   Authorization: `Token ${VITE_DATA_TOKEN}`,
   'Content-Type': 'application/json',
 };
 
-const basePath = `https://api.baserow.io/api/database/rows/table/${VITE_DATA_TABLE}/`;
-
-const usePresences = () => {
+const usePresences = place => {
   const queryClient = useQueryClient();
+  const basePath = `https://api.baserow.io/api/database/rows/table/${placesId[place]}/`;
+
+  const queryKey = ['presences', place];
 
   const { data: { results: presences = [] } = {} } = useQuery(
-    'presences',
+    queryKey,
     async () => {
       const response = await fetch(
         basePath,
@@ -30,14 +32,14 @@ const usePresences = () => {
     { headers, method: 'POST', body: JSON.stringify(record) },
   ), {
     onMutate: async record => {
-      queryClient.setQueryData('presences', previous => ({
+      queryClient.setQueryData(queryKey, previous => ({
         results: [
           ...previous.results,
-          { ...record, fake: true, id: record.field_90299 },
+          { ...record, fake: true, id: record[fieldMap[place].KEY] },
         ],
       }));
     },
-    onSettled: () => queryClient.invalidateQueries('presences'),
+    onSettled: () => queryClient.invalidateQueries(queryKey),
   });
 
   const updateRow = useMutation(record => fetch(
@@ -45,7 +47,7 @@ const usePresences = () => {
     { headers, method: 'PATCH', body: JSON.stringify(record) },
   ), {
     onMutate: async record => {
-      queryClient.setQueryData('presences', ({ results = [] }) => ({
+      queryClient.setQueryData(queryKey, ({ results = [] }) => ({
         results: results.map(result => (
           result.id === record.id
             ? { ...result, ...record, fake: true }
@@ -53,7 +55,7 @@ const usePresences = () => {
         )),
       }));
     },
-    onSettled: () => queryClient.invalidateQueries('presences'),
+    onSettled: () => queryClient.invalidateQueries(queryKey),
   });
 
   const deleteRow = useMutation(record => fetch(
@@ -61,11 +63,11 @@ const usePresences = () => {
     { headers, method: 'DELETE' },
   ), {
     onMutate: async record => {
-      queryClient.setQueryData('presences', ({ results = [] }) => ({
+      queryClient.setQueryData(queryKey, ({ results = [] }) => ({
         results: results.filter(result => (result.id !== record.id)),
       }));
     },
-    onSettled: () => queryClient.invalidateQueries('presences'),
+    onSettled: () => queryClient.invalidateQueries(queryKey),
   });
 
   return {

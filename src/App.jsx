@@ -24,28 +24,10 @@ import { RemoveCircle, ExposureOutlined, AddCircle } from '@material-ui/icons';
 import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
 
+import { placesId, fieldLabel, fieldMap, Days, Months } from './settings';
+
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
-
-const KEY = 'field_90299';
-const DATE = 'field_99443';
-const MATIN = 'field_99444';
-const MIDI = 'field_99445';
-const APREM = 'field_99446';
-const TRI = 'field_99447';
-
-const labels = {
-  field_90299: 'key',
-  field_99443: 'date',
-  field_99444: 'matin',
-  field_99445: 'midi',
-  field_99446: 'aprem',
-  field_99447: 'tri',
-};
-
-const Days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-const Months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-// const colors = ['#97e3d5', '#61cdbb', '#e8a838', '#f1e15b', '#f47560', '#e8c1a0'];
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -126,11 +108,21 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const validPlaces = Object.keys(placesId);
+
 function App () {
   const classes = useStyles();
   const [tri, setTri] = useTriState('');
-  const [place, setPlace] = usePlaceState();
-  const { presences, createRow, updateRow, deleteRow } = usePresences();
+  const [place, setPlace] = usePlaceState(validPlaces[0]);
+
+  if (!validPlaces.includes(place)) {
+    setPlace(validPlaces[0]);
+  }
+
+  const labels = fieldLabel[place];
+  const { KEY, DATE, MATIN, MIDI, APREM, TRI } = fieldMap[place];
+  const { presences, createRow, updateRow, deleteRow } = usePresences(place);
+
   const holidays = useHolidays();
 
   const dayAdd = (
@@ -167,7 +159,9 @@ function App () {
   const today = dayjs();
   const days = [...Array(21)];
   const handleTriChange = event => setTri(event.target.value);
-  const handlePlaceChange = (event, newPlace) => setPlace(newPlace);
+  const handlePlaceChange = (event, newPlace) => {
+    setPlace(prevPlace => (newPlace || prevPlace));
+  };
 
   return (
     <div className="App">
