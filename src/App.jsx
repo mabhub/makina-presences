@@ -12,21 +12,19 @@ import {
   CardHeader,
   Chip,
   Container,
-  FormControl,
   Grid,
   IconButton,
-  Input,
-  InputLabel,
 } from '@material-ui/core';
-import { Alert, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
-import { AddCircle, AddCircleOutline, RemoveCircle, RemoveCircleOutline, MoreHoriz } from '@material-ui/icons';
+import { AddCircle, AddCircleOutline, RemoveCircle, RemoveCircleOutline } from '@material-ui/icons';
 
 import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
 
 import { placesId, fieldLabel, fieldMap, Days, Months } from './settings';
+import Header from './Header';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -35,14 +33,6 @@ const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
-  placeButtons: {
-    width: '100%',
-
-    '& .Mui-selected': {
-      background: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-    },
-  },
   week: {
     textAlign: 'right',
     fontStyle: 'italic',
@@ -172,49 +162,10 @@ function App () {
 
   const today = dayjs();
   const days = [...Array(21)];
-  const handleTriChange = event => setTri(event.target.value);
-  const handlePlaceChange = (event, newPlace) => {
-    setPlace(prevPlace => (newPlace || prevPlace));
-  };
-
-  /* eslint-disable key-spacing */
-  const grid = {
-    spacer: { xs: 12, sm: 12, md: 12, lg: 3, style: { border: '1px solid rgba(255, 0, 0, 0.0)' } },
-    toggle: { xs:  3, sm:  2, md:  2, lg: 1, style: { border: '1px solid rgba(255, 0, 0, 0.0)' } },
-    tri:    { xs:  9, sm:  4, md:  4, lg: 3, style: { border: '1px solid rgba(255, 0, 0, 0.0)' } },
-  };
-  /* eslint-enable */
 
   return (
     <div className="App">
-      <Container style={{ marginTop: '2rem' }}>
-        <Grid container spacing={2} alignItems="flex-end">
-          <Grid item {...grid.spacer} />
-          <Grid item {...grid.toggle}>
-            <ToggleButtonGroup
-              orientation="vertical"
-              size="small"
-              className={classes.placeButtons}
-              onChange={handlePlaceChange}
-              exclusive
-              value={place}
-            >
-              <ToggleButton value="nantes">Nantes</ToggleButton>
-              <ToggleButton value="toulouse">Toulouse</ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
-          <Grid item {...grid.tri}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="tri">Trigramme</InputLabel>
-              <Input
-                id="tri"
-                value={tri}
-                onChange={handleTriChange}
-              />
-            </FormControl>
-          </Grid>
-        </Grid>
-      </Container>
+      <Header />
 
       {(!place || tri.length < 3) && (
         <Container style={{ marginTop: '1rem' }}>
