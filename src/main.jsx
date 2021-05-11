@@ -1,21 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { createMuiTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 import { CssBaseline } from '@material-ui/core';
 
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import App from './App';
 
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#adb31b',
-      contrastText: '#fff',
+const theme = responsiveFontSizes(
+  createMuiTheme({
+    palette: {
+      primary: {
+        main: '#adb31b',
+        contrastText: '#fff',
+      },
     },
-  },
-});
+  }),
+);
 
 const queryClient = new QueryClient();
 
