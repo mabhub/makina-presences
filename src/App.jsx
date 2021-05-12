@@ -26,6 +26,7 @@ import useHolidays from './hooks/useHolidays';
 
 import { placesId, fieldLabel, fieldMap, Days, Months, tooltipOptions } from './settings';
 import Header from './Header';
+import Footer from './Footer';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -379,6 +380,8 @@ function App () {
           })}
         </Grid>
       </Container>
+
+      <Footer />
     </div>
   );
 }
