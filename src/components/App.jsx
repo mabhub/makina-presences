@@ -11,24 +11,24 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Chip,
   Container,
   Grid,
   IconButton,
 } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
-import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
+import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
 import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
-import { placesId, fieldLabel, fieldMap, Days, Months } from '../settings';
+import { placesId, fieldMap, Days, Months } from '../settings';
 import { asDayRef } from '../helpers';
 import Header from './Header';
 import Footer from './Footer';
 
 import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
+import InitialNotice from './InitialNotice';
+import Moment from './Moment';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -88,43 +88,13 @@ const useStyles = makeStyles(theme => ({
     fontStyle: 'italic',
     alignSelf: 'center',
   },
-  moment: {
-    color: theme.palette.grey[500],
-  },
-  matin: {
-    background: fade(theme.palette.primary.main, 0.15),
-  },
-  midi: {},
-  aprem: {
-    background: fade(theme.palette.primary.main, 0.15),
-  },
-  tri: {
-    margin: theme.spacing(0.25),
-    height: theme.spacing(2.5),
-    '& .MuiChip-label': {
-      padding: theme.spacing(0, 0.65, 0, 0.75),
-    },
-    '& .MuiChip-deleteIcon': {
-      marginRight: theme.spacing(0.2),
-    },
-  },
-  currentTri: {
-    fontWeight: 'bold',
-  },
-  addMoment: {
-    fontSize: '0.5rem',
-    '& .MuiSvgIcon-root': {
-      width: '0.7em',
-      height: '0.7em',
-    },
-  },
 }));
 
 const validPlaces = Object.keys(placesId);
 
 function App () {
   const classes = useStyles();
-  const [tri, setTri] = useTriState('');
+  const [tri] = useTriState('');
   const [place, setPlace] = usePlaceState(validPlaces[0]);
 
   if (!validPlaces.includes(place)) {
@@ -136,7 +106,6 @@ function App () {
   const dayRefFrom = asDayRef(today.day(1));
   const dayRefTo = asDayRef(today.day(21));
 
-  const labels = fieldLabel[place];
   const { KEY, DATE, DAYREF, MATIN, MIDI, APREM, TRI } = fieldMap[place];
   const { presences, createRow, updateRow, deleteRow } = usePresences(place, dayRefFrom, dayRefTo);
 
@@ -192,15 +161,7 @@ function App () {
       <Header />
 
       {(!place || tri.length < 3) && (
-        <Container style={{ marginTop: '1rem' }}>
-          <Grid container justify="center">
-            <Grid item xs={10}>
-              <Alert severity="info">
-                Choisir un lieu et saisir un trigramme pour pouvoir remplir les présences.
-              </Alert>
-            </Grid>
-          </Grid>
-        </Container>
+        <InitialNotice />
       )}
 
       <Container style={{ marginTop: '2rem' }}>
@@ -300,62 +261,20 @@ function App () {
                       )}
 
                       {!holiday && [MATIN, MIDI, APREM].map(moment => {
-                        const isPresent = todayPresences.some(
-                          ({ [moment]: m, [TRI]: t }) => (m && t === tri),
-                        );
-
                         const removeMoment = dayAdd(currentDay, { [moment]: false });
                         const addMoment = dayAdd(currentDay, { [moment]: true });
-                        const todayMomentPresences = todayPresences.filter(({ [moment]: m }) => m);
+                        const momentPresences = todayPresences.filter(({ [moment]: m }) => m);
+                        const isTriPresent = momentPresences.some(({ [TRI]: t }) => (t === tri));
 
                         return (
-                          <Grid
-                            item
-                            xs={4}
-                            className={clsx(
-                              classes.moment,
-                              classes[labels[moment]],
-                            )}
+                          <Moment
                             key={moment}
-                          >
-                            {labels[moment]}<br />
-
-                            {todayMomentPresences
-                              .map(({ id, [TRI]: t, fake }) => {
-                                const color = fake ? 'secondary' : 'primary';
-                                const currentTri = t === tri;
-
-                                return (
-                                  <Chip
-                                    key={id}
-                                    size="small"
-                                    label={t}
-                                    color={currentTri ? color : undefined}
-                                    className={classes.tri}
-                                    onClick={!currentTri ? () => setTri(t) : undefined}
-                                    deleteIcon={(
-                                      <UnsubscribeIcon
-                                        outline={false}
-                                        when={fieldLabel[place][moment]}
-                                      />
-                                    )}
-                                    onDelete={t === tri ? removeMoment : undefined}
-                                  />
-                                );
-                              })}
-
-                            {(!isPresent && tri.length > 2) && (
-                              <IconButton
-                                onClick={addMoment}
-                                className={classes.addMoment}
-                                size="small"
-                              >
-                                <SubscribeIcon
-                                  when={fieldLabel[place][moment]}
-                                />
-                              </IconButton>
-                            )}
-                          </Grid>
+                            moment={moment}
+                            onAdd={addMoment}
+                            onDelete={removeMoment}
+                            presences={momentPresences}
+                            showAdd={!isTriPresent}
+                          />
                         );
                       })}
                     </Grid>
