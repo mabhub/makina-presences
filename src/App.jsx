@@ -5,6 +5,7 @@ import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
 import {
   Avatar,
   Card,
@@ -25,11 +26,13 @@ import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
 
 import { placesId, fieldLabel, fieldMap, Days, Months, tooltipOptions } from './settings';
+import { asDayRef } from './helpers';
 import Header from './Header';
 import Footer from './Footer';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
+dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -128,8 +131,13 @@ function App () {
     setPlace(validPlaces[0]);
   }
 
+  const today = dayjs();
+  const days = [...Array(21)];
+  const dayRefFrom = asDayRef(today.day(1));
+  const dayRefTo = asDayRef(today.day(21));
+
   const labels = fieldLabel[place];
-  const { KEY, DATE, MATIN, MIDI, APREM, TRI } = fieldMap[place];
+  const { KEY, DATE, DAYREF, MATIN, MIDI, APREM, TRI } = fieldMap[place];
   const { presences, createRow, updateRow, deleteRow } = usePresences(place);
 
   const holidays = useHolidays();
@@ -150,7 +158,15 @@ function App () {
         return deleteRow.mutate(existing);
       }
 
-      return createRow.mutate({ [KEY]: `${isoDate}-${tri}`, [DATE]: isoDate, [TRI]: tri, [MATIN]: true, [MIDI]: true, [APREM]: true });
+      return createRow.mutate({
+        [KEY]: `${isoDate}-${tri}`,
+        [DATE]: isoDate,
+        [DAYREF]: asDayRef(date),
+        [TRI]: tri,
+        [MATIN]: true,
+        [MIDI]: true,
+        [APREM]: true,
+      });
     }
 
     if (existing) {
@@ -162,11 +178,14 @@ function App () {
       return updateRow.mutate({ id: existing.id, ...changes });
     }
 
-    return createRow.mutate({ [KEY]: `${isoDate}-${tri}`, [DATE]: isoDate, [TRI]: tri, ...changes });
+    return createRow.mutate({
+      [KEY]: `${isoDate}-${tri}`,
+      [DATE]: isoDate,
+      [DAYREF]: asDayRef(date),
+      [TRI]: tri,
+      ...changes,
+    });
   };
-
-  const today = dayjs();
-  const days = [...Array(21)];
 
   return (
     <div className="App">

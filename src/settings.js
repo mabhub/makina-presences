@@ -7,6 +7,7 @@ export const fieldMap = {
   toulouse: {
     KEY: 'field_90299',
     DATE: 'field_99443',
+    DAYREF: 'field_101645',
     MATIN: 'field_99444',
     MIDI: 'field_99445',
     APREM: 'field_99446',
@@ -15,6 +16,7 @@ export const fieldMap = {
   nantes: {
     KEY: 'field_100298',
     DATE: 'field_100299',
+    DAYREF: 'field_101646',
     TRI: 'field_100300',
     MATIN: 'field_100301',
     MIDI: 'field_100302',
@@ -26,6 +28,7 @@ export const fieldLabel = {
   toulouse: {
     field_90299: 'key',
     field_99443: 'date',
+    field_101645: 'dayref',
     field_99444: 'matin',
     field_99445: 'midi',
     field_99446: 'aprem',
@@ -34,6 +37,7 @@ export const fieldLabel = {
   nantes: {
     field_100298: 'key',
     field_100299: 'date',
+    field_101646: 'dayref',
     field_100300: 'tri',
     field_100301: 'matin',
     field_100302: 'midi',
