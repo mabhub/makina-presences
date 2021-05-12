@@ -15,20 +15,20 @@ import {
   Container,
   Grid,
   IconButton,
-  Tooltip,
 } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
-import { AddCircleOutline, RemoveCircle, RemoveCircleOutline } from '@material-ui/icons';
 
 import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
 
-import { placesId, fieldLabel, fieldMap, Days, Months, tooltipOptions } from './settings';
+import { placesId, fieldLabel, fieldMap, Days, Months } from './settings';
 import { asDayRef } from './helpers';
 import Header from './Header';
 import Footer from './Footer';
+
+import { SubscribeIcon, UnsubscribeIcon } from './components/SubscriptionIcon';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -279,32 +279,9 @@ function App () {
                     subheader={date}
                     action={(!holiday && tri.length > 2) && (
                       <IconButton onClick={dayAdd(currentDay)}>
-                        {dayLongPresence && (
-                          <Tooltip
-                            {...tooltipOptions}
-                            title={(
-                              <>
-                                <strong>Se désinscrire</strong><br />
-                                (journée entière)
-                              </>
-                            )}
-                          >
-                            <RemoveCircleOutline />
-                          </Tooltip>
-                        )}
-                        {!dayLongPresence && (
-                          <Tooltip
-                            {...tooltipOptions}
-                            title={(
-                              <>
-                                <strong>S'inscrire</strong><br />
-                                (journée entière)
-                              </>
-                            )}
-                          >
-                            <AddCircleOutline />
-                          </Tooltip>
-                        )}
+                        {dayLongPresence
+                          ? <UnsubscribeIcon />
+                          : <SubscribeIcon />}
                       </IconButton>
                     )}
                     className={clsx(
@@ -357,17 +334,10 @@ function App () {
                                     className={classes.tri}
                                     onClick={!currentTri ? () => setTri(t) : undefined}
                                     deleteIcon={(
-                                      <Tooltip
-                                        {...tooltipOptions}
-                                        title={(
-                                          <>
-                                            <strong>Se désinscrire</strong><br />
-                                            ({fieldLabel[place][moment]} uniquement)
-                                          </>
-                                        )}
-                                      >
-                                        <RemoveCircle />
-                                      </Tooltip>
+                                      <UnsubscribeIcon
+                                        outline={false}
+                                        when={fieldLabel[place][moment]}
+                                      />
                                     )}
                                     onDelete={t === tri ? removeMoment : undefined}
                                   />
@@ -380,17 +350,9 @@ function App () {
                                 className={classes.addMoment}
                                 size="small"
                               >
-                                <Tooltip
-                                  {...tooltipOptions}
-                                  title={(
-                                    <>
-                                      <strong>S'inscrire</strong><br />
-                                      ({fieldLabel[place][moment]} uniquement)
-                                    </>
-                                  )}
-                                >
-                                  <AddCircleOutline />
-                                </Tooltip>
+                                <SubscribeIcon
+                                  when={fieldLabel[place][moment]}
+                                />
                               </IconButton>
                             )}
                           </Grid>
