@@ -19,7 +19,7 @@ import {
 import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
-import { AddCircle, AddCircleOutline, RemoveCircle, RemoveCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline, RemoveCircle, RemoveCircleOutline } from '@material-ui/icons';
 
 import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
@@ -370,7 +370,7 @@ function App () {
                                     </>
                                   )}
                                 >
-                                  <AddCircle />
+                                  <AddCircleOutline />
                                 </Tooltip>
                               </IconButton>
                             )}
