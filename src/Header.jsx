@@ -7,11 +7,12 @@ import {
   Grid,
   Input,
   InputLabel,
+  Tooltip,
 } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { placesId } from './settings';
+import { placesId, tooltipOptions } from './settings';
 
 const useStyles = makeStyles(theme => ({
   placeButtons: {
@@ -68,11 +69,21 @@ const Header = () => {
         <Grid item {...grid.tri}>
           <FormControl fullWidth>
             <InputLabel htmlFor="tri">Trigramme</InputLabel>
-            <Input
-              id="tri"
-              value={tri}
-              onChange={handleTriChange}
-            />
+            <Tooltip
+              {...tooltipOptions}
+              title={(
+                <>
+                  <strong>Astuce :</strong><br />
+                  Cliquer sur un trigramme permet de le définir comme étant le trigramme actuel
+                </>
+              )}
+            >
+              <Input
+                id="tri"
+                value={tri}
+                onChange={handleTriChange}
+              />
+            </Tooltip>
           </FormControl>
         </Grid>
       </Grid>

@@ -14,6 +14,7 @@ import {
   Container,
   Grid,
   IconButton,
+  Tooltip,
 } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
@@ -23,7 +24,7 @@ import { AddCircle, AddCircleOutline, RemoveCircle, RemoveCircleOutline } from '
 import usePresences from './hooks/usePresences';
 import useHolidays from './hooks/useHolidays';
 
-import { placesId, fieldLabel, fieldMap, Days, Months } from './settings';
+import { placesId, fieldLabel, fieldMap, Days, Months, tooltipOptions } from './settings';
 import Header from './Header';
 
 dayjs.extend(weekOfYear);
@@ -253,7 +254,32 @@ function App () {
                     subheader={date}
                     action={(
                       <IconButton disabled={Boolean(holiday)} onClick={dayAdd(currentDay)}>
-                        {dayLongPresence ? <RemoveCircleOutline /> : <AddCircleOutline />}
+                        {dayLongPresence && (
+                          <Tooltip
+                            {...tooltipOptions}
+                            title={(
+                              <>
+                                <strong>Se désinscrire</strong><br />
+                                (journée entière)
+                              </>
+                            )}
+                          >
+                            <RemoveCircleOutline />
+                          </Tooltip>
+                        )}
+                        {!dayLongPresence && (
+                          <Tooltip
+                            {...tooltipOptions}
+                            title={(
+                              <>
+                                <strong>S'inscrire</strong><br />
+                                (journée entière)
+                              </>
+                            )}
+                          >
+                            <AddCircleOutline />
+                          </Tooltip>
+                        )}
                       </IconButton>
                     )}
                     className={clsx(
@@ -295,16 +321,29 @@ function App () {
                             {todayMomentPresences
                               .map(({ id, [TRI]: t, fake }) => {
                                 const color = fake ? 'secondary' : 'primary';
+                                const currentTri = t === tri;
 
                                 return (
                                   <Chip
                                     key={id}
                                     size="small"
                                     label={t}
-                                    color={t === tri ? color : undefined}
+                                    color={currentTri ? color : undefined}
                                     className={classes.tri}
-                                    onClick={() => setTri(t)}
-                                    deleteIcon={<RemoveCircle />}
+                                    onClick={!currentTri ? () => setTri(t) : undefined}
+                                    deleteIcon={(
+                                      <Tooltip
+                                        {...tooltipOptions}
+                                        title={(
+                                          <>
+                                            <strong>Se désinscrire</strong><br />
+                                            ({fieldLabel[place][moment]} uniquement)
+                                          </>
+                                        )}
+                                      >
+                                        <RemoveCircle />
+                                      </Tooltip>
+                                    )}
                                     onDelete={t === tri ? removeMoment : undefined}
                                   />
                                 );
@@ -316,7 +355,17 @@ function App () {
                                 className={classes.addMoment}
                                 size="small"
                               >
-                                <AddCircle />
+                                <Tooltip
+                                  {...tooltipOptions}
+                                  title={(
+                                    <>
+                                      <strong>S'inscrire</strong><br />
+                                      ({fieldLabel[place][moment]} uniquement)
+                                    </>
+                                  )}
+                                >
+                                  <AddCircle />
+                                </Tooltip>
                               </IconButton>
                             )}
                           </Grid>
