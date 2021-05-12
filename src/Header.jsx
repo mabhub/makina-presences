@@ -13,6 +13,7 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { placesId, tooltipOptions } from './settings';
+import LoadIndicator from './LoadIndicator';
 
 const useStyles = makeStyles(theme => ({
   placeButtons: {
@@ -51,6 +52,7 @@ const Header = () => {
 
   return (
     <Container style={{ marginTop: '2rem' }}>
+      <LoadIndicator />
       <Grid container spacing={2} alignItems="flex-end">
         <Grid item {...grid.spacer} />
         <Grid item {...grid.toggle}>
