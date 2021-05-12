@@ -20,15 +20,15 @@ import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade, emphasize } from '@material-ui/core/styles/colorManipulator';
 
-import usePresences from './hooks/usePresences';
-import useHolidays from './hooks/useHolidays';
+import usePresences from '../hooks/usePresences';
+import useHolidays from '../hooks/useHolidays';
 
-import { placesId, fieldLabel, fieldMap, Days, Months } from './settings';
-import { asDayRef } from './helpers';
+import { placesId, fieldLabel, fieldMap, Days, Months } from '../settings';
+import { asDayRef } from '../helpers';
 import Header from './Header';
 import Footer from './Footer';
 
-import { SubscribeIcon, UnsubscribeIcon } from './components/SubscriptionIcon';
+import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);

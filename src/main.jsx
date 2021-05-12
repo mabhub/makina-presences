@@ -6,7 +6,7 @@ import { CssBaseline } from '@material-ui/core';
 
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import App from './App';
+import App from './components/App';
 
 const theme = responsiveFontSizes(
   createMuiTheme({

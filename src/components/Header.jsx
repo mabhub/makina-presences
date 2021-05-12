@@ -12,7 +12,7 @@ import {
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { placesId, tooltipOptions } from './settings';
+import { placesId, tooltipOptions } from '../settings';
 import LoadIndicator from './LoadIndicator';
 
 const useStyles = makeStyles(theme => ({
