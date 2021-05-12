@@ -53,6 +53,9 @@ const useStyles = makeStyles(theme => ({
   day: {
     display: 'flex',
   },
+  past: {
+    opacity: 0.45,
+  },
   dayCard: {
     flex: 1,
     display: 'flex',
@@ -188,6 +191,7 @@ function App () {
             const dayIndex = currentDay.day();
             const isoDay = currentDay.format('YYYY-MM-DD');
             const holiday = holidays[isoDay];
+            const isPast = currentDay.isBefore(today);
 
             const dayname = Days[(index) % 7];
             const dayInitial = dayname[0].toUpperCase();
@@ -240,6 +244,7 @@ function App () {
                 <Card
                   className={clsx({
                     [classes.dayCard]: true,
+                    [classes.past]: isPast,
                     [classes.holidayCard]: holiday,
                   })}
                 >
