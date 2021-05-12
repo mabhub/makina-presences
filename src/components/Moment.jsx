@@ -2,12 +2,12 @@ import React from 'react';
 import clsx from 'clsx';
 import createPersistedState from 'use-persisted-state';
 
-import { Chip, Grid, IconButton } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 
 import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
-import { fieldLabel, fieldMap, placesId } from '../settings';
+import { fieldLabel, fieldMap, placesId, tooltipOptions } from '../settings';
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -79,21 +79,26 @@ const Moment = ({
           const currentTri = t === tri;
 
           return (
-            <Chip
+            <Tooltip
+              {...tooltipOptions}
+              title={currentTri ? '' : 'Utiliser ce trigramme'}
               key={id}
-              size="small"
-              label={t}
-              color={currentTri ? color : undefined}
-              className={classes.tri}
-              onClick={!currentTri ? () => setTri(t) : undefined}
-              deleteIcon={(
-                <UnsubscribeIcon
-                  outline={false}
-                  when={fieldLabel[place][moment]}
-                />
-              )}
-              onDelete={t === tri ? onDelete : undefined}
-            />
+            >
+              <Chip
+                size="small"
+                label={t}
+                color={currentTri ? color : undefined}
+                className={classes.tri}
+                onClick={!currentTri ? () => setTri(t) : undefined}
+                deleteIcon={(
+                  <UnsubscribeIcon
+                    outline={false}
+                    when={fieldLabel[place][moment]}
+                  />
+                )}
+                onDelete={t === tri ? onDelete : undefined}
+              />
+            </Tooltip>
           );
         })}
 
