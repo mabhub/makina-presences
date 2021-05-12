@@ -138,7 +138,7 @@ function App () {
 
   const labels = fieldLabel[place];
   const { KEY, DATE, DAYREF, MATIN, MIDI, APREM, TRI } = fieldMap[place];
-  const { presences, createRow, updateRow, deleteRow } = usePresences(place);
+  const { presences, createRow, updateRow, deleteRow } = usePresences(place, dayRefFrom, dayRefTo);
 
   const holidays = useHolidays();
 

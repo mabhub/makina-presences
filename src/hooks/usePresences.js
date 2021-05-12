@@ -8,17 +8,21 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
-const usePresences = place => {
+const usePresences = (place, dayRefFrom, dayRefTo) => {
   const queryClient = useQueryClient();
   const basePath = `https://api.baserow.io/api/database/rows/table/${placesId[place]}/`;
 
-  const queryKey = ['presences', place];
+  const queryKey = ['presences', place, dayRefFrom, dayRefTo];
+  const qs = [
+    `?filter__${fieldMap[place].DAYREF}__higher_than=${dayRefFrom - 1}`,
+    `&filter__${fieldMap[place].DAYREF}__lower_than=${dayRefTo + 1}`,
+  ].join('');
 
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
       const response = await fetch(
-        basePath,
+        basePath + qs,
         { headers: { Authorization: `Token ${VITE_DATA_TOKEN}` } },
       );
 
