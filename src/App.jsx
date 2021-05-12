@@ -186,7 +186,7 @@ function App () {
 
       <Container style={{ marginTop: '2rem' }}>
         <Grid container spacing={2}>
-          {(tri.length >= 3) && days.map((_, index) => {
+          {days.map((_, index) => {
             const currentDay = today.day(index);
             const dayIndex = currentDay.day();
             const isoDay = currentDay.format('YYYY-MM-DD');
@@ -258,7 +258,7 @@ function App () {
                     )}
                     title={dayname}
                     subheader={date}
-                    action={!holiday && (
+                    action={(!holiday && tri.length > 2) && (
                       <IconButton onClick={dayAdd(currentDay)}>
                         {dayLongPresence && (
                           <Tooltip
@@ -355,7 +355,7 @@ function App () {
                                 );
                               })}
 
-                            {!isPresent && (
+                            {(!isPresent && tri.length > 2) && (
                               <IconButton
                                 onClick={addMoment}
                                 className={classes.addMoment}
