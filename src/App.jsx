@@ -258,8 +258,8 @@ function App () {
                     )}
                     title={dayname}
                     subheader={date}
-                    action={(
-                      <IconButton disabled={Boolean(holiday)} onClick={dayAdd(currentDay)}>
+                    action={!holiday && (
+                      <IconButton onClick={dayAdd(currentDay)}>
                         {dayLongPresence && (
                           <Tooltip
                             {...tooltipOptions}
