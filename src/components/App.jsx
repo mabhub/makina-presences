@@ -67,6 +67,9 @@ const useStyles = makeStyles(theme => ({
   today: {
     backgroundColor: emphasize(theme.palette.primary.main, 0.75),
   },
+  todayAvatar: {
+    backgroundColor: theme.palette.primary.main,
+  },
   cardHeader: {
     padding: theme.spacing(2, 2, 1),
   },
@@ -231,7 +234,13 @@ function App () {
                   <CardHeader
                     avatar={(
                       <Avatar
-                        className={clsx(classes.avatar, { [classes.holidayAvatar]: holiday })}
+                        className={clsx(
+                          classes.avatar,
+                          {
+                            [classes.holidayAvatar]: holiday,
+                            [classes.todayAvatar]: today.isSame(currentDay),
+                          },
+                        )}
                       >
                         {dayInitial}
                       </Avatar>
