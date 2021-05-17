@@ -8,6 +8,7 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 
 import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 import { fieldLabel, fieldMap, placesId, tooltipOptions } from '../settings';
+import { sameLowC } from '../helpers';
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -76,7 +77,7 @@ const Moment = ({
       {presences
         .map(({ id, [TRI]: t, fake }) => {
           const color = fake ? 'secondary' : 'primary';
-          const currentTri = t === tri;
+          const currentTri = sameLowC(t, tri);
 
           return (
             <Tooltip
@@ -96,7 +97,7 @@ const Moment = ({
                     when={fieldLabel[place][moment]}
                   />
                 )}
-                onDelete={t === tri ? onDelete : undefined}
+                onDelete={sameLowC(t, tri) ? onDelete : undefined}
               />
             </Tooltip>
           );

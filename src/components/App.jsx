@@ -22,7 +22,7 @@ import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
 import { placesId, fieldMap, Days, Months } from '../settings';
-import { asDayRef } from '../helpers';
+import { asDayRef, nrmlStr, sameLowC } from '../helpers';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -118,8 +118,9 @@ function App () {
     date,
     changes,
   ) => () => {
+    const cleanTri = tri.length <= 3 ? nrmlStr(tri) : tri.trim();
     const isoDate = date.format('YYYY-MM-DD');
-    const existing = presences.find(({ [KEY]: key }) => (key === `${isoDate}-${tri}`));
+    const existing = presences.find(({ [KEY]: key }) => (key === `${isoDate}-${cleanTri}`));
 
     if (!changes) {
       if (existing) {
@@ -131,10 +132,10 @@ function App () {
       }
 
       return createRow.mutate({
-        [KEY]: `${isoDate}-${tri}`,
+        [KEY]: `${isoDate}-${cleanTri}`,
         [DATE]: isoDate,
         [DAYREF]: asDayRef(date),
-        [TRI]: tri,
+        [TRI]: cleanTri,
         [MATIN]: true,
         [MIDI]: true,
         [APREM]: true,
@@ -151,10 +152,10 @@ function App () {
     }
 
     return createRow.mutate({
-      [KEY]: `${isoDate}-${tri}`,
+      [KEY]: `${isoDate}-${cleanTri}`,
       [DATE]: isoDate,
       [DAYREF]: asDayRef(date),
-      [TRI]: tri,
+      [TRI]: cleanTri,
       ...changes,
     });
   };
@@ -163,7 +164,7 @@ function App () {
     <div className="App">
       <Header />
 
-      {(!place || tri.length < 3) && (
+      {tri.length < 3 && (
         <InitialNotice />
       )}
 
@@ -209,7 +210,9 @@ function App () {
             }
 
             const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
-            const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => t === tri) || {};
+            const currentTodayPresences = todayPresences.find(
+              ({ [TRI]: t }) => sameLowC(t, tri),
+            ) || {};
             const dayLongPresence = currentTodayPresences[MATIN]
               && currentTodayPresences[MIDI]
               && currentTodayPresences[APREM];
@@ -273,7 +276,9 @@ function App () {
                         const removeMoment = dayAdd(currentDay, { [moment]: false });
                         const addMoment = dayAdd(currentDay, { [moment]: true });
                         const momentPresences = todayPresences.filter(({ [moment]: m }) => m);
-                        const isTriPresent = momentPresences.some(({ [TRI]: t }) => (t === tri));
+                        const isTriPresent = momentPresences.some(
+                          ({ [TRI]: t }) => sameLowC(t, tri),
+                        );
 
                         return (
                           <Moment
