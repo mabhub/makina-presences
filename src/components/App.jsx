@@ -272,25 +272,15 @@ function App () {
                         </Grid>
                       )}
 
-                      {!holiday && [MATIN, MIDI, APREM].map(moment => {
-                        const removeMoment = dayAdd(currentDay, { [moment]: false });
-                        const addMoment = dayAdd(currentDay, { [moment]: true });
-                        const momentPresences = todayPresences.filter(({ [moment]: m }) => m);
-                        const isTriPresent = momentPresences.some(
-                          ({ [TRI]: t }) => sameLowC(t, tri),
-                        );
-
-                        return (
-                          <Moment
-                            key={moment}
-                            moment={moment}
-                            onAdd={addMoment}
-                            onDelete={removeMoment}
-                            presences={momentPresences}
-                            showAdd={!isTriPresent}
-                          />
-                        );
-                      })}
+                      {!holiday && [MATIN, MIDI, APREM].map(moment => (
+                        <Moment
+                          key={moment}
+                          day={currentDay}
+                          dayAdd={dayAdd}
+                          moment={moment}
+                          presences={todayPresences.filter(({ [moment]: m }) => m)}
+                        />
+                      ))}
                     </Grid>
                   </CardContent>
                 </Card>

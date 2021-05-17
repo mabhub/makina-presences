@@ -50,29 +50,31 @@ const validPlaces = Object.keys(placesId);
 
 const Moment = ({
   moment,
-  onAdd = () => {},
-  onDelete = () => {},
+  dayAdd,
+  day,
   presences = [],
-  showAdd,
 }) => {
   const classes = useStyles();
   const [tri, setTri] = useTriState('');
   const [place] = usePlaceState(validPlaces[0]);
 
   const { TRI } = fieldMap[place];
-  const labels = fieldLabel[place];
-  const momentLabel = labels[moment];
 
+  const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
   const canAdd = showAdd && tri.length > 2;
+
+  const onAdd = dayAdd(day, { [moment]: true });
+  const onDelete = dayAdd(day, { [moment]: false });
+
+  const label = fieldLabel[place][moment];
 
   return (
     <Grid
       item
       xs={4}
-      className={clsx(classes.moment, classes[momentLabel])}
-      key={momentLabel}
+      className={clsx(classes.moment, classes[label])}
     >
-      {momentLabel}<br />
+      {label}<br />
 
       {presences
         .map(({ id, [TRI]: t, fake }) => {
@@ -94,7 +96,7 @@ const Moment = ({
                 deleteIcon={(
                   <UnsubscribeIcon
                     outline={false}
-                    when={fieldLabel[place][moment]}
+                    when={label}
                   />
                 )}
                 onDelete={sameLowC(t, tri) ? onDelete : undefined}
@@ -110,7 +112,7 @@ const Moment = ({
         disabled={!canAdd}
       >
         <SubscribeIcon
-          when={fieldLabel[place][moment]}
+          when={label}
         />
       </IconButton>
     </Grid>
