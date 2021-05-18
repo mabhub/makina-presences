@@ -141,7 +141,7 @@ function App () {
                   item
                   xs={12}
                   lg={1}
-                  key={currentDay.toString()}
+                  key={isoDay}
                 />
               );
             }
@@ -154,7 +154,7 @@ function App () {
                   sm={6}
                   md={4}
                   lg={1}
-                  key={currentDay.toString()}
+                  key={isoDay}
                   className={classes.week}
                 >
                   s<strong>{currentDay.day(1).isoWeek()}</strong>
@@ -177,7 +177,7 @@ function App () {
                 sm={6}
                 md={4}
                 lg={2}
-                key={currentDay.toString()}
+                key={isoDay}
                 className={classes.day}
               >
                 <Card
