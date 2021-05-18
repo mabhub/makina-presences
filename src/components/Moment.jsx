@@ -50,7 +50,7 @@ const validPlaces = Object.keys(placesId);
 
 const Moment = ({
   moment,
-  dayAdd,
+  setPresence,
   day,
   presences = [],
 }) => {
@@ -63,8 +63,8 @@ const Moment = ({
   const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
   const canAdd = showAdd && tri.length > 2;
 
-  const onAdd = dayAdd(day, { [moment]: true });
-  const onDelete = dayAdd(day, { [moment]: false });
+  const onAdd = () => setPresence({ tri, date: day, changes: { [moment]: true } });
+  const onDelete = () => setPresence({ tri, date: day, changes: { [moment]: false } });
 
   const label = fieldLabel[place][moment];
 

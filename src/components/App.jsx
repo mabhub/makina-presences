@@ -22,7 +22,7 @@ import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
 import { placesId, fieldMap, Days, Months } from '../settings';
-import { asDayRef, nrmlStr, sameLowC } from '../helpers';
+import { asDayRef, sameLowC } from '../helpers';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -109,78 +109,10 @@ function App () {
   const dayRefFrom = asDayRef(today.day(1));
   const dayRefTo = asDayRef(today.day(21));
 
-  const { KEY, DATE, DAYREF, MATIN, MIDI, APREM, TRI } = fieldMap[place];
-  const { presences, createRow, updateRow, deleteRow } = usePresences(place, dayRefFrom, dayRefTo);
-
-  const triPresences = React.useMemo(
-    () => presences.filter(({ [TRI]: t }) => sameLowC(t, tri)),
-    [TRI, presences, tri],
-  );
+  const { DATE, MATIN, MIDI, APREM, TRI } = fieldMap[place];
+  const { presences, setPresence } = usePresences(place, dayRefFrom, dayRefTo);
 
   const holidays = useHolidays();
-  const cleanTri = tri.length <= 3 ? nrmlStr(tri) : tri.trim();
-
-  const createPresence = React.useCallback(
-    (date, moments) => {
-      const isoDate = date.format('YYYY-MM-DD');
-      return createRow.mutate({
-        [KEY]: `${isoDate}-${cleanTri}`,
-        [DATE]: isoDate,
-        [DAYREF]: asDayRef(date),
-        [TRI]: cleanTri,
-        ...moments,
-      });
-    },
-    [DATE, DAYREF, KEY, TRI, cleanTri, createRow],
-  );
-
-  const createDayPresence = React.useCallback(
-    date => createPresence(date, { [MATIN]: true, [MIDI]: true, [APREM]: true }),
-    [APREM, MATIN, MIDI, createPresence],
-  );
-
-  const deletePresence = React.useCallback(
-    presence => deleteRow.mutate(presence),
-    [deleteRow],
-  );
-
-  const fillPresence = React.useCallback(
-    presence => updateRow.mutate({ ...presence, [MATIN]: true, [MIDI]: true, [APREM]: true }),
-    [APREM, MATIN, MIDI, updateRow],
-  );
-
-  const editPresence = React.useCallback(
-    (presence, changes) => updateRow.mutate({ ...presence, ...changes }),
-    [updateRow],
-  );
-
-  const dayAdd = (date, changes) => () => {
-    const presence = triPresences.find(({ [DATE]: d }) => (d === date.format('YYYY-MM-DD')));
-
-    if (!changes) {
-      if (presence) {
-        if (!presence[MATIN] || !presence[MIDI] || !presence[APREM]) {
-          return fillPresence(presence);
-        }
-
-        return deletePresence(presence);
-      }
-
-      return createDayPresence(date);
-    }
-
-    if (presence) {
-      const newPresence = { ...presence, ...changes };
-
-      if (!newPresence[MATIN] && !newPresence[MIDI] && !newPresence[APREM]) {
-        return deletePresence(newPresence);
-      }
-
-      return editPresence({ ...presence, ...changes });
-    }
-
-    return createPresence(date, changes);
-  };
 
   return (
     <div className="App">
@@ -273,7 +205,7 @@ function App () {
                     title={dayname}
                     subheader={date}
                     action={(!holiday && tri.length > 2) && (
-                      <IconButton onClick={dayAdd(currentDay)}>
+                      <IconButton onClick={() => setPresence({ tri, date: currentDay })}>
                         {dayLongPresence
                           ? <UnsubscribeIcon />
                           : <SubscribeIcon />}
@@ -298,7 +230,7 @@ function App () {
                         <Moment
                           key={moment}
                           day={currentDay}
-                          dayAdd={dayAdd}
+                          setPresence={setPresence}
                           moment={moment}
                           presences={todayPresences.filter(({ [moment]: m }) => m)}
                         />
