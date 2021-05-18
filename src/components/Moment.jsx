@@ -79,6 +79,7 @@ const Moment = ({
       {label}<br />
 
       {presences
+        .sort(({ [TRI]: a }, { [TRI]: b }) => (a.localeCompare(b)))
         .map(({ id, [TRI]: t, fake }) => {
           const color = fake ? 'secondary' : 'primary';
           const currentTri = sameLowC(t, tri);
