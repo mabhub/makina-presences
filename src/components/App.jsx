@@ -207,7 +207,6 @@ function App () {
                         <DayPresenceButton
                           tri={tri}
                           date={currentDay}
-                          setPresence={setPresence}
                           unsub={dayLongPresence}
                           userPresence={currentTodayPresences}
                         />
@@ -231,7 +230,6 @@ function App () {
                           <Moment
                             key={moment}
                             day={currentDay}
-                            setPresence={setPresence}
                             moment={moment}
                             momentPresences={todayPresences.filter(({ [moment]: m }) => m)}
                             userPresence={currentTodayPresences}

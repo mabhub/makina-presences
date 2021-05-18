@@ -9,6 +9,7 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 import { fieldLabel, fieldMap, placesId, tooltipOptions } from '../settings';
 import { sameLowC } from '../helpers';
+import PresenceContext from './PresenceContext';
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -50,7 +51,6 @@ const validPlaces = Object.keys(placesId);
 
 const Moment = ({
   moment,
-  setPresence,
   day,
   momentPresences: presences = [],
   userPresence,
@@ -64,9 +64,17 @@ const Moment = ({
   const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
   const canAdd = showAdd && tri.length > 2;
 
-  const onAdd = () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence });
-  const onDelete = () =>
-    setPresence({ tri, date: day, changes: { [moment]: false }, userPresence });
+  const setPresence = React.useContext(PresenceContext);
+
+  const onAdd = React.useCallback(
+    () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence }),
+    [day, moment, setPresence, tri, userPresence],
+  );
+
+  const onDelete = React.useCallback(
+    () => setPresence({ tri, date: day, changes: { [moment]: false }, userPresence }),
+    [day, moment, setPresence, tri, userPresence],
+  );
 
   const label = fieldLabel[place][moment];
 
