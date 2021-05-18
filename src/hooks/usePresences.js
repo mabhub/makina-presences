@@ -32,7 +32,37 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
         { headers: { Authorization: `Token ${VITE_DATA_TOKEN}` } },
       );
 
-      return response.json();
+      const nextData = await response.json();
+      const prevData = queryClient.getQueryData(queryKey);
+
+      if (prevData && Array.isArray(nextData.results)) {
+        // Transpose `prevData.results` as object for quicker finding existing items
+        const prevResults = prevData.results?.reduce(
+          (acc, curr) => ({ ...acc, [curr.id]: curr }),
+          {},
+        );
+
+        // Replace unchanged new items with pre-existing items
+        nextData.results = nextData.results.map(nextResult => {
+          const prevResult = prevResults[nextResult.id] || {};
+          const prevHash = JSON.stringify([
+            prevResult.fake,
+            prevResult[MATIN],
+            prevResult[MIDI],
+            prevResult[APREM],
+          ]);
+          const newHash = JSON.stringify([
+            nextResult.fake,
+            nextResult[MATIN],
+            nextResult[MIDI],
+            nextResult[APREM],
+          ]);
+
+          return prevHash === newHash ? prevResult : nextResult;
+        });
+      }
+
+      return nextData;
     },
     { staleTime: 60000, refetchInterval: 60000, retryDelay: 10000 },
   );
