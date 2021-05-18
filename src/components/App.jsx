@@ -103,7 +103,7 @@ function App () {
     setPlace(validPlaces[0]);
   }
 
-  const today = dayjs();
+  const today = dayjs(dayjs().format('YYYY-MM-DD'));
   const days = [...Array(21)];
   const dayRefFrom = asDayRef(today.day(1));
   const dayRefTo = asDayRef(today.day(21));
