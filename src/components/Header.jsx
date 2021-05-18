@@ -45,7 +45,7 @@ const Header = () => {
   const [tri, setTri] = useTriState('');
   const [place, setPlace] = usePlaceState(validPlaces[0]);
 
-  const handleTriChange = event => setTri(event.target.value);
+  const handleTriChange = event => setTri(event.target.value.substr(0, 255));
   const handlePlaceChange = (event, newPlace) => {
     setPlace(prevPlace => (newPlace || prevPlace));
   };

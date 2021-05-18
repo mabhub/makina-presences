@@ -8,6 +8,7 @@ import { fade } from '@material-ui/core/styles/colorManipulator';
 
 import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 import { fieldLabel, fieldMap, placesId, tooltipOptions } from '../settings';
+import { sameLowC } from '../helpers';
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -49,34 +50,38 @@ const validPlaces = Object.keys(placesId);
 
 const Moment = ({
   moment,
-  onAdd = () => {},
-  onDelete = () => {},
-  presences = [],
-  showAdd,
+  setPresence,
+  day,
+  momentPresences: presences = [],
+  userPresence,
 }) => {
   const classes = useStyles();
   const [tri, setTri] = useTriState('');
   const [place] = usePlaceState(validPlaces[0]);
 
   const { TRI } = fieldMap[place];
-  const labels = fieldLabel[place];
-  const momentLabel = labels[moment];
 
+  const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
   const canAdd = showAdd && tri.length > 2;
+
+  const onAdd = () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence });
+  const onDelete = () =>
+    setPresence({ tri, date: day, changes: { [moment]: false }, userPresence });
+
+  const label = fieldLabel[place][moment];
 
   return (
     <Grid
       item
       xs={4}
-      className={clsx(classes.moment, classes[momentLabel])}
-      key={momentLabel}
+      className={clsx(classes.moment, classes[label])}
     >
-      {momentLabel}<br />
+      {label}<br />
 
       {presences
         .map(({ id, [TRI]: t, fake }) => {
           const color = fake ? 'secondary' : 'primary';
-          const currentTri = t === tri;
+          const currentTri = sameLowC(t, tri);
 
           return (
             <Tooltip
@@ -93,10 +98,10 @@ const Moment = ({
                 deleteIcon={(
                   <UnsubscribeIcon
                     outline={false}
-                    when={fieldLabel[place][moment]}
+                    when={label}
                   />
                 )}
-                onDelete={t === tri ? onDelete : undefined}
+                onDelete={sameLowC(t, tri) ? onDelete : undefined}
               />
             </Tooltip>
           );
@@ -109,11 +114,15 @@ const Moment = ({
         disabled={!canAdd}
       >
         <SubscribeIcon
-          when={fieldLabel[place][moment]}
+          when={label}
         />
       </IconButton>
     </Grid>
   );
 };
 
-export default Moment;
+const MemoizedMoment = React.memo(Moment, (prev, next) =>
+  JSON.stringify(prev.momentPresences) === JSON.stringify(next.momentPresences)
+  && JSON.stringify(prev.userPresence) === JSON.stringify(next.userPresence));
+
+export default MemoizedMoment;

@@ -13,7 +13,6 @@ import {
   CardHeader,
   Container,
   Grid,
-  IconButton,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
@@ -22,13 +21,13 @@ import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
 import { placesId, fieldMap, Days, Months } from '../settings';
-import { asDayRef } from '../helpers';
+import { asDayRef, sameLowC } from '../helpers';
 import Header from './Header';
 import Footer from './Footer';
 
-import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 import InitialNotice from './InitialNotice';
 import Moment from './Moment';
+import DayPresenceButton from './DayPresenceButton';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -109,61 +108,16 @@ function App () {
   const dayRefFrom = asDayRef(today.day(1));
   const dayRefTo = asDayRef(today.day(21));
 
-  const { KEY, DATE, DAYREF, MATIN, MIDI, APREM, TRI } = fieldMap[place];
-  const { presences, createRow, updateRow, deleteRow } = usePresences(place, dayRefFrom, dayRefTo);
+  const { DATE, MATIN, MIDI, APREM, TRI } = fieldMap[place];
+  const { presences, setPresence } = usePresences(place, dayRefFrom, dayRefTo);
 
   const holidays = useHolidays();
-
-  const dayAdd = (
-    date,
-    changes,
-  ) => () => {
-    const isoDate = date.format('YYYY-MM-DD');
-    const existing = presences.find(({ [KEY]: key }) => (key === `${isoDate}-${tri}`));
-
-    if (!changes) {
-      if (existing) {
-        if (!existing[MATIN] || !existing[MIDI] || !existing[APREM]) {
-          return updateRow.mutate({ id: existing.id, [MATIN]: true, [MIDI]: true, [APREM]: true });
-        }
-
-        return deleteRow.mutate(existing);
-      }
-
-      return createRow.mutate({
-        [KEY]: `${isoDate}-${tri}`,
-        [DATE]: isoDate,
-        [DAYREF]: asDayRef(date),
-        [TRI]: tri,
-        [MATIN]: true,
-        [MIDI]: true,
-        [APREM]: true,
-      });
-    }
-
-    if (existing) {
-      const temp = { ...existing, ...changes };
-      if (!temp[MATIN] && !temp[MIDI] && !temp[APREM]) {
-        return deleteRow.mutate(temp);
-      }
-
-      return updateRow.mutate({ id: existing.id, ...changes });
-    }
-
-    return createRow.mutate({
-      [KEY]: `${isoDate}-${tri}`,
-      [DATE]: isoDate,
-      [DAYREF]: asDayRef(date),
-      [TRI]: tri,
-      ...changes,
-    });
-  };
 
   return (
     <div className="App">
       <Header />
 
-      {(!place || tri.length < 3) && (
+      {tri.length < 3 && (
         <InitialNotice />
       )}
 
@@ -187,7 +141,7 @@ function App () {
                   item
                   xs={12}
                   lg={1}
-                  key={currentDay.toString()}
+                  key={isoDay}
                 />
               );
             }
@@ -200,7 +154,7 @@ function App () {
                   sm={6}
                   md={4}
                   lg={1}
-                  key={currentDay.toString()}
+                  key={isoDay}
                   className={classes.week}
                 >
                   s<strong>{currentDay.day(1).isoWeek()}</strong>
@@ -209,10 +163,10 @@ function App () {
             }
 
             const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
-            const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => t === tri) || {};
-            const dayLongPresence = currentTodayPresences[MATIN]
-              && currentTodayPresences[MIDI]
-              && currentTodayPresences[APREM];
+            const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => sameLowC(t, tri));
+            const dayLongPresence = currentTodayPresences?.[MATIN]
+              && currentTodayPresences?.[MIDI]
+              && currentTodayPresences?.[APREM];
 
             return (
               <Grid
@@ -221,7 +175,7 @@ function App () {
                 sm={6}
                 md={4}
                 lg={2}
-                key={currentDay.toString()}
+                key={isoDay}
                 className={classes.day}
               >
                 <Card
@@ -248,11 +202,13 @@ function App () {
                     title={dayname}
                     subheader={date}
                     action={(!holiday && tri.length > 2) && (
-                      <IconButton onClick={dayAdd(currentDay)}>
-                        {dayLongPresence
-                          ? <UnsubscribeIcon />
-                          : <SubscribeIcon />}
-                      </IconButton>
+                      <DayPresenceButton
+                        tri={tri}
+                        date={currentDay}
+                        setPresence={setPresence}
+                        unsub={dayLongPresence}
+                        userPresence={currentTodayPresences}
+                      />
                     )}
                     className={clsx(
                       classes.cardHeader,
@@ -269,23 +225,16 @@ function App () {
                         </Grid>
                       )}
 
-                      {!holiday && [MATIN, MIDI, APREM].map(moment => {
-                        const removeMoment = dayAdd(currentDay, { [moment]: false });
-                        const addMoment = dayAdd(currentDay, { [moment]: true });
-                        const momentPresences = todayPresences.filter(({ [moment]: m }) => m);
-                        const isTriPresent = momentPresences.some(({ [TRI]: t }) => (t === tri));
-
-                        return (
-                          <Moment
-                            key={moment}
-                            moment={moment}
-                            onAdd={addMoment}
-                            onDelete={removeMoment}
-                            presences={momentPresences}
-                            showAdd={!isTriPresent}
-                          />
-                        );
-                      })}
+                      {!holiday && [MATIN, MIDI, APREM].map(moment => (
+                        <Moment
+                          key={moment}
+                          day={currentDay}
+                          setPresence={setPresence}
+                          moment={moment}
+                          momentPresences={todayPresences.filter(({ [moment]: m }) => m)}
+                          userPresence={currentTodayPresences}
+                        />
+                      ))}
                     </Grid>
                   </CardContent>
                 </Card>
