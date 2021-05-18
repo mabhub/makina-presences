@@ -205,7 +205,6 @@ function App () {
                       subheader={date}
                       action={(!holiday && tri.length > 2) && (
                         <DayPresenceButton
-                          tri={tri}
                           date={currentDay}
                           unsub={dayLongPresence}
                           userPresence={currentTodayPresences}
