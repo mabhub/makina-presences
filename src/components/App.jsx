@@ -13,7 +13,6 @@ import {
   CardHeader,
   Container,
   Grid,
-  IconButton,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
@@ -26,9 +25,9 @@ import { asDayRef, sameLowC } from '../helpers';
 import Header from './Header';
 import Footer from './Footer';
 
-import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 import InitialNotice from './InitialNotice';
 import Moment from './Moment';
+import DayPresenceButton from './DayPresenceButton';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -205,11 +204,12 @@ function App () {
                     title={dayname}
                     subheader={date}
                     action={(!holiday && tri.length > 2) && (
-                      <IconButton onClick={() => setPresence({ tri, date: currentDay })}>
-                        {dayLongPresence
-                          ? <UnsubscribeIcon />
-                          : <SubscribeIcon />}
-                      </IconButton>
+                      <DayPresenceButton
+                        tri={tri}
+                        date={currentDay}
+                        setPresence={setPresence}
+                        unsub={dayLongPresence}
+                      />
                     )}
                     className={clsx(
                       classes.cardHeader,
