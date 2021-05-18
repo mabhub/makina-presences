@@ -28,6 +28,7 @@ import Footer from './Footer';
 import InitialNotice from './InitialNotice';
 import Moment from './Moment';
 import DayPresenceButton from './DayPresenceButton';
+import PresenceContext from './PresenceContext';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -121,128 +122,130 @@ function App () {
         <InitialNotice />
       )}
 
-      <Container style={{ marginTop: '2rem' }}>
-        <Grid container spacing={2}>
-          {days.map((_, index) => {
-            const currentDay = today.day(index);
-            const dayIndex = currentDay.day();
-            const isoDay = currentDay.format('YYYY-MM-DD');
-            const holiday = holidays[isoDay];
-            const isPast = currentDay.isBefore(today);
+      <PresenceContext.Provider value={setPresence}>
+        <Container style={{ marginTop: '2rem' }}>
+          <Grid container spacing={2}>
+            {days.map((_, index) => {
+              const currentDay = today.day(index);
+              const dayIndex = currentDay.day();
+              const isoDay = currentDay.format('YYYY-MM-DD');
+              const holiday = holidays[isoDay];
+              const isPast = currentDay.isBefore(today);
 
-            const dayname = Days[(index) % 7];
-            const dayInitial = dayname[0].toUpperCase();
+              const dayname = Days[(index) % 7];
+              const dayInitial = dayname[0].toUpperCase();
 
-            const date = `${currentDay.date().toString()} ${Months[currentDay.month()]}`;
+              const date = `${currentDay.date().toString()} ${Months[currentDay.month()]}`;
 
-            if (dayIndex === 6) {
-              return (
-                <Grid
-                  item
-                  xs={12}
-                  lg={1}
-                  key={isoDay}
-                />
-              );
-            }
+              if (dayIndex === 6) {
+                return (
+                  <Grid
+                    item
+                    xs={12}
+                    lg={1}
+                    key={isoDay}
+                  />
+                );
+              }
 
-            if (dayIndex === 0) {
+              if (dayIndex === 0) {
+                return (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={1}
+                    key={isoDay}
+                    className={classes.week}
+                  >
+                    s<strong>{currentDay.day(1).isoWeek()}</strong>
+                  </Grid>
+                );
+              }
+
+              const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
+              const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => sameLowC(t, tri));
+              const dayLongPresence = currentTodayPresences?.[MATIN]
+                && currentTodayPresences?.[MIDI]
+                && currentTodayPresences?.[APREM];
+
               return (
                 <Grid
                   item
                   xs={12}
                   sm={6}
                   md={4}
-                  lg={1}
+                  lg={2}
                   key={isoDay}
-                  className={classes.week}
+                  className={classes.day}
                 >
-                  s<strong>{currentDay.day(1).isoWeek()}</strong>
-                </Grid>
-              );
-            }
-
-            const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
-            const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => sameLowC(t, tri));
-            const dayLongPresence = currentTodayPresences?.[MATIN]
-              && currentTodayPresences?.[MIDI]
-              && currentTodayPresences?.[APREM];
-
-            return (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                lg={2}
-                key={isoDay}
-                className={classes.day}
-              >
-                <Card
-                  className={clsx({
-                    [classes.dayCard]: true,
-                    [classes.past]: isPast,
-                    [classes.holidayCard]: holiday,
-                  })}
-                >
-                  <CardHeader
-                    avatar={(
-                      <Avatar
-                        className={clsx(
-                          classes.avatar,
-                          {
-                            [classes.holidayAvatar]: holiday,
-                            [classes.todayAvatar]: today.isSame(currentDay),
-                          },
-                        )}
-                      >
-                        {dayInitial}
-                      </Avatar>
-                    )}
-                    title={dayname}
-                    subheader={date}
-                    action={(!holiday && tri.length > 2) && (
-                      <DayPresenceButton
-                        tri={tri}
-                        date={currentDay}
-                        setPresence={setPresence}
-                        unsub={dayLongPresence}
-                        userPresence={currentTodayPresences}
-                      />
-                    )}
-                    className={clsx(
-                      classes.cardHeader,
-                      { [classes.today]: today.isSame(currentDay) },
-                    )}
-                  />
-
-                  <CardContent className={classes.cardContent}>
-                    <Grid container spacing={2}>
-                      {holiday && (
-                        <Grid item xs={12} className={classes.holiday}>
-                          Jour férié<br />
-                          ({holiday})
-                        </Grid>
+                  <Card
+                    className={clsx({
+                      [classes.dayCard]: true,
+                      [classes.past]: isPast,
+                      [classes.holidayCard]: holiday,
+                    })}
+                  >
+                    <CardHeader
+                      avatar={(
+                        <Avatar
+                          className={clsx(
+                            classes.avatar,
+                            {
+                              [classes.holidayAvatar]: holiday,
+                              [classes.todayAvatar]: today.isSame(currentDay),
+                            },
+                          )}
+                        >
+                          {dayInitial}
+                        </Avatar>
                       )}
-
-                      {!holiday && [MATIN, MIDI, APREM].map(moment => (
-                        <Moment
-                          key={moment}
-                          day={currentDay}
+                      title={dayname}
+                      subheader={date}
+                      action={(!holiday && tri.length > 2) && (
+                        <DayPresenceButton
+                          tri={tri}
+                          date={currentDay}
                           setPresence={setPresence}
-                          moment={moment}
-                          momentPresences={todayPresences.filter(({ [moment]: m }) => m)}
+                          unsub={dayLongPresence}
                           userPresence={currentTodayPresences}
                         />
-                      ))}
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Container>
+                      )}
+                      className={clsx(
+                        classes.cardHeader,
+                        { [classes.today]: today.isSame(currentDay) },
+                      )}
+                    />
+
+                    <CardContent className={classes.cardContent}>
+                      <Grid container spacing={2}>
+                        {holiday && (
+                          <Grid item xs={12} className={classes.holiday}>
+                            Jour férié<br />
+                            ({holiday})
+                          </Grid>
+                        )}
+
+                        {!holiday && [MATIN, MIDI, APREM].map(moment => (
+                          <Moment
+                            key={moment}
+                            day={currentDay}
+                            setPresence={setPresence}
+                            moment={moment}
+                            momentPresences={todayPresences.filter(({ [moment]: m }) => m)}
+                            userPresence={currentTodayPresences}
+                          />
+                        ))}
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Container>
+      </PresenceContext.Provider>
 
       <Footer />
     </div>
