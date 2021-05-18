@@ -65,7 +65,8 @@ const Moment = ({
   const canAdd = showAdd && tri.length > 2;
 
   const onAdd = () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence });
-  const onDelete = () => setPresence({ tri, date: day, changes: { [moment]: false }, userPresence });
+  const onDelete = () =>
+    setPresence({ tri, date: day, changes: { [moment]: false }, userPresence });
 
   const label = fieldLabel[place][moment];
 
