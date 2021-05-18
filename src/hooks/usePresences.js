@@ -147,12 +147,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
   );
 
   const setPresence = React.useCallback(
-    ({ date, tri, changes, currentPresences }) => {
-      const userPresence = currentPresences.find(
-        ({ [TRI]: t, [DATE]: d }) =>
-          d === date.format('YYYY-MM-DD') && tri === t,
-      );
-
+    ({ date, tri, changes, userPresence }) => {
       if (!changes) {
         if (userPresence) {
           if (!userPresence[MATIN] || !userPresence[MIDI] || !userPresence[APREM]) {
@@ -178,7 +173,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
       return createPresence(date, tri, changes);
     },
     [
-      APREM, DATE, MATIN, MIDI, TRI,
+      APREM, MATIN, MIDI,
       createDayPresence, createPresence, deletePresence, editPresence, fillPresence,
     ],
   );

@@ -8,10 +8,11 @@ const DayPresenceButton = React.memo(({
   setPresence,
   tri,
   date,
+  userPresence,
   ...props
 }) => (
   <IconButton
-    onClick={() => setPresence({ tri, date })}
+    onClick={() => setPresence({ tri, date, userPresence })}
     {...props}
   >
     {unsub ? <UnsubscribeIcon /> : <SubscribeIcon />}

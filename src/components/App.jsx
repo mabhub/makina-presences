@@ -163,12 +163,10 @@ function App () {
             }
 
             const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDay));
-            const currentTodayPresences = todayPresences.find(
-              ({ [TRI]: t }) => sameLowC(t, tri),
-            ) || {};
-            const dayLongPresence = currentTodayPresences[MATIN]
-              && currentTodayPresences[MIDI]
-              && currentTodayPresences[APREM];
+            const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => sameLowC(t, tri));
+            const dayLongPresence = currentTodayPresences?.[MATIN]
+              && currentTodayPresences?.[MIDI]
+              && currentTodayPresences?.[APREM];
 
             return (
               <Grid
@@ -209,6 +207,7 @@ function App () {
                         date={currentDay}
                         setPresence={setPresence}
                         unsub={dayLongPresence}
+                        userPresence={currentTodayPresences}
                       />
                     )}
                     className={clsx(
@@ -232,7 +231,8 @@ function App () {
                           day={currentDay}
                           setPresence={setPresence}
                           moment={moment}
-                          presences={todayPresences.filter(({ [moment]: m }) => m)}
+                          momentPresences={todayPresences.filter(({ [moment]: m }) => m)}
+                          userPresence={currentTodayPresences}
                         />
                       ))}
                     </Grid>

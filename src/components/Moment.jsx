@@ -52,7 +52,8 @@ const Moment = ({
   moment,
   setPresence,
   day,
-  presences = [],
+  momentPresences: presences = [],
+  userPresence,
 }) => {
   const classes = useStyles();
   const [tri, setTri] = useTriState('');
@@ -63,8 +64,8 @@ const Moment = ({
   const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
   const canAdd = showAdd && tri.length > 2;
 
-  const onAdd = () => setPresence({ tri, date: day, changes: { [moment]: true } }, presences);
-  const onDelete = () => setPresence({ tri, date: day, changes: { [moment]: false } }, presences);
+  const onAdd = () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence });
+  const onDelete = () => setPresence({ tri, date: day, changes: { [moment]: false }, userPresence });
 
   const label = fieldLabel[place][moment];
 
@@ -120,6 +121,7 @@ const Moment = ({
 };
 
 const MemoizedMoment = React.memo(Moment, (prev, next) =>
-  JSON.stringify(prev.presences) === JSON.stringify(next.presences));
+  JSON.stringify(prev.momentPresences) === JSON.stringify(next.momentPresences)
+  && JSON.stringify(prev.userPresence) === JSON.stringify(next.userPresence));
 
 export default MemoizedMoment;
