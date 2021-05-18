@@ -34,7 +34,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
 
       return response.json();
     },
-    { staleTime: 60000, refetchInterval: 60000 },
+    { staleTime: 60000, refetchInterval: 60000, retryDelay: 10000 },
   );
 
   const createRow = useMutation(record => fetch(
