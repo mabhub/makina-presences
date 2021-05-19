@@ -27,4 +27,4 @@ const DayPresenceButton = React.memo(({
   );
 });
 
-export default DayPresenceButton;
+export default React.memo(DayPresenceButton);
