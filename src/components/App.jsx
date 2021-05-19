@@ -109,6 +109,8 @@ const App = () => {
   if (!validPlaces.includes(place)) { setPlace(validPlaces[0]); }
   const { [place]: { DATE, MATIN, MIDI, APREM, TRI } } = fieldMap;
 
+  const isTriValid = tri.length >= 3;
+
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
   const dayRefFrom = asDayRef(today.day(1));
   const dayRefTo = asDayRef(today.day(timespan));
@@ -116,34 +118,54 @@ const App = () => {
   const { presences, setPresence } = usePresences(place, dayRefFrom, dayRefTo);
   const holidays = useHolidays();
 
+  const dayGrid = [...Array(timespan).keys()].map(index => {
+    const date = today.day(index);
+    const isoDate = date.format('YYYY-MM-DD');
+    const dayName = Days[(index) % 7];
+
+    return {
+      date,
+      isoDate,
+      dayName,
+      weekIndex: date.day(1).isoWeek(),
+      weekDayIndex: date.day(),
+      isPast: date.isBefore(today),
+      dayInitial: dayName[0].toUpperCase(),
+      dateString: `${date.date().toString()} ${Months[date.month()]}`,
+      isDateToday: date.isSame(today),
+    };
+  });
+
   return (
     <div className="App">
       <Header />
 
-      {tri.length < 3 && (
+      {!isTriValid && (
         <InitialNotice className={classes.notice} />
       )}
 
       <PresenceContext.Provider value={setPresence}>
         <Container className={classes.container}>
           <Grid container spacing={2}>
-            {[...Array(timespan)].map((_, index) => {
-              const date = today.day(index);
-              const isoDate = date.format('YYYY-MM-DD');
-
+            {dayGrid.map(({
+              date,
+              isoDate,
+              dayName,
+              weekIndex,
+              weekDayIndex,
+              isPast,
+              dayInitial,
+              dateString,
+              isDateToday,
+            }) => {
               /**
                * saturday,
                * last day of (sunday started) week
                * used as simple Grid spacer
                */
-              if (date.day() === 6) {
+              if (weekDayIndex === 6) {
                 return (
-                  <Grid
-                    item
-                    xs={12}
-                    lg={1}
-                    key={isoDate}
-                  />
+                  <Grid item xs={12} lg={1} key={isoDate} />
                 );
               }
 
@@ -152,27 +174,16 @@ const App = () => {
                * used as simple Grid spacer
                * and for displaying week number
                */
-              if (date.day() === 0) {
+              if (weekDayIndex === 0) {
                 return (
-                  <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={4}
-                    lg={1}
-                    key={isoDate}
-                    className={classes.week}
-                  >
-                    s<strong>{date.day(1).isoWeek()}</strong>
+                  <Grid item xs={12} sm={6} md={4} lg={1} key={isoDate} className={classes.week}>
+                    s<strong>{weekIndex}</strong>
                   </Grid>
                 );
               }
 
               const holiday = holidays[isoDate];
-              const isPast = date.isBefore(today);
-              const dayname = Days[(index) % 7];
-              const dayInitial = dayname[0].toUpperCase();
-              const dateString = `${date.date().toString()} ${Months[date.month()]}`;
+              const isHoliday = Boolean(holiday);
 
               const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDate));
               const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => sameLowC(t, tri));
@@ -181,39 +192,29 @@ const App = () => {
                 && currentTodayPresences?.[APREM];
 
               return (
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={4}
-                  lg={2}
-                  key={isoDate}
-                  className={classes.day}
-                >
+                <Grid item xs={12} sm={6} md={4} lg={2} key={isoDate} className={classes.day}>
                   <Card
                     className={clsx({
                       [classes.dayCard]: true,
                       [classes.past]: isPast,
-                      [classes.holidayCard]: holiday,
+                      [classes.holidayCard]: isHoliday,
                     })}
                   >
                     <CardHeader
                       avatar={(
                         <Avatar
-                          className={clsx(
-                            classes.avatar,
-                            {
-                              [classes.holidayAvatar]: holiday,
-                              [classes.todayAvatar]: today.isSame(date),
-                            },
-                          )}
+                          className={clsx({
+                            [classes.avatar]: true,
+                            [classes.holidayAvatar]: isHoliday,
+                            [classes.todayAvatar]: isDateToday,
+                          })}
                         >
                           {dayInitial}
                         </Avatar>
                       )}
-                      title={dayname}
+                      title={dayName}
                       subheader={dateString}
-                      action={(!holiday && tri.length > 2) && (
+                      action={(!isHoliday && isTriValid) && (
                         <DayPresenceButton
                           date={date}
                           unsub={dayLongPresence}
@@ -222,20 +223,20 @@ const App = () => {
                       )}
                       className={clsx(
                         classes.cardHeader,
-                        { [classes.today]: today.isSame(date) },
+                        { [classes.today]: isDateToday },
                       )}
                     />
 
                     <CardContent className={classes.cardContent}>
                       <Grid container spacing={2}>
-                        {holiday && (
+                        {isHoliday && (
                           <Grid item xs={12} className={classes.holiday}>
                             Jour férié<br />
                             ({holiday})
                           </Grid>
                         )}
 
-                        {!holiday && [MATIN, MIDI, APREM].map(moment => (
+                        {!isHoliday && [MATIN, MIDI, APREM].map(moment => (
                           <Moment
                             key={moment}
                             day={date}
