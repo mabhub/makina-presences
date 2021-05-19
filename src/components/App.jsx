@@ -7,15 +7,12 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import {
-  Avatar,
   Card,
   CardContent,
-  CardHeader,
   Container,
   Grid,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
 import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
@@ -27,8 +24,8 @@ import Footer from './Footer';
 
 import InitialNotice from './InitialNotice';
 import Moment from './Moment';
-import DayPresenceButton from './DayPresenceButton';
 import PresenceContext from './PresenceContext';
+import DayHeader from './DayHeader';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -53,12 +50,6 @@ const useStyles = makeStyles(theme => ({
   holidayCard: {
     opacity: 0.85,
   },
-  avatar: {
-    background: theme.palette.grey[400],
-  },
-  holidayAvatar: {
-    background: theme.palette.grey[200],
-  },
   day: {
     display: 'flex',
   },
@@ -69,15 +60,6 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-  },
-  today: {
-    backgroundColor: emphasize(theme.palette.primary.main, 0.75),
-  },
-  todayAvatar: {
-    backgroundColor: theme.palette.primary.main,
-  },
-  cardHeader: {
-    padding: theme.spacing(2, 2, 1),
   },
   cardContent: {
     flex: 1,
@@ -200,31 +182,16 @@ const App = () => {
                       [classes.holidayCard]: isHoliday,
                     })}
                   >
-                    <CardHeader
-                      avatar={(
-                        <Avatar
-                          className={clsx({
-                            [classes.avatar]: true,
-                            [classes.holidayAvatar]: isHoliday,
-                            [classes.todayAvatar]: isDateToday,
-                          })}
-                        >
-                          {dayInitial}
-                        </Avatar>
-                      )}
-                      title={dayName}
-                      subheader={dateString}
-                      action={(!isHoliday && isTriValid) && (
-                        <DayPresenceButton
-                          date={date}
-                          unsub={dayLongPresence}
-                          userPresence={currentTodayPresences}
-                        />
-                      )}
-                      className={clsx(
-                        classes.cardHeader,
-                        { [classes.today]: isDateToday },
-                      )}
+                    <DayHeader
+                      currentTodayPresences={currentTodayPresences}
+                      date={date}
+                      dateString={dateString}
+                      dayInitial={dayInitial}
+                      dayLongPresence={dayLongPresence}
+                      dayName={dayName}
+                      isDateToday={isDateToday}
+                      isHoliday={isHoliday}
+                      isTriValid={isTriValid}
                     />
 
                     <CardContent className={classes.cardContent}>
