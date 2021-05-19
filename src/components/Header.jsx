@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 
 import createPersistedState from 'use-persisted-state';
 import {
@@ -16,6 +17,9 @@ import { placesId, tooltipOptions } from '../settings';
 import LoadIndicator from './LoadIndicator';
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    paddingTop: theme.spacing(4),
+  },
   placeButtons: {
     width: '100%',
 
@@ -39,7 +43,7 @@ const grid = {
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
 
-const Header = () => {
+const Header = ({ className, ...props }) => {
   const classes = useStyles();
 
   const [tri, setTri] = useTriState('');
@@ -51,8 +55,9 @@ const Header = () => {
   };
 
   return (
-    <Container style={{ marginTop: '2rem' }}>
+    <Container className={clsx(className, classes.root)} {...props}>
       <LoadIndicator />
+
       <Grid container spacing={2} alignItems="flex-end">
         <Grid item {...grid.spacer} />
         <Grid item {...grid.toggle}>

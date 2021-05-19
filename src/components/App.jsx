@@ -38,6 +38,12 @@ const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
+  notice: {
+    marginTop: theme.spacing(4),
+  },
+  container: {
+    marginTop: theme.spacing(4),
+  },
   week: {
     textAlign: 'right',
     fontStyle: 'italic',
@@ -119,11 +125,11 @@ function App () {
       <Header />
 
       {tri.length < 3 && (
-        <InitialNotice />
+        <InitialNotice className={classes.notice} />
       )}
 
       <PresenceContext.Provider value={setPresence}>
-        <Container style={{ marginTop: '2rem' }}>
+        <Container className={classes.container}>
           <Grid container spacing={2}>
             {days.map((_, index) => {
               const currentDay = today.day(index);
