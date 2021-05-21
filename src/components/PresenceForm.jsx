@@ -14,7 +14,6 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { placesId, tooltipOptions } from '../settings';
-import LoadIndicator from './LoadIndicator';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -43,7 +42,7 @@ const grid = {
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
 
-const Header = ({ className, ...props }) => {
+const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
 
   const [tri, setTri] = useTriState('');
@@ -56,8 +55,6 @@ const Header = ({ className, ...props }) => {
 
   return (
     <Container className={clsx(className, classes.root)} {...props}>
-      <LoadIndicator />
-
       <Grid container spacing={2} alignItems="flex-end">
         <Grid item {...grid.spacer} />
         <Grid item {...grid.toggle}>
@@ -98,4 +95,4 @@ const Header = ({ className, ...props }) => {
   );
 };
 
-export default React.memo(Header);
+export default React.memo(PresenceForm);

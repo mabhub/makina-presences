@@ -19,13 +19,14 @@ import useHolidays from '../hooks/useHolidays';
 
 import { placesId, fieldMap, Days, Months } from '../settings';
 import { asDayRef, sameLowC } from '../helpers';
-import Header from './Header';
+import PresenceForm from './PresenceForm';
 import Footer from './Footer';
 
 import InitialNotice from './InitialNotice';
 import Moment from './Moment';
 import PresenceContext from './PresenceContext';
 import DayHeader from './DayHeader';
+import LoadIndicator from './LoadIndicator';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -120,7 +121,9 @@ const PresencePage = () => {
 
   return (
     <div className="PresencePage">
-      <Header />
+      <LoadIndicator />
+
+      <PresenceForm />
 
       {!isTriValid && (
         <InitialNotice className={classes.notice} />
