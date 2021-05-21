@@ -6,7 +6,7 @@ import { CssBaseline } from '@material-ui/core';
 
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import App from './components/App';
+import PresencePage from './components/PresencePage';
 
 const theme = responsiveFontSizes(
   createMuiTheme({
@@ -26,7 +26,7 @@ ReactDOM.render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <PresencePage />
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>,

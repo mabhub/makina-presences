@@ -84,7 +84,7 @@ const useStyles = makeStyles(theme => ({
 const validPlaces = Object.keys(placesId);
 const timespan = 21;
 
-const App = () => {
+const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
   const [place, setPlace] = usePlaceState(validPlaces[0]);
@@ -119,7 +119,7 @@ const App = () => {
   });
 
   return (
-    <div className="App">
+    <div className="PresencePage">
       <Header />
 
       {!isTriValid && (
@@ -227,4 +227,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default PresencePage;
