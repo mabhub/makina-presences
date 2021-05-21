@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+
 import { createMuiTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 import { CssBaseline } from '@material-ui/core';
 
@@ -26,7 +28,12 @@ ReactDOM.render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <PresencePage />
+        <Router>
+          <Switch>
+            <Route exact path="/"><PresencePage /></Route>
+            <Route path="*">Error 404</Route>
+          </Switch>
+        </Router>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>,
