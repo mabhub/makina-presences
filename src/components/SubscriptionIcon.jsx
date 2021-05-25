@@ -9,7 +9,7 @@ import {
 
 import { tooltipOptions } from '../settings';
 
-export const SubscribeIcon = ({ when, outline = true, ...props }) => (
+export const SubscribeIcon = React.memo(({ when, outline = true, ...props }) => (
   <Tooltip
     title={(
       <>
@@ -24,9 +24,9 @@ export const SubscribeIcon = ({ when, outline = true, ...props }) => (
       ? <AddCircleOutline />
       : <AddCircle />}
   </Tooltip>
-);
+));
 
-export const UnsubscribeIcon = ({ when, outline = true, ...props }) => (
+export const UnsubscribeIcon = React.memo(({ when, outline = true, ...props }) => (
   <Tooltip
     title={(
       <>
@@ -41,4 +41,4 @@ export const UnsubscribeIcon = ({ when, outline = true, ...props }) => (
       ? <RemoveCircleOutline />
       : <RemoveCircle />}
   </Tooltip>
-);
+));

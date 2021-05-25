@@ -2,8 +2,8 @@ import React from 'react';
 import { Container, Grid } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 
-const InitialNotice = () => (
-  <Container style={{ marginTop: '1rem' }}>
+const InitialNotice = props => (
+  <Container {...props}>
     <Grid container justify="center">
       <Grid item xs={10}>
         <Alert severity="info">
