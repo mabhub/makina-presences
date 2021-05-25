@@ -9,6 +9,7 @@ import { CssBaseline } from '@material-ui/core';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import PresencePage from './components/PresencePage';
+import ArchivePage from './components/ArchivePage';
 
 const theme = responsiveFontSizes(
   createMuiTheme({
@@ -31,6 +32,7 @@ ReactDOM.render(
         <Router>
           <Switch>
             <Route exact path="/"><PresencePage /></Route>
+            <Route path="/archives"><ArchivePage /></Route>
             <Route path="*">Error 404</Route>
           </Switch>
         </Router>
