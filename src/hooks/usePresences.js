@@ -22,6 +22,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
   const qs = [
     `?filter__${fields.DAYREF}__higher_than=${dayRefFrom - 1}`,
     `&filter__${fields.DAYREF}__lower_than=${dayRefTo + 1}`,
+    '&size=200',
   ].join('');
 
   const { data: { results: presences = [] } = {} } = useQuery(
