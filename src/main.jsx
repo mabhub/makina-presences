@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
-import { createMuiTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
+import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 import { CssBaseline } from '@material-ui/core';
 
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -12,7 +12,7 @@ import PresencePage from './components/PresencePage';
 import ArchivePage from './components/ArchivePage';
 
 const theme = responsiveFontSizes(
-  createMuiTheme({
+  createTheme({
     palette: {
       primary: {
         main: '#adb31b',

@@ -1,12 +1,13 @@
 {
   "name": "makina-presences",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx",
     "serve": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "version": "git changelog -n -t $npm_package_version && git add CHANGELOG.md"
   },
   "dependencies": {
     "@date-io/dayjs": "^1.3.13",

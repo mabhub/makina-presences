@@ -3,8 +3,7 @@ import clsx from 'clsx';
 import createPersistedState from 'use-persisted-state';
 
 import { Grid, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { fade } from '@material-ui/core/styles/colorManipulator';
+import { makeStyles, alpha } from '@material-ui/core/styles';
 
 import { SubscribeIcon } from './SubscriptionIcon';
 import { fieldLabel, fieldMap, placesId } from '../settings';
@@ -20,11 +19,11 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.grey[500],
   },
   matin: {
-    background: fade(theme.palette.primary.main, 0.15),
+    background: alpha(theme.palette.primary.main, 0.15),
   },
   midi: {},
   aprem: {
-    background: fade(theme.palette.primary.main, 0.15),
+    background: alpha(theme.palette.primary.main, 0.15),
   },
   addMoment: {
     fontSize: '0.5rem',

@@ -68,7 +68,7 @@ const ArchivePage = () => {
     <div className="ArchivePage">
       <Container className={classes.root}>
 
-        <Grid container spacing={2} justify="center" alignItems="flex-start">
+        <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
           <Grid item xs={12} sm={6} md={4} lg={3}>
 
             <MuiPickersUtilsProvider utils={DateUtils} locale={fr}>

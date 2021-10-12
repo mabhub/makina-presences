@@ -14,7 +14,7 @@ const Footer = () => {
 
   return (
     <Container className={classes.root}>
-      <Grid container justify="center">
+      <Grid container justifyContent="center">
         <Grid item>
           <Link href="https://github.com/mabhub/makina-presences">
             <GitHub />
