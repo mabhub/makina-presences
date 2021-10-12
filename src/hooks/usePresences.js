@@ -4,10 +4,10 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { asDayRef, nrmlStr } from '../helpers';
 import { fieldMap, placesId } from '../settings';
 
-const { VITE_DATA_TOKEN } = import.meta.env;
+const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
 const headers = {
-  Authorization: `Token ${VITE_DATA_TOKEN}`,
+  Authorization: `Token ${token}`,
   'Content-Type': 'application/json',
 };
 
@@ -30,7 +30,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
     async () => {
       const response = await fetch(
         basePath + qs,
-        { headers: { Authorization: `Token ${VITE_DATA_TOKEN}` } },
+        { headers: { Authorization: `Token ${token}` } },
       );
 
       const nextData = await response.json();
