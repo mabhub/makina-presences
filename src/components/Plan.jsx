@@ -25,6 +25,7 @@ const useStyles = makeStyles(() => ({
   spot: {
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
+    border: '2px solid transparent',
   },
 }));
 
@@ -59,7 +60,11 @@ const Plan = () => {
             <Fab
               key={spot.Identifiant}
               className={classes.spot}
-              style={{ left: `${spot.x}px`, top: `${spot.y}px` }}
+              style={{
+                left: `${spot.x}px`,
+                top: `${spot.y}px`,
+                borderColor: spot?.Type?.color?.replace('-', ''),
+              }}
               size="small"
             >
               {spot.Identifiant}
