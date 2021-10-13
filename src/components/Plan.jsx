@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
@@ -26,6 +27,11 @@ const useStyles = makeStyles(() => ({
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
     border: '2px solid transparent',
+  },
+
+  locked: {
+    opacity: 0.2,
+    cursor: 'not-allowed',
   },
 }));
 
@@ -59,7 +65,10 @@ const Plan = () => {
           {spots.map(spot => (
             <Fab
               key={spot.Identifiant}
-              className={classes.spot}
+              className={clsx({
+                [classes.spot]: true,
+                [classes.locked]: spot?.Bloqué,
+              })}
               style={{
                 left: `${spot.x}px`,
                 top: `${spot.y}px`,
