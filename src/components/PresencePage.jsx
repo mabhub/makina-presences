@@ -8,6 +8,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import {
   Card,
+  CardActionArea,
   CardContent,
   Container,
   Grid,
@@ -17,13 +18,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
-import { placesId, fieldMap, Days, Months } from '../settings';
+import { Days, Months } from '../settings';
 import { asDayRef, sameLowC } from '../helpers';
 import PresenceForm from './PresenceForm';
 import Footer from './Footer';
 
 import InitialNotice from './InitialNotice';
 import Moment from './Moment';
+import Plan from './Plan';
 import PresenceContext from './PresenceContext';
 import DayHeader from './DayHeader';
 import LoadIndicator from './LoadIndicator';
@@ -33,6 +35,7 @@ dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
+const useDayState = createPersistedState('day');
 const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
@@ -43,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(4),
   },
   week: {
-    textAlign: 'right',
+    textAlign: 'center',
     fontStyle: 'italic',
     fontSize: '0.8em',
     alignSelf: 'center',
@@ -61,6 +64,10 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    borderRight: '4px solid transparent',
+  },
+  planDay: {
+    borderColor: theme.palette.primary.main,
   },
   cardContent: {
     flex: 1,
@@ -82,19 +89,17 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const validPlaces = Object.keys(placesId);
-const timespan = 21;
+const timespan = 14;
 
 const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
-  const [place, setPlace] = usePlaceState(validPlaces[0]);
-  if (!validPlaces.includes(place)) { setPlace(validPlaces[0]); }
-  const { [place]: { DATE, MATIN, MIDI, APREM, TRI } } = fieldMap;
+  const [place] = usePlaceState('Toulouse');
 
   const isTriValid = tri.length >= 3;
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
+  const [day, setDay] = useDayState(today);
   const dayRefFrom = asDayRef(today.day(1));
   const dayRefTo = asDayRef(today.day(timespan));
 
@@ -132,95 +137,101 @@ const PresencePage = () => {
       <PresenceContext.Provider value={setPresence}>
         <Container className={classes.container}>
           <Grid container spacing={2}>
-            {dayGrid.map(({
-              date,
-              isoDate,
-              dayName,
-              weekIndex,
-              weekDayIndex,
-              isPast,
-              dayInitial,
-              dateString,
-              isDateToday,
-            }) => {
-              /**
-               * saturday,
-               * last day of (sunday started) week
-               * used as simple Grid spacer
-               */
-              if (weekDayIndex === 6) {
-                return (
-                  <Grid item xs={12} lg={1} key={isoDate} />
-                );
-              }
+            <Grid item xs={3}>
+              <Grid container spacing={2}>
+                {dayGrid.map(({
+                  date,
+                  isoDate,
+                  dayName,
+                  weekIndex,
+                  weekDayIndex,
+                  isPast,
+                  dayInitial,
+                  dateString,
+                  isDateToday,
+                }) => {
+                  /**
+                  * saturday,
+                  * last day of (sunday started) week
+                  * used as simple Grid spacer
+                  */
+                  if (weekDayIndex === 6) {
+                    return <React.Fragment key={isoDate} />;
+                  }
 
-              /**
-               * sunday,
-               * used as simple Grid spacer
-               * and for displaying week number
-               */
-              if (weekDayIndex === 0) {
-                return (
-                  <Grid item xs={12} sm={6} md={4} lg={1} key={isoDate} className={classes.week}>
-                    s<strong>{weekIndex}</strong>
-                  </Grid>
-                );
-              }
-
-              const holiday = holidays[isoDate];
-              const isHoliday = Boolean(holiday);
-
-              const todayPresences = presences.filter(({ [DATE]: d }) => (d === isoDate));
-              const currentTodayPresences = todayPresences.find(({ [TRI]: t }) => sameLowC(t, tri));
-              const dayLongPresence = currentTodayPresences?.[MATIN]
-                && currentTodayPresences?.[MIDI]
-                && currentTodayPresences?.[APREM];
-
-              return (
-                <Grid item xs={12} sm={6} md={4} lg={2} key={isoDate} className={classes.day}>
-                  <Card
-                    className={clsx({
-                      [classes.dayCard]: true,
-                      [classes.past]: isPast,
-                      [classes.holidayCard]: isHoliday,
-                    })}
-                  >
-                    <DayHeader
-                      currentTodayPresences={currentTodayPresences}
-                      date={date}
-                      dateString={dateString}
-                      dayInitial={dayInitial}
-                      dayLongPresence={dayLongPresence}
-                      dayName={dayName}
-                      isDateToday={isDateToday}
-                      isHoliday={isHoliday}
-                      isTriValid={isTriValid}
-                    />
-
-                    <CardContent className={classes.cardContent}>
-                      <Grid container spacing={2}>
-                        {isHoliday && (
-                          <Grid item xs={12} className={classes.holiday}>
-                            Jour férié<br />
-                            ({holiday})
-                          </Grid>
-                        )}
-
-                        {!isHoliday && [MATIN, MIDI, APREM].map(moment => (
-                          <Moment
-                            key={moment}
-                            day={date}
-                            moment={moment}
-                            momentPresences={todayPresences.filter(({ [moment]: m }) => m)}
-                            userPresence={currentTodayPresences}
-                          />
-                        ))}
+                  /**
+                  * sunday,
+                  * used as simple Grid spacer
+                  * and for displaying week number
+                  */
+                  if (weekDayIndex === 0) {
+                    return (
+                      <Grid item xs={12} key={isoDate} className={classes.week}>
+                        s<strong>{weekIndex}</strong>
                       </Grid>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })}
+                    );
+                  }
+
+                  const holiday = holidays[isoDate];
+                  const isHoliday = Boolean(holiday);
+
+                  const todayPresences = presences.filter(({ day: d }) => (d === isoDate));
+                  const currentTodayPresences = todayPresences
+                    .find(({ tri: t }) => sameLowC(t, tri));
+
+                  const dayLongPresence = typeof currentTodayPresences?.spot === 'string';
+
+                  return (
+                    <Grid item xs={12} key={isoDate} className={classes.day}>
+                      <Card
+                        className={clsx({
+                          [classes.dayCard]: true,
+                          [classes.past]: isPast,
+                          [classes.holidayCard]: isHoliday,
+                          [classes.planDay]: day === isoDate,
+                        })}
+                      >
+                        <CardActionArea onClick={() => setDay(isoDate)}>
+                          <DayHeader
+                            currentTodayPresences={currentTodayPresences}
+                            date={date}
+                            dateString={dateString}
+                            dayInitial={dayInitial}
+                            dayLongPresence={dayLongPresence}
+                            dayName={dayName}
+                            isDateToday={isDateToday}
+                            isHoliday={isHoliday}
+                            isTriValid={isTriValid}
+                          />
+
+                          <CardContent className={classes.cardContent}>
+                            <Grid container spacing={2}>
+                              {isHoliday && (
+                                <Grid item xs={12} className={classes.holiday}>
+                                  Jour férié<br />
+                                  ({holiday})
+                                </Grid>
+                              )}
+
+                              {!isHoliday && (
+                                <Moment
+                                  momentPresences={todayPresences.filter(({ spot: m }) => m)}
+                                  userPresence={currentTodayPresences}
+                                />
+                              )}
+                            </Grid>
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Grid>
+
+            <Grid item xs={9}>
+              <Plan />
+            </Grid>
           </Grid>
         </Container>
       </PresenceContext.Provider>

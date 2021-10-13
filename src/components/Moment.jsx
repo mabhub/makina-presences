@@ -1,18 +1,14 @@
 import React from 'react';
-import clsx from 'clsx';
-import createPersistedState from 'use-persisted-state';
+// import createPersistedState from 'use-persisted-state';
 
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import { makeStyles, alpha } from '@material-ui/core/styles';
 
-import { SubscribeIcon } from './SubscriptionIcon';
-import { fieldLabel, fieldMap, placesId } from '../settings';
-import { sameLowC } from '../helpers';
-import PresenceContext from './PresenceContext';
+// import { sameLowC } from '../helpers';
+// import PresenceContext from './PresenceContext';
 import TriPresence from './TriPresence';
 
-const useTriState = createPersistedState('tri');
-const usePlaceState = createPersistedState('place');
+// const useTriState = createPersistedState('tri');
 
 const useStyles = makeStyles(theme => ({
   moment: {
@@ -47,68 +43,49 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const validPlaces = Object.keys(placesId);
-
 const Moment = ({
-  moment,
-  day,
+  // moment,
+  // day,
   momentPresences: presences = [],
-  userPresence,
+  // userPresence,
 }) => {
   const classes = useStyles();
-  const [tri] = useTriState('');
-  const [place] = usePlaceState(validPlaces[0]);
+  // const [tri] = useTriState('');
 
-  const { TRI } = fieldMap[place];
+  // const TRI = 'tri';
 
-  const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
-  const canAdd = showAdd && tri.length > 2;
+  // const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
+  // const canAdd = showAdd && tri.length > 2;
 
-  const setPresence = React.useContext(PresenceContext);
+  // const setPresence = React.useContext(PresenceContext);
 
-  const onAdd = React.useCallback(
-    () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence }),
-    [day, moment, setPresence, tri, userPresence],
-  );
+  // const onAdd = React.useCallback(
+  //   () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence }),
+  //   [day, moment, setPresence, tri, userPresence],
+  // );
 
-  const onDelete = React.useCallback(
-    () => setPresence({ tri, date: day, changes: { [moment]: false }, userPresence }),
-    [day, moment, setPresence, tri, userPresence],
-  );
-
-  const label = fieldLabel[place][moment];
+  // const onDelete = React.useCallback(
+  //   () => setPresence({ tri, date: day, changes: { [moment]: false }, userPresence }),
+  //   [day, moment, setPresence, tri, userPresence],
+  // );
 
   return (
     <Grid
       item
-      xs={4}
-      className={clsx(classes.moment, classes[label])}
+      xs={12}
+      className={classes.moment}
     >
-      {label}<br />
-
       {presences
-        .sort(({ [TRI]: a }, { [TRI]: b }) => (a.localeCompare(b)))
-        .map(({ id, [TRI]: t, fake }) => (
+        .sort(({ tri: a }, { tri: b }) => (a.localeCompare(b)))
+        .map(({ id, tri: t, fake }) => (
           <TriPresence
             key={id}
             tri={t}
-            momentLabel={label}
             alt={fake}
-            onDelete={onDelete}
+            // onDelete={onDelete}
             className={classes.tri}
           />
         ))}
-
-      <IconButton
-        onClick={onAdd}
-        className={classes.addMoment}
-        size="small"
-        disabled={!canAdd}
-      >
-        <SubscribeIcon
-          when={label}
-        />
-      </IconButton>
     </Grid>
   );
 };

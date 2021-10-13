@@ -13,7 +13,9 @@ import {
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { placesId, tooltipOptions } from '../settings';
+import usePlans from '../hooks/usePlans';
+
+import { tooltipOptions } from '../settings';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,7 +31,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const validPlaces = Object.keys(placesId);
+// const validPlaces = Object.keys(placesId);
 
 /* eslint-disable key-spacing */
 const grid = {
@@ -44,9 +46,10 @@ const usePlaceState = createPersistedState('place');
 
 const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
+  const plans = usePlans();
 
   const [tri, setTri] = useTriState('');
-  const [place, setPlace] = usePlaceState(validPlaces[0]);
+  const [place, setPlace] = usePlaceState('');
 
   const handleTriChange = event => setTri(event.target.value.substr(0, 255));
   const handlePlaceChange = (event, newPlace) => {
@@ -66,10 +69,12 @@ const PresenceForm = ({ className, ...props }) => {
             exclusive
             value={place}
           >
-            <ToggleButton value="nantes">Nantes</ToggleButton>
-            <ToggleButton value="toulouse">Toulouse</ToggleButton>
+            {plans.map(({ Name }) => (
+              <ToggleButton key={Name} value={Name}>{Name}</ToggleButton>
+            ))}
           </ToggleButtonGroup>
         </Grid>
+
         <Grid item {...grid.tri}>
           <FormControl fullWidth>
             <InputLabel htmlFor="tri">Trigramme</InputLabel>

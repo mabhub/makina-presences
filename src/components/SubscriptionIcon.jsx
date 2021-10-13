@@ -9,12 +9,11 @@ import {
 
 import { tooltipOptions } from '../settings';
 
-export const SubscribeIcon = React.memo(({ when, outline = true, ...props }) => (
+export const SubscribeIcon = React.memo(({ outline = true, ...props }) => (
   <Tooltip
     title={(
       <>
-        <strong>S'inscrire</strong><br />
-        {when ? `(${when} uniquement)` : '(journée entière)'}
+        <strong>S'inscrire</strong>
       </>
     )}
     {...tooltipOptions}
@@ -26,12 +25,11 @@ export const SubscribeIcon = React.memo(({ when, outline = true, ...props }) => 
   </Tooltip>
 ));
 
-export const UnsubscribeIcon = React.memo(({ when, outline = true, ...props }) => (
+export const UnsubscribeIcon = React.memo(({ outline = true, ...props }) => (
   <Tooltip
     title={(
       <>
-        <strong>Se désinscrire</strong><br />
-        {when ? `(${when} uniquement)` : '(journée entière)'}
+        <strong>Se désinscrire</strong>
       </>
     )}
     {...tooltipOptions}

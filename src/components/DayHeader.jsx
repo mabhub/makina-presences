@@ -5,7 +5,7 @@ import { Avatar, CardHeader } from '@material-ui/core';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/core/styles';
 
-import DayPresenceButton from './DayPresenceButton';
+// import DayPresenceButton from './DayPresenceButton';
 
 const useStyles = makeStyles(theme => ({
   avatar: {
@@ -54,13 +54,13 @@ const DayHeader = ({
       )}
       title={dayName}
       subheader={dateString}
-      action={(!isHoliday && isTriValid) && (
-        <DayPresenceButton
-          date={date}
-          unsub={dayLongPresence}
-          userPresence={currentTodayPresences}
-        />
-      )}
+      // action={(!isHoliday && isTriValid) && (
+      //   <DayPresenceButton
+      //     date={date}
+      //     unsub={dayLongPresence}
+      //     userPresence={currentTodayPresences}
+      //   />
+      // )}
       className={clsx(
         classes.cardHeader,
         { [classes.today]: isDateToday },

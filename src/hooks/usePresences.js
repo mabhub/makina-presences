@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { asDayRef, nrmlStr } from '../helpers';
-import { fieldMap, placesId } from '../settings';
+import { nrmlStr } from '../helpers';
+import { fieldMap } from '../settings';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
@@ -11,26 +11,31 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
+const fields = {
+  day: 'field_175674',
+  plan: 'field_175698',
+};
+
 const usePresences = (place, dayRefFrom, dayRefTo) => {
   const queryClient = useQueryClient();
-  const basePath = `https://api.baserow.io/api/database/rows/table/${placesId[place]}/`;
-
-  const fields = fieldMap[place];
-  const { KEY, DATE, DAYREF, MATIN, MIDI, APREM, TRI } = fields;
+  const basePath = `https://api.baserow.io/api/database/rows/table/${32974}/`;
 
   const queryKey = ['presences', place, dayRefFrom, dayRefTo];
   const qs = [
-    `?filter__${fields.DAYREF}__higher_than=${dayRefFrom - 1}`,
-    `&filter__${fields.DAYREF}__lower_than=${dayRefTo + 1}`,
-    '&size=200',
-  ].join('');
+    '?',
+    'user_field_names=true',
+    `filter__${fields.day}__date_after=${dayRefFrom - 1}`,
+    `filter__${fields.day}__date_before=${dayRefTo + 1}`,
+    `filter__${fields.plan}__equal=${place}`,
+    'size=200',
+  ].join('&');
 
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
       const response = await fetch(
         basePath + qs,
-        { headers: { Authorization: `Token ${token}` } },
+        { headers },
       );
 
       const nextData = await response.json();
@@ -46,18 +51,8 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
         // Replace unchanged new items with pre-existing items
         nextData.results = nextData.results.map(nextResult => {
           const prevResult = prevResults[nextResult.id] || {};
-          const prevHash = JSON.stringify([
-            prevResult.fake,
-            prevResult[MATIN],
-            prevResult[MIDI],
-            prevResult[APREM],
-          ]);
-          const newHash = JSON.stringify([
-            nextResult.fake,
-            nextResult[MATIN],
-            nextResult[MIDI],
-            nextResult[APREM],
-          ]);
+          const prevHash = JSON.stringify([prevResult.fake, prevResult.spot]);
+          const newHash = JSON.stringify([nextResult.fake, nextResult.spot]);
 
           return prevHash === newHash ? prevResult : nextResult;
         });
@@ -117,19 +112,19 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
       const cleanTri = tri.length <= 3 ? nrmlStr(tri) : tri.trim();
 
       return createRow.mutate({
-        [KEY]: `${isoDate}-${cleanTri}`,
-        [DATE]: isoDate,
-        [DAYREF]: asDayRef(date),
-        [TRI]: cleanTri,
+        key: `${isoDate}-${cleanTri}`,
+        day: isoDate,
+        // [DAYREF]: asDayRef(date),
+        tri: cleanTri,
         ...changes,
       });
     },
-    [DATE, DAYREF, KEY, TRI, createRow],
+    [createRow],
   );
 
   const createDayPresence = React.useCallback(
-    (date, tri) => createPresence(date, tri, { [MATIN]: true, [MIDI]: true, [APREM]: true }),
-    [APREM, MATIN, MIDI, createPresence],
+    (date, tri) => createPresence(date, tri, { spot: 'PX' }),
+    [createPresence],
   );
 
   const deletePresence = React.useCallback(
@@ -138,8 +133,8 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
   );
 
   const fillPresence = React.useCallback(
-    presence => updateRow.mutate({ ...presence, [MATIN]: true, [MIDI]: true, [APREM]: true }),
-    [APREM, MATIN, MIDI, updateRow],
+    presence => updateRow.mutate({ ...presence, spot: 'PX' }),
+    [updateRow],
   );
 
   const editPresence = React.useCallback(
@@ -151,7 +146,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
     ({ date, tri, changes, userPresence }) => {
       if (!changes) {
         if (userPresence) {
-          if (!userPresence[MATIN] || !userPresence[MIDI] || !userPresence[APREM]) {
+          if (!userPresence.spot) {
             return fillPresence(userPresence);
           }
 
@@ -164,7 +159,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
       if (userPresence) {
         const newPresence = { ...userPresence, ...changes };
 
-        if (!newPresence[MATIN] && !newPresence[MIDI] && !newPresence[APREM]) {
+        if (!newPresence.spot) {
           return deletePresence(newPresence);
         }
 
@@ -173,10 +168,7 @@ const usePresences = (place, dayRefFrom, dayRefTo) => {
 
       return createPresence(date, tri, changes);
     },
-    [
-      APREM, MATIN, MIDI,
-      createDayPresence, createPresence, deletePresence, editPresence, fillPresence,
-    ],
+    [createDayPresence, createPresence, deletePresence, editPresence, fillPresence],
   );
 
   return {
