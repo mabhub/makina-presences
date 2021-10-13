@@ -136,8 +136,8 @@ const PresencePage = () => {
 
       <PresenceContext.Provider value={setPresence}>
         <Container className={classes.container}>
-          <Grid container spacing={2}>
-            <Grid item xs={3}>
+          <Grid container spacing={2} style={{ height: '80vh' }}>
+            <Grid item xs={3} style={{ overflow: 'auto', height: '100%' }}>
               <Grid container spacing={2}>
                 {dayGrid.map(({
                   date,
@@ -229,7 +229,7 @@ const PresencePage = () => {
               </Grid>
             </Grid>
 
-            <Grid item xs={9}>
+            <Grid item xs={9} style={{ height: '100%' }}>
               <Plan />
             </Grid>
           </Grid>

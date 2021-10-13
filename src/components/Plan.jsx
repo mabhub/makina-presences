@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+
 import createPersistedState from 'use-persisted-state';
 
 import { Box, Fab } from '@material-ui/core';
@@ -9,14 +11,30 @@ import useSpots from '../hooks/useSpots';
 
 const usePlaceState = createPersistedState('place');
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: theme.spacing(2),
-    position: 'relative',
+const useStyles = makeStyles(() => ({
+  wrapper: {
+    width: '100%',
+    height: '100%',
+  },
+
+  content: {
   },
 
   plan: {},
+
+  spot: {
+    position: 'absolute',
+    transform: 'translate(-50%, -50%)',
+  },
 }));
+
+const transformWrapperProps = {
+  panning: { velocityDisabled: true },
+  doubleClick: { disabled: true },
+  zoomAnimation: { disabled: true },
+  alignmentAnimation: { disabled: true },
+  velocityAnimation: { disabled: true },
+};
 
 const Plan = () => {
   const classes = useStyles();
@@ -27,21 +45,29 @@ const Plan = () => {
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
   return (
-    <Box className={classes.root}>
-      {plan?.url && (
-        <img src={plan.url} alt="" className={classes.plan} />
-      )}
+    <TransformWrapper {...transformWrapperProps}>
+      <TransformComponent
+        wrapperClass={classes.wrapper}
+        contentClass={classes.content}
+      >
+        <Box style={{ position: 'relative' }}>
+          {plan?.url && (
+            <img src={plan.url} alt="" className={classes.plan} />
+          )}
 
-      {spots.map(spot => (
-        <Fab
-          key={spot.Identifiant}
-          color="primary"
-          style={{ position: 'absolute', left: `${spot.x}px`, top: `${spot.y}px` }}
-        >
-          {spot.Identifiant}
-        </Fab>
-      ))}
-    </Box>
+          {spots.map(spot => (
+            <Fab
+              key={spot.Identifiant}
+              className={classes.spot}
+              style={{ left: `${spot.x}px`, top: `${spot.y}px` }}
+              size="small"
+            >
+              {spot.Identifiant}
+            </Fab>
+          ))}
+        </Box>
+      </TransformComponent>
+    </TransformWrapper>
   );
 };
 
