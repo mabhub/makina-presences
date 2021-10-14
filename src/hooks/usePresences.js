@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import React from 'react';
 
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -16,16 +17,23 @@ const fields = {
   plan: 'field_175698',
 };
 
-const usePresences = (place, dayRefFrom, dayRefTo) => {
+const timespan = 14;
+
+const usePresences = place => {
+  const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
+  const dayFrom = today.day(1);
+  const dayTo = today.day(timespan);
+
   const queryClient = useQueryClient();
   const basePath = `https://api.baserow.io/api/database/rows/table/${32974}/`;
 
-  const queryKey = ['presences', place, dayRefFrom, dayRefTo];
+  const queryKey = ['presences', place, dayFrom, dayTo];
+
   const qs = [
     '?',
     'user_field_names=true',
-    `filter__${fields.day}__date_after=${dayRefFrom - 1}`,
-    `filter__${fields.day}__date_before=${dayRefTo + 1}`,
+    `filter__${fields.day}__date_after=${dayFrom}`,
+    `filter__${fields.day}__date_before=${dayTo}`,
     `filter__${fields.plan}__equal=${place}`,
     'size=200',
   ].join('&');

@@ -19,7 +19,7 @@ import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
 import { Days, Months } from '../settings';
-import { asDayRef, sameLowC } from '../helpers';
+import { sameLowC } from '../helpers';
 import PresenceForm from './PresenceForm';
 import Footer from './Footer';
 
@@ -100,10 +100,8 @@ const PresencePage = () => {
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
   const [day, setDay] = useDayState(today);
-  const dayRefFrom = asDayRef(today.day(1));
-  const dayRefTo = asDayRef(today.day(timespan));
 
-  const { presences, setPresence } = usePresences(place, dayRefFrom, dayRefTo);
+  const { presences, setPresence } = usePresences(place);
   const holidays = useHolidays();
 
   const dayGrid = [...Array(timespan).keys()].map(index => {
