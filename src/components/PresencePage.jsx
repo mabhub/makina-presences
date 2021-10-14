@@ -11,9 +11,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import usePresences from '../hooks/usePresences';
 
 import PresenceForm from './PresenceForm';
-import Footer from './Footer';
+// import Footer from './Footer';
 
-import InitialNotice from './InitialNotice';
+// import InitialNotice from './InitialNotice';
 import Plan from './Plan';
 import PresenceContext from './PresenceContext';
 import LoadIndicator from './LoadIndicator';
@@ -48,27 +48,25 @@ const PresencePage = () => {
     <div className="PresencePage">
       <LoadIndicator />
 
-      <PresenceForm />
-
-      {!isTriValid && (
-        <InitialNotice className={classes.notice} />
+      {(!isTriValid || !place) && (
+        <PresenceForm />
       )}
 
-      <PresenceContext.Provider value={setPresence}>
-        <Container className={classes.container}>
-          <Grid container spacing={2} style={{ height: '80vh' }}>
-            <Grid item xs={3} style={{ overflow: 'auto', height: '100%' }}>
-              <PresenceCalendar />
-            </Grid>
+      {(isTriValid && place) && (
+        <PresenceContext.Provider value={setPresence}>
+          <Container className={classes.container}>
+            <Grid container spacing={2} style={{ height: '80vh' }}>
+              <Grid item xs={3} style={{ overflow: 'auto', height: '100%' }}>
+                <PresenceCalendar />
+              </Grid>
 
-            <Grid item xs={9} style={{ height: '100%' }}>
-              <Plan />
+              <Grid item xs={9} style={{ height: '100%' }}>
+                <Plan />
+              </Grid>
             </Grid>
-          </Grid>
-        </Container>
-      </PresenceContext.Provider>
-
-      <Footer />
+          </Container>
+        </PresenceContext.Provider>
+      )}
     </div>
   );
 };
