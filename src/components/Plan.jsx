@@ -6,8 +6,8 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 import createPersistedState from 'use-persisted-state';
 
-import { Box, Fab } from '@material-ui/core';
-import { makeStyles, alpha } from '@material-ui/core/styles';
+import { Box, Fab, Tooltip, Typography } from '@material-ui/core';
+import { makeStyles, withStyles, alpha } from '@material-ui/core/styles';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import usePresences from '../hooks/usePresences';
@@ -15,6 +15,14 @@ import usePresences from '../hooks/usePresences';
 const useTriState = createPersistedState('tri');
 const useDayState = createPersistedState('day');
 const usePlaceState = createPersistedState('place');
+
+const CustomTooltip = withStyles(theme => ({
+  tooltip: {
+    backgroundColor: theme.palette.background.default,
+    color: theme.palette.getContrastText(theme.palette.background.default),
+    boxShadow: theme.shadows[2],
+  },
+}))(Tooltip);
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -133,7 +141,7 @@ const Plan = () => {
             <img src={plan.url} alt="" className={classes.plan} />
           )}
 
-          {spots.map(({ Bloqué, Identifiant: spot, x, y, Type }) => {
+          {spots.map(({ Bloqué, Identifiant: spot, x, y, Type, Description }) => {
             const [presence, ...rest] = spotPresences[spot] || [];
 
             const isLocked = Boolean(Bloqué);
@@ -143,41 +151,52 @@ const Plan = () => {
 
             const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
+            const tooltip = !Description ? '' : (
+              <>
+                {Description && (
+                  <Typography variant="body1" component="pre">
+                    {Description}
+                  </Typography>
+                )}
+              </>
+            );
+
             return (
-              <Fab
-                key={spot}
-                className={clsx({
-                  [classes.spot]: true,
-                  [classes.locked]: isLocked,
-                  [classes.conflict]: isConflict,
-                  [classes.occupied]: isOccupied && !isOwnSpot,
-                  [classes.ownSpot]: isOwnSpot,
-                })}
-                disabled={isPast}
-                component={canClick ? 'div' : 'button'}
-                style={{
-                  left: `${x}px`,
-                  top: `${y}px`,
-                  borderColor: Type?.color?.replace('-', ''),
-                }}
-                size="small"
-                onClick={() => {
-                  if (!isOccupied && !isLocked) {
-                    dayPresences
-                      .filter(({ tri: t }) => t === tri)
-                      .map(p => deletePresence(p));
-                    return createPresence(day, tri, { spot, plan: place });
-                  }
+              <CustomTooltip key={spot} title={tooltip} placement="right">
+                <Fab
+                  className={clsx({
+                    [classes.spot]: true,
+                    [classes.locked]: isLocked,
+                    [classes.conflict]: isConflict,
+                    [classes.occupied]: isOccupied && !isOwnSpot,
+                    [classes.ownSpot]: isOwnSpot,
+                  })}
+                  disabled={isPast}
+                  component={canClick ? 'div' : 'button'}
+                  style={{
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    borderColor: Type?.color?.replace('-', ''),
+                  }}
+                  size="small"
+                  onClick={() => {
+                    if (!isOccupied && !isLocked) {
+                      dayPresences
+                        .filter(({ tri: t }) => t === tri)
+                        .map(p => deletePresence(p));
+                      return createPresence(day, tri, { spot, plan: place });
+                    }
 
-                  if (isOwnSpot) {
-                    return deletePresence(presence);
-                  }
+                    if (isOwnSpot) {
+                      return deletePresence(presence);
+                    }
 
-                  return null;
-                }}
-              >
-                {presence?.tri || spot}
-              </Fab>
+                    return null;
+                  }}
+                >
+                  {presence?.tri || spot}
+                </Fab>
+              </CustomTooltip>
             );
           })}
         </Box>
