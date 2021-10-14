@@ -43,6 +43,23 @@ const transformWrapperProps = {
   velocityAnimation: { disabled: true },
 };
 
+export const createSpot = async e => {
+  const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+  const rect = e.target.getBoundingClientRect();
+  await fetch(
+    `https://api.baserow.io/api/database/rows/table/${32973}/?user_field_names=true`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        Identifiant: 'PX',
+        x: Math.floor((e.clientX - rect.left) / 5) * 5,
+        y: Math.floor((e.clientY - rect.top) / 5) * 5,
+      }),
+    },
+  );
+};
+
 const Plan = () => {
   const classes = useStyles();
 
@@ -57,7 +74,10 @@ const Plan = () => {
         wrapperClass={classes.wrapper}
         contentClass={classes.content}
       >
-        <Box style={{ position: 'relative' }}>
+        <Box
+          style={{ position: 'relative' }}
+          // onClick={createSpot}
+        >
           {plan?.url && (
             <img src={plan.url} alt="" className={classes.plan} />
           )}
