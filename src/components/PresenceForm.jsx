@@ -8,14 +8,11 @@ import {
   Grid,
   Input,
   InputLabel,
-  Tooltip,
 } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
 import usePlans from '../hooks/usePlans';
-
-import { tooltipOptions } from '../settings';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -30,16 +27,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
 }));
-
-// const validPlaces = Object.keys(placesId);
-
-/* eslint-disable key-spacing */
-const grid = {
-  spacer: { xs: 12, sm: 12, md: 12, lg: 3 },
-  toggle: { xs:  3, sm:  2, md:  2, lg: 1 },
-  tri:    { xs:  9, sm:  4, md:  4, lg: 3 },
-};
-/* eslint-enable */
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
@@ -59,10 +46,8 @@ const PresenceForm = ({ className, ...props }) => {
   return (
     <Container className={clsx(className, classes.root)} {...props}>
       <Grid container spacing={2} alignItems="flex-end">
-        <Grid item {...grid.spacer} />
-        <Grid item {...grid.toggle}>
+        <Grid item>
           <ToggleButtonGroup
-            orientation="vertical"
             size="small"
             className={classes.placeButtons}
             onChange={handlePlaceChange}
@@ -73,26 +58,10 @@ const PresenceForm = ({ className, ...props }) => {
               <ToggleButton key={Name} value={Name}>{Name}</ToggleButton>
             ))}
           </ToggleButtonGroup>
-        </Grid>
 
-        <Grid item {...grid.tri}>
           <FormControl fullWidth>
             <InputLabel htmlFor="tri">Trigramme</InputLabel>
-            <Tooltip
-              {...tooltipOptions}
-              title={(
-                <>
-                  <strong>Astuce :</strong><br />
-                  Cliquer sur un trigramme permet de le définir comme étant le trigramme actuel
-                </>
-              )}
-            >
-              <Input
-                id="tri"
-                value={tri}
-                onChange={handleTriChange}
-              />
-            </Tooltip>
+            <Input id="tri" value={tri} onChange={handleTriChange} />
           </FormControl>
         </Grid>
       </Grid>

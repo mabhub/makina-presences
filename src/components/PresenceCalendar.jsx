@@ -7,6 +7,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import {
+  Box,
   Card,
   CardActionArea,
   CardContent,
@@ -31,20 +32,29 @@ const useDayState = createPersistedState('day');
 const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
-  week: {
-    textAlign: 'center',
+  day: {
+    display: 'flex',
+    position: 'relative',
+  },
+  weekIndex: {
     fontStyle: 'italic',
-    fontSize: '0.8em',
-    alignSelf: 'center',
+    fontSize: '0.7em',
+    position: 'absolute',
+    top: theme.spacing(1),
+    right: theme.spacing(3),
+    zIndex: 1,
+    transform: 'translateY(-50%)',
+    borderRadius: '5px',
+    padding: theme.spacing(0, 1),
+    background: 'white',
+    boxShadow: theme.shadows[1],
+    opacity: 0.7,
   },
   holidayCard: {
     opacity: 0.85,
   },
-  day: {
-    display: 'flex',
-  },
   past: {
-    opacity: 0.45,
+    opacity: 0.40,
   },
   dayCard: {
     flex: 1,
@@ -109,23 +119,16 @@ const PresenceCalendar = () => {
         /**
         * saturday,
         * last day of (sunday started) week
-        * used as simple Grid spacer
         */
         if (weekDayIndex === 6) {
           return <React.Fragment key={isoDate} />;
         }
 
         /**
-        * sunday,
-        * used as simple Grid spacer
-        * and for displaying week number
+        * sunday
         */
         if (weekDayIndex === 0) {
-          return (
-            <Grid item xs={12} key={isoDate} className={classes.week}>
-              s<strong>{weekIndex}</strong>
-            </Grid>
-          );
+          return <React.Fragment key={isoDate} />;
         }
 
         const holiday = holidays[isoDate];
@@ -139,6 +142,12 @@ const PresenceCalendar = () => {
 
         return (
           <Grid item xs={12} key={isoDate} className={classes.day}>
+            {weekDayIndex === 1 && (
+              <Box className={classes.weekIndex}>
+                <>s{weekIndex}</>
+              </Box>
+            )}
+
             <Card
               className={clsx({
                 [classes.dayCard]: true,
