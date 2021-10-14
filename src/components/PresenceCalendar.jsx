@@ -182,7 +182,7 @@ const PresenceCalendar = () => {
                 [classes.holidayCard]: isHoliday,
               })}
             >
-              <CardActionArea onClick={() => setDay(isoDate)} disableRipple>
+              <CardActionArea onClick={() => setDay(isoDate)} disableRipple component="div">
                 <DayHeader
                   date={date}
                   isHoliday={isHoliday}
