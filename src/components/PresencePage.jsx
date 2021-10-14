@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
-import { Box, Container, Grid } from '@material-ui/core';
+import { Box, Container, Grid, Tabs, Tab } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import usePresences from '../hooks/usePresences';
@@ -18,6 +18,8 @@ import Plan from './Plan';
 import PresenceContext from './PresenceContext';
 import LoadIndicator from './LoadIndicator';
 import PresenceCalendar from './PresenceCalendar';
+import usePlans from '../hooks/usePlans';
+import UserMenu from './UserMenu';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -39,10 +41,19 @@ const useStyles = makeStyles(theme => ({
       "a a a"
       "b c c"
       "b c c"`,
-    gridTemplateColumns: '300px 1fr',
+    gridTemplateColumns: '1fr 3fr',
+    gridTemplateRows: 'auto 1fr',
   },
   top: {
     gridArea: 'a',
+    borderBottom: `1px solid ${theme.palette.primary.main}`,
+  },
+  tabs: {
+    minHeight: 0,
+  },
+  tab: {
+    textTransform: 'none',
+    minHeight: 0,
   },
   calendar: {
     gridArea: 'b',
@@ -58,11 +69,16 @@ const useStyles = makeStyles(theme => ({
 const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
-  const [place] = usePlaceState('Toulouse');
+  const [place, setPlace] = usePlaceState('Toulouse');
+  const plans = usePlans();
 
-  const isTriValid = tri.length >= 3;
+  const isTriValid = tri?.length >= 3;
 
   const { setPresence } = usePresences(place);
+
+  const handlePlaceChange = (event, newPlace) => {
+    setPlace(prevPlace => (newPlace || prevPlace));
+  };
 
   return (
     <div className="PresencePage">
@@ -80,7 +96,26 @@ const PresencePage = () => {
               className={classes.wrapper}
             >
               <Box className={classes.top}>
-                top
+                <Grid container alignItems="center">
+                  <Tabs
+                    component={Grid}
+                    item
+                    xs={11}
+                    value={place}
+                    onChange={handlePlaceChange}
+                    centered
+                    className={classes.tabs}
+                    indicatorColor="primary"
+                    textColor="primary"
+                  >
+                    {plans.map(({ Name }) => (
+                      <Tab key={Name} value={Name} label={Name} className={classes.tab} />
+                    ))}
+                  </Tabs>
+                  <Grid item xs={1}>
+                    <UserMenu />
+                  </Grid>
+                </Grid>
               </Box>
 
               <Grid container className={classes.calendar}>

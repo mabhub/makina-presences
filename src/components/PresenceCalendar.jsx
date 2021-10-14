@@ -33,9 +33,14 @@ const useDayState = createPersistedState('day');
 const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+  },
+
   dayBox: {
     position: 'relative',
-    marginTop: theme.spacing(2),
+    margin: theme.spacing(2, 0),
+    width: '100%',
   },
 
   newWeek: {},
@@ -117,7 +122,7 @@ const PresenceCalendar = () => {
   });
 
   return (
-    <Box spacing={2}>
+    <Box spacing={2} className={classes.root}>
       {dayGrid.map(({
         date,
         isoDate,
