@@ -22,6 +22,7 @@ import { sameLowC } from '../helpers';
 
 import Moment from './Moment';
 import DayHeader from './DayHeader';
+import TodayBadge from './TodayBadge';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -147,6 +148,7 @@ const PresenceCalendar = () => {
           .find(({ tri: t }) => sameLowC(t, tri));
 
         const isPresent = Boolean(currentTodayPresences?.spot);
+        const isToday = isoDate === today.format('YYYY-MM-DD');
 
         const newWeek = Boolean(weekDayIndex === 1);
 
@@ -164,6 +166,10 @@ const PresenceCalendar = () => {
               <Box className={classes.weekIndex}>
                 <>s{weekIndex}</>
               </Box>
+            )}
+
+            {isToday && (
+              <TodayBadge />
             )}
 
             <Card
