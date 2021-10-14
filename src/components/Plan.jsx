@@ -25,6 +25,9 @@ const useStyles = makeStyles(theme => ({
   content: {
   },
 
+  planWrapper: {
+    position: 'relative',
+  },
   plan: {},
 
   spot: {
@@ -33,11 +36,13 @@ const useStyles = makeStyles(theme => ({
     border: '1px solid transparent',
     backgroundColor: 'white',
     color: theme.palette.grey[600],
+    textTransform: 'none',
     opacity: 0.3,
   },
 
   locked: {
     opacity: 0.2,
+    boxShadow: 'none',
     cursor: 'not-allowed',
   },
 
@@ -48,13 +53,21 @@ const useStyles = makeStyles(theme => ({
   occupied: {
     backgroundColor: alpha(theme.palette.primary.main, 0.25),
     color: theme.palette.primary.main,
-    textTransform: 'none',
     opacity: 1,
+    cursor: 'default',
+    boxShadow: 'none',
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.25),
+    },
   },
 
   ownSpot: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
+    opacity: 1,
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.5),
+    },
   },
 }));
 
@@ -96,7 +109,9 @@ const Plan = () => {
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
   const [day] = useDayState(today);
 
-  const { presences } = usePresences(place);
+  const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
+
+  const { presences, createPresence, deletePresence } = usePresences(place);
   const dayPresences = presences.filter(presence => presence.day === day);
   const spotPresences = dayPresences
     .reduce((acc, { spot, ...presence }) => ({
@@ -111,33 +126,60 @@ const Plan = () => {
         contentClass={classes.content}
       >
         <Box
-          style={{ position: 'relative' }}
+          className={classes.planWrapper}
           // onClick={createSpot}
         >
           {plan?.url && (
             <img src={plan.url} alt="" className={classes.plan} />
           )}
 
-          {spots.map(spot => (
-            <Fab
-              key={spot.Identifiant}
-              className={clsx({
-                [classes.spot]: true,
-                [classes.locked]: spot?.Bloqué,
-                [classes.conflict]: spotPresences[spot.Identifiant]?.length > 1,
-                [classes.occupied]: spotPresences[spot.Identifiant]?.length === 1,
-                [classes.ownSpot]: spotPresences[spot.Identifiant]?.[0].tri === tri,
-              })}
-              style={{
-                left: `${spot.x}px`,
-                top: `${spot.y}px`,
-                borderColor: spot?.Type?.color?.replace('-', ''),
-              }}
-              size="small"
-            >
-              {spotPresences[spot.Identifiant]?.[0].tri || spot.Identifiant}
-            </Fab>
-          ))}
+          {spots.map(({ Bloqué, Identifiant: spot, x, y, Type }) => {
+            const [presence, ...rest] = spotPresences[spot] || [];
+
+            const isLocked = Boolean(Bloqué);
+            const isConflict = Boolean(rest.length);
+            const isOccupied = Boolean(presence);
+            const isOwnSpot = Boolean(presence?.tri === tri);
+
+            const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
+
+            return (
+              <Fab
+                key={spot}
+                className={clsx({
+                  [classes.spot]: true,
+                  [classes.locked]: isLocked,
+                  [classes.conflict]: isConflict,
+                  [classes.occupied]: isOccupied && !isOwnSpot,
+                  [classes.ownSpot]: isOwnSpot,
+                })}
+                disabled={isPast}
+                component={canClick ? 'div' : 'button'}
+                style={{
+                  left: `${x}px`,
+                  top: `${y}px`,
+                  borderColor: Type?.color?.replace('-', ''),
+                }}
+                size="small"
+                onClick={() => {
+                  if (!isOccupied && !isLocked) {
+                    dayPresences
+                      .filter(({ tri: t }) => t === tri)
+                      .map(p => deletePresence(p));
+                    return createPresence(day, tri, { spot, plan: place });
+                  }
+
+                  if (isOwnSpot) {
+                    return deletePresence(presence);
+                  }
+
+                  return null;
+                }}
+              >
+                {presence?.tri || spot}
+              </Fab>
+            );
+          })}
         </Box>
       </TransformComponent>
     </TransformWrapper>

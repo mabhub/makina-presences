@@ -3,7 +3,6 @@ import React from 'react';
 
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { nrmlStr } from '../helpers';
-import { fieldMap } from '../settings';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
@@ -72,14 +71,14 @@ const usePresences = place => {
   );
 
   const createRow = useMutation(record => fetch(
-    basePath,
+    `${basePath}?user_field_names=true`,
     { headers, method: 'POST', body: JSON.stringify(record) },
   ), {
     onMutate: async record => {
       queryClient.setQueryData(queryKey, previous => ({
         results: [
           ...previous.results,
-          { ...record, fake: true, id: record[fieldMap[place].KEY] },
+          { ...record, fake: true, id: record.key },
         ],
       }));
     },
@@ -116,13 +115,12 @@ const usePresences = place => {
 
   const createPresence = React.useCallback(
     (date, tri, changes) => {
-      const isoDate = date.format('YYYY-MM-DD');
+      const isoDate = date?.format?.('YYYY-MM-DD') || date;
       const cleanTri = tri.length <= 3 ? nrmlStr(tri) : tri.trim();
 
       return createRow.mutate({
         key: `${isoDate}-${cleanTri}`,
         day: isoDate,
-        // [DAYREF]: asDayRef(date),
         tri: cleanTri,
         ...changes,
       });
@@ -182,6 +180,8 @@ const usePresences = place => {
   return {
     presences,
     setPresence,
+    createPresence,
+    deletePresence,
     createRow,
     updateRow,
     deleteRow,
