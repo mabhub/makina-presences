@@ -17,7 +17,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
 
-import { Days, Months } from '../settings';
 import { sameLowC } from '../helpers';
 
 import Moment from './Moment';
@@ -51,17 +50,12 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    borderRight: '4px solid transparent',
-  },
-  planDay: {
-    borderColor: theme.palette.primary.main,
   },
   cardContent: {
     flex: 1,
     display: 'flex',
 
     background: '#f5f5f5',
-    textAlign: 'center',
     fontSize: theme.typography.pxToRem(10),
     padding: theme.spacing(1),
     '&:last-child': {
@@ -94,17 +88,13 @@ const PresenceCalendar = () => {
   const dayGrid = [...Array(timespan).keys()].map(index => {
     const date = today.day(index);
     const isoDate = date.format('YYYY-MM-DD');
-    const dayName = Days[(index) % 7];
 
     return {
       date,
       isoDate,
-      dayName,
       weekIndex: date.day(1).isoWeek(),
       weekDayIndex: date.day(),
       isPast: date.isBefore(today),
-      dayInitial: dayName[0].toUpperCase(),
-      dateString: `${date.date().toString()} ${Months[date.month()]}`,
       isDateToday: date.isSame(today),
     };
   });
@@ -114,13 +104,9 @@ const PresenceCalendar = () => {
       {dayGrid.map(({
         date,
         isoDate,
-        dayName,
         weekIndex,
         weekDayIndex,
         isPast,
-        dayInitial,
-        dateString,
-        isDateToday,
       }) => {
         /**
         * saturday,
@@ -151,8 +137,6 @@ const PresenceCalendar = () => {
         const currentTodayPresences = todayPresences
           .find(({ tri: t }) => sameLowC(t, tri));
 
-        const dayLongPresence = typeof currentTodayPresences?.spot === 'string';
-
         return (
           <Grid item xs={12} key={isoDate} className={classes.day}>
             <Card
@@ -160,20 +144,14 @@ const PresenceCalendar = () => {
                 [classes.dayCard]: true,
                 [classes.past]: isPast,
                 [classes.holidayCard]: isHoliday,
-                [classes.planDay]: day === isoDate,
               })}
             >
-              <CardActionArea onClick={() => setDay(isoDate)}>
+              <CardActionArea onClick={() => setDay(isoDate)} disableRipple>
                 <DayHeader
-                  currentTodayPresences={currentTodayPresences}
                   date={date}
-                  dateString={dateString}
-                  dayInitial={dayInitial}
-                  dayLongPresence={dayLongPresence}
-                  dayName={dayName}
-                  isDateToday={isDateToday}
                   isHoliday={isHoliday}
                   isTriValid={isTriValid}
+                  highlight={day === isoDate}
                 />
 
                 <CardContent className={classes.cardContent}>
