@@ -36,6 +36,9 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     position: 'relative',
   },
+  newWeek: {
+    marginTop: theme.spacing(4),
+  },
   weekIndex: {
     fontStyle: 'italic',
     fontSize: '0.7em',
@@ -46,9 +49,14 @@ const useStyles = makeStyles(theme => ({
     transform: 'translateY(-50%)',
     borderRadius: '5px',
     padding: theme.spacing(0, 1),
-    background: 'white',
+    background: theme.palette.secondary.main,
+    color: theme.palette.secondary.contrastText,
     boxShadow: theme.shadows[1],
-    opacity: 0.7,
+    opacity: 0.2,
+    transition: theme.transitions.create('opacity'),
+    '&:hover': {
+      opacity: 0.8,
+    },
   },
   holidayCard: {
     opacity: 0.85,
@@ -140,9 +148,19 @@ const PresenceCalendar = () => {
 
         const isPresent = Boolean(currentTodayPresences?.spot);
 
+        const newWeek = Boolean(weekDayIndex === 1);
+
         return (
-          <Grid item xs={12} key={isoDate} className={classes.day}>
-            {weekDayIndex === 1 && (
+          <Grid
+            item
+            xs={12}
+            key={isoDate}
+            className={clsx(
+              classes.day,
+              { [classes.newWeek]: newWeek },
+            )}
+          >
+            {newWeek && (
               <Box className={classes.weekIndex}>
                 <>s{weekIndex}</>
               </Box>

@@ -30,8 +30,9 @@ const useStyles = makeStyles(theme => ({
   notice: {
     marginTop: theme.spacing(4),
   },
-  container: {
-    marginTop: theme.spacing(4),
+  container: {},
+  gridContainer: {
+    height: '100vh',
   },
 }));
 
@@ -55,7 +56,7 @@ const PresencePage = () => {
       {(isTriValid && place) && (
         <PresenceContext.Provider value={setPresence}>
           <Container className={classes.container}>
-            <Grid container spacing={2} style={{ height: '80vh' }}>
+            <Grid container spacing={2} className={classes.gridContainer}>
               <Grid item xs={3} style={{ overflow: 'auto', height: '100%' }}>
                 <PresenceCalendar />
               </Grid>
