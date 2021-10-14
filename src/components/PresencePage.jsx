@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
-import { Container, Grid } from '@material-ui/core';
+import { Box, Container, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import usePresences from '../hooks/usePresences';
@@ -31,8 +31,27 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(4),
   },
   container: {},
-  gridContainer: {
+
+  wrapper: {
     height: '100vh',
+    display: 'grid',
+    gridTemplateAreas: `
+      "a a a"
+      "b c c"
+      "b c c"`,
+    gridTemplateColumns: '300px 1fr',
+  },
+  top: {
+    gridArea: 'a',
+  },
+  calendar: {
+    gridArea: 'b',
+    overflow: 'auto',
+    padding: theme.spacing(0, 0.25),
+  },
+  plan: {
+    gridArea: 'c',
+    overflow: 'auto',
   },
 }));
 
@@ -56,15 +75,22 @@ const PresencePage = () => {
       {(isTriValid && place) && (
         <PresenceContext.Provider value={setPresence}>
           <Container className={classes.container}>
-            <Grid container spacing={2} className={classes.gridContainer}>
-              <Grid item xs={3} style={{ overflow: 'auto', height: '100%' }}>
+            <Box
+              spacing={2}
+              className={classes.wrapper}
+            >
+              <Box className={classes.top}>
+                top
+              </Box>
+
+              <Grid container className={classes.calendar}>
                 <PresenceCalendar />
               </Grid>
 
-              <Grid item xs={9} style={{ height: '100%' }}>
+              <Box className={classes.plan}>
                 <Plan />
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </Container>
         </PresenceContext.Provider>
       )}

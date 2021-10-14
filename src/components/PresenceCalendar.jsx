@@ -33,19 +33,18 @@ const useDayState = createPersistedState('day');
 const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
-  day: {
-    display: 'flex',
+  dayBox: {
     position: 'relative',
+    marginTop: theme.spacing(2),
   },
-  newWeek: {
-    marginTop: theme.spacing(4),
-  },
+
+  newWeek: {},
   weekIndex: {
     fontStyle: 'italic',
     fontSize: '0.7em',
     position: 'absolute',
-    top: theme.spacing(1),
-    right: theme.spacing(3),
+    top: 0,
+    right: theme.spacing(2),
     zIndex: 1,
     transform: 'translateY(-50%)',
     borderRadius: '5px',
@@ -55,6 +54,7 @@ const useStyles = makeStyles(theme => ({
     boxShadow: theme.shadows[1],
     opacity: 0.2,
     transition: theme.transitions.create('opacity'),
+    cursor: 'default',
     '&:hover': {
       opacity: 0.8,
     },
@@ -117,7 +117,7 @@ const PresenceCalendar = () => {
   });
 
   return (
-    <Grid container spacing={2}>
+    <Box spacing={2}>
       {dayGrid.map(({
         date,
         isoDate,
@@ -153,12 +153,10 @@ const PresenceCalendar = () => {
         const newWeek = Boolean(weekDayIndex === 1);
 
         return (
-          <Grid
-            item
-            xs={12}
+          <Box
             key={isoDate}
             className={clsx(
-              classes.day,
+              classes.dayBox,
               { [classes.newWeek]: newWeek },
             )}
           >
@@ -206,10 +204,10 @@ const PresenceCalendar = () => {
                 </CardContent>
               </CardActionArea>
             </Card>
-          </Grid>
+          </Box>
         );
       })}
-    </Grid>
+    </Box>
   );
 };
 
