@@ -1,18 +1,22 @@
 import React from 'react';
 import clsx from 'clsx';
+import dayjs from 'dayjs';
 
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 import createPersistedState from 'use-persisted-state';
 
 import { Box, Fab } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, alpha } from '@material-ui/core/styles';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
+import usePresences from '../hooks/usePresences';
 
+const useTriState = createPersistedState('tri');
+const useDayState = createPersistedState('day');
 const usePlaceState = createPersistedState('place');
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   wrapper: {
     width: '100%',
     height: '100%',
@@ -26,12 +30,31 @@ const useStyles = makeStyles(() => ({
   spot: {
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
-    border: '2px solid transparent',
+    border: '1px solid transparent',
+    backgroundColor: 'white',
+    color: theme.palette.grey[600],
+    opacity: 0.3,
   },
 
   locked: {
     opacity: 0.2,
     cursor: 'not-allowed',
+  },
+
+  conflict: {
+    backgroundColor: 'red',
+  },
+
+  occupied: {
+    backgroundColor: alpha(theme.palette.primary.main, 0.25),
+    color: theme.palette.primary.main,
+    textTransform: 'none',
+    opacity: 1,
+  },
+
+  ownSpot: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
   },
 }));
 
@@ -68,6 +91,19 @@ const Plan = () => {
   const spots = useSpots(place);
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
+  const [tri] = useTriState('');
+
+  const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
+  const [day] = useDayState(today);
+
+  const { presences } = usePresences(place);
+  const dayPresences = presences.filter(presence => presence.day === day);
+  const spotPresences = dayPresences
+    .reduce((acc, { spot, ...presence }) => ({
+      ...acc,
+      [spot]: [...(acc[spot] || []), presence],
+    }), {});
+
   return (
     <TransformWrapper {...transformWrapperProps}>
       <TransformComponent
@@ -88,6 +124,9 @@ const Plan = () => {
               className={clsx({
                 [classes.spot]: true,
                 [classes.locked]: spot?.Bloqué,
+                [classes.conflict]: spotPresences[spot.Identifiant]?.length > 1,
+                [classes.occupied]: spotPresences[spot.Identifiant]?.length === 1,
+                [classes.ownSpot]: spotPresences[spot.Identifiant]?.[0].tri === tri,
               })}
               style={{
                 left: `${spot.x}px`,
@@ -96,7 +135,7 @@ const Plan = () => {
               }}
               size="small"
             >
-              {spot.Identifiant}
+              {spotPresences[spot.Identifiant]?.[0].tri || spot.Identifiant}
             </Fab>
           ))}
         </Box>
