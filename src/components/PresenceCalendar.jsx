@@ -77,8 +77,6 @@ const PresenceCalendar = () => {
   const [tri] = useTriState('');
   const [place] = usePlaceState('Toulouse');
 
-  const isTriValid = tri.length >= 3;
-
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
   const [day, setDay] = useDayState(today);
 
@@ -137,6 +135,8 @@ const PresenceCalendar = () => {
         const currentTodayPresences = todayPresences
           .find(({ tri: t }) => sameLowC(t, tri));
 
+        const isPresent = Boolean(currentTodayPresences?.spot);
+
         return (
           <Grid item xs={12} key={isoDate} className={classes.day}>
             <Card
@@ -150,7 +150,7 @@ const PresenceCalendar = () => {
                 <DayHeader
                   date={date}
                   isHoliday={isHoliday}
-                  isTriValid={isTriValid}
+                  allowUnsub={!isPast && isPresent}
                   highlight={day === isoDate}
                 />
 

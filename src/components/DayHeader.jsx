@@ -31,8 +31,8 @@ const useStyles = makeStyles(theme => ({
 const DayHeader = ({
   date,
   isHoliday,
-  isTriValid,
   highlight,
+  allowUnsub,
   ...props
 }) => {
   const classes = useStyles();
@@ -56,7 +56,7 @@ const DayHeader = ({
       )}
       title={dayName}
       subheader={dateString}
-      action={(!isHoliday && isTriValid) && (
+      action={(!isHoliday && allowUnsub) && (
         <DayPresenceButton date={date} />
       )}
       className={clsx(
