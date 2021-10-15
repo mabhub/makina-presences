@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     position: 'absolute',
     top: 0,
     left: 0,
-    transform: 'translate(-50%, -50%) translate(18px, 18px) rotate(-45deg)',
+    transform: 'translate(-50%, -50%) translate(21px, 15px) rotate(-30deg)',
   },
 }));
 

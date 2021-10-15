@@ -12,7 +12,11 @@ import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
-    padding: theme.spacing(1.5, 1.5, 0.25),
+    padding: theme.spacing(1.5, 1.5, 0.25, 2),
+  },
+
+  dayName: {
+    textTransform: 'capitalize',
   },
 
   highlight: {
@@ -61,7 +65,7 @@ const DayHeader = ({
       <CardHeader
         subheader={(
           <>
-            <strong>{Days[(date.day()) % 7]}</strong>{' '}
+            <strong className={classes.dayName}>{Days[(date.day()) % 7]}</strong>{' '}
             {date.date().toString()}{' '}
             {Months[date.month()]}
           </>
