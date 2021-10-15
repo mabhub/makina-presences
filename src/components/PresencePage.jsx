@@ -27,44 +27,58 @@ dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
 const usePlaceState = createPersistedState('place');
+const useStyles = makeStyles(theme => {
+  const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
 
-const useStyles = makeStyles(theme => ({
-  notice: {
-    marginTop: theme.spacing(4),
-  },
-  container: {},
+  return {
+    notice: {
+      marginTop: theme.spacing(4),
+    },
+    container: {},
 
-  wrapper: {
-    height: '100vh',
-    display: 'grid',
-    gridTemplateAreas: `
-      "a a a"
-      "b c c"
-      "b c c"`,
-    gridTemplateColumns: '1fr 3fr',
-    gridTemplateRows: 'auto 1fr',
-  },
-  top: {
-    gridArea: 'a',
-    borderBottom: `1px solid ${theme.palette.primary.main}`,
-  },
-  tabs: {
-    minHeight: 0,
-  },
-  tab: {
-    textTransform: 'none',
-    minHeight: 0,
-  },
-  calendar: {
-    gridArea: 'b',
-    overflow: 'auto',
-    padding: theme.spacing(0, 0.25),
-  },
-  plan: {
-    gridArea: 'c',
-    overflow: 'auto',
-  },
-}));
+    wrapper: {
+      height: '100vh',
+      display: 'grid',
+      gridTemplateAreas: `
+        "a a a"
+        "b c c"
+        "b c c"`,
+      gridTemplateColumns: '1fr 3fr',
+      gridTemplateRows: 'auto 1fr',
+      [maxWidth('sm')]: {
+        gridTemplateAreas: `
+          "a"
+          "c"
+          "b"`,
+        gridTemplateColumns: 'auto',
+        gridTemplateRows: 'auto',
+      },
+    },
+    top: {
+      gridArea: 'a',
+      borderBottom: `1px solid ${theme.palette.primary.main}`,
+    },
+    tabs: {
+      minHeight: 0,
+    },
+    tab: {
+      textTransform: 'none',
+      minHeight: 0,
+    },
+    userMenu: {
+      textAlign: 'right',
+    },
+    calendar: {
+      gridArea: 'b',
+      overflow: 'auto',
+      padding: theme.spacing(0, 0.25),
+    },
+    plan: {
+      gridArea: 'c',
+      overflow: 'auto',
+    },
+  };
+});
 
 const PresencePage = () => {
   const classes = useStyles();
@@ -100,7 +114,7 @@ const PresencePage = () => {
                   <Tabs
                     component={Grid}
                     item
-                    xs={11}
+                    xs
                     value={place}
                     onChange={handlePlaceChange}
                     centered
@@ -112,7 +126,8 @@ const PresencePage = () => {
                       <Tab key={Name} value={Name} label={Name} className={classes.tab} />
                     ))}
                   </Tabs>
-                  <Grid item xs={1}>
+
+                  <Grid item xs={2} className={classes.userMenu}>
                     <UserMenu />
                   </Grid>
                 </Grid>
