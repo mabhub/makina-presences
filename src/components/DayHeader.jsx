@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import PresenceContext from './PresenceContext';
 import { Days, Months } from '../settings';
 import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
+import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
@@ -31,6 +32,7 @@ const DayHeader = ({
 }) => {
   const classes = useStyles();
   const isPresent = Boolean(presence?.spot);
+  const [dialogOpen, setDialogOpen] = React.useState();
 
   const setPresence = React.useContext(PresenceContext);
 
@@ -39,33 +41,51 @@ const DayHeader = ({
       // Delete presence
       setPresence({ ...presence, spot: null });
     } else {
-      // Create presence
-      setPresence({ day: date, tri, plan: place, spot: 'XX' });
+      // May create presence
+      setDialogOpen(true);
     }
 
     event.stopPropagation();
   };
 
+  const handleDialogClose = React.useCallback(value => {
+    setDialogOpen(false);
+    if (value) {
+      // Create présence
+      setPresence({ day: date, tri, plan: place, spot: value });
+    }
+  }, [date, place, setPresence, tri]);
+
   return (
-    <CardHeader
-      subheader={(
-        <>
-          <strong>{Days[(date.day()) % 7]}</strong>{' '}
-          {date.date().toString()}{' '}
-          {Months[date.month()]}
-        </>
+    <>
+      <CardHeader
+        subheader={(
+          <>
+            <strong>{Days[(date.day()) % 7]}</strong>{' '}
+            {date.date().toString()}{' '}
+            {Months[date.month()]}
+          </>
+        )}
+        action={(!isHoliday && !isPast) && (
+          <IconButton onClick={handleAction} size="small">
+            {isPresent ? <UnsubscribeIcon /> : <SubscribeIcon />}
+          </IconButton>
+        )}
+        className={clsx(
+          classes.cardHeader,
+          { [classes.highlight]: highlight },
+        )}
+        {...props}
+      />
+      {dialogOpen && (
+        <SpotDialog
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          place={place}
+          date={date}
+        />
       )}
-      action={(!isHoliday && !isPast) && (
-        <IconButton onClick={handleAction} size="small">
-          {isPresent ? <UnsubscribeIcon /> : <SubscribeIcon />}
-        </IconButton>
-      )}
-      className={clsx(
-        classes.cardHeader,
-        { [classes.highlight]: highlight },
-      )}
-      {...props}
-    />
+    </>
   );
 };
 
