@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
   spot: {
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
-    border: '1px solid transparent',
+    border: '2px solid transparent',
     backgroundColor: 'white',
     color: theme.palette.grey[600],
     textTransform: 'none',
