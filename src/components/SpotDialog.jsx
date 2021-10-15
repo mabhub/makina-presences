@@ -59,6 +59,7 @@ const SpotDialog = ({
       className={classes.root}
       fullScreen={fullScreen}
       open={open}
+      onClick={event => event.stopPropagation()}
     >
       <DialogContent dividers>
         <FormControl variant="outlined" fullWidth>
