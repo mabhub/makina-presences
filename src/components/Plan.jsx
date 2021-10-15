@@ -162,7 +162,13 @@ const Plan = () => {
             );
 
             return (
-              <CustomTooltip key={spot} title={tooltip} placement="right">
+              <CustomTooltip
+                key={spot}
+                title={tooltip}
+                placement="right"
+                interactive
+                enterDelay={500}
+              >
                 <Fab
                   className={clsx({
                     [classes.spot]: true,
