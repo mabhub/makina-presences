@@ -86,7 +86,7 @@ const usePresences = place => {
   });
 
   const updateRow = useMutation(record => fetch(
-    `${basePath}${record.id}/`,
+    `${basePath}${record.id}/?user_field_names=true`,
     { headers, method: 'PATCH', body: JSON.stringify(record) },
   ), {
     onMutate: async record => {
@@ -128,53 +128,29 @@ const usePresences = place => {
     [createRow],
   );
 
-  const createDayPresence = React.useCallback(
-    (date, tri) => createPresence(date, tri, { spot: 'PX' }),
-    [createPresence],
-  );
-
   const deletePresence = React.useCallback(
     presence => deleteRow.mutate(presence),
     [deleteRow],
   );
 
-  const fillPresence = React.useCallback(
-    presence => updateRow.mutate({ ...presence, spot: 'PX' }),
-    [updateRow],
-  );
-
-  const editPresence = React.useCallback(
-    (presence, changes) => updateRow.mutate({ ...presence, ...changes }),
-    [updateRow],
-  );
-
   const setPresence = React.useCallback(
-    ({ date, tri, changes, userPresence }) => {
-      if (!changes) {
-        if (userPresence) {
-          if (!userPresence.spot) {
-            return fillPresence(userPresence);
-          }
-
-          return deletePresence(userPresence);
-        }
-
-        return createDayPresence(date, tri);
+    presence => {
+      const { id, day, tri, plan, spot } = presence;
+      if (id && !spot) {
+        return deleteRow.mutate(presence);
       }
 
-      if (userPresence) {
-        const newPresence = { ...userPresence, ...changes };
-
-        if (!newPresence.spot) {
-          return deletePresence(newPresence);
-        }
-
-        return editPresence({ ...userPresence, ...changes });
+      if (id && spot) {
+        return updateRow.mutate(presence);
       }
 
-      return createPresence(date, tri, changes);
+      if (!id && (day && tri && plan && spot)) {
+        createPresence(day, tri, { spot, plan });
+      }
+
+      return null;
     },
-    [createDayPresence, createPresence, deletePresence, editPresence, fillPresence],
+    [createPresence, deleteRow, updateRow],
   );
 
   return {

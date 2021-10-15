@@ -119,7 +119,7 @@ const Plan = () => {
 
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
-  const { presences, createPresence, deletePresence } = usePresences(place);
+  const { presences, setPresence, deletePresence } = usePresences(place);
   const dayPresences = presences.filter(presence => presence.day === day);
   const spotPresences = dayPresences
     .reduce((acc, { spot, ...presence }) => ({
@@ -181,10 +181,8 @@ const Plan = () => {
                   size="small"
                   onClick={() => {
                     if (!isOccupied && !isLocked) {
-                      dayPresences
-                        .filter(({ tri: t }) => t === tri)
-                        .map(p => deletePresence(p));
-                      return createPresence(day, tri, { spot, plan: place });
+                      const { id } = dayPresences?.find(({ tri: t }) => t === tri) || {};
+                      return setPresence({ id, day, tri, spot, plan: place });
                     }
 
                     if (isOwnSpot) {

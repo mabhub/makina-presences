@@ -152,7 +152,6 @@ const PresenceCalendar = () => {
         const currentTodayPresences = todayPresences
           .find(({ tri: t }) => sameLowC(t, tri));
 
-        const isPresent = Boolean(currentTodayPresences?.spot);
         const isToday = isoDate === today.format('YYYY-MM-DD');
 
         const newWeek = Boolean(weekDayIndex === 1);
@@ -185,9 +184,12 @@ const PresenceCalendar = () => {
               <CardActionArea onClick={() => setDay(isoDate)} disableRipple component="div">
                 <DayHeader
                   date={date}
+                  presence={currentTodayPresences}
+                  tri={tri}
+                  place={place}
                   isHoliday={isHoliday}
-                  allowUnsub={!isPast && isPresent}
                   highlight={day === isoDate}
+                  isPast={isPast}
                 />
 
                 <CardContent className={classes.cardContent}>

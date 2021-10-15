@@ -1,12 +1,13 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import { CardHeader } from '@material-ui/core';
+import { CardHeader, IconButton } from '@material-ui/core';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/core/styles';
 
-import DayPresenceButton from './DayPresenceButton';
+import PresenceContext from './PresenceContext';
 import { Days, Months } from '../settings';
+import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
@@ -22,10 +23,28 @@ const DayHeader = ({
   date,
   isHoliday,
   highlight,
-  allowUnsub,
+  presence,
+  tri,
+  place,
+  isPast,
   ...props
 }) => {
   const classes = useStyles();
+  const isPresent = Boolean(presence?.spot);
+
+  const setPresence = React.useContext(PresenceContext);
+
+  const handleAction = event => {
+    if (isPresent) {
+      // Delete presence
+      setPresence({ ...presence, spot: null });
+    } else {
+      // Create presence
+      setPresence({ day: date, tri, plan: place, spot: 'XX' });
+    }
+
+    event.stopPropagation();
+  };
 
   return (
     <CardHeader
@@ -36,8 +55,10 @@ const DayHeader = ({
           {Months[date.month()]}
         </>
       )}
-      action={(!isHoliday && allowUnsub) && (
-        <DayPresenceButton date={date} size="small" />
+      action={(!isHoliday && !isPast) && (
+        <IconButton onClick={handleAction} size="small">
+          {isPresent ? <UnsubscribeIcon /> : <SubscribeIcon />}
+        </IconButton>
       )}
       className={clsx(
         classes.cardHeader,
