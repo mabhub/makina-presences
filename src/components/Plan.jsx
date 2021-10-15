@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
+import { useQueryClient } from 'react-query';
 
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
@@ -50,9 +51,11 @@ const useStyles = makeStyles(theme => ({
   },
 
   locked: {
-    opacity: 0.2,
+    opacity: 0.3,
     boxShadow: 'none',
     cursor: 'not-allowed',
+
+    borderColor: 'silver !important',
   },
 
   conflict: {
@@ -98,15 +101,18 @@ export const createSpot = async e => {
       headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         Identifiant: 'PX',
-        x: Math.floor((e.clientX - rect.left) / 5) * 5,
-        y: Math.floor((e.clientY - rect.top) / 5) * 5,
+        x: Math.round((e.clientX - rect.left) / 5) * 5,
+        y: Math.round((e.clientY - rect.top) / 5) * 5,
       }),
     },
   );
 };
 
-const Plan = () => {
+const Children = ({ children }) => children;
+
+const Plan = ({ edit }) => {
   const classes = useStyles();
+  const queryClient = useQueryClient();
 
   const plans = usePlans();
   const [place] = usePlaceState('');
@@ -128,9 +134,45 @@ const Plan = () => {
       [spot]: [...(acc[spot] || []), presence],
     }), {});
 
+  const DragWrapper = edit ? Children : TransformWrapper;
+  const DragComponent = edit ? Children : TransformComponent;
+  const [movingSpot, setMovingSpot] = React.useState();
+
+  const snap = (v, a = 5) => Math.round(v / a) * a;
+
+  const handleMouseDown = s => ({ screenX, screenY }) => {
+    if (!edit) { return null; }
+    return setMovingSpot({ spot: s, from: [screenX, screenY] });
+  };
+
+  const handleDragEnd = async ({ screenX: x2, screenY: y2 }) => {
+    if (!movingSpot || !edit) { return; }
+
+    const { spot, from: [x1, y1] = [] } = movingSpot;
+    const deltas = { x: x2 - x1, y: y2 - y1 };
+
+    setMovingSpot();
+
+    const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+
+    await fetch(
+      `https://api.baserow.io/api/database/rows/table/${32973}/${spot.id}/?user_field_names=true`,
+      {
+        method: 'PATCH',
+        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          x: snap(deltas.x + Number(spot.x)),
+          y: snap(deltas.y + Number(spot.y)),
+        }),
+      },
+    );
+
+    queryClient.invalidateQueries([`${32973}`]);
+  };
+
   return (
-    <TransformWrapper {...transformWrapperProps}>
-      <TransformComponent
+    <DragWrapper {...transformWrapperProps}>
+      <DragComponent
         wrapperClass={classes.wrapper}
         contentClass={classes.content}
       >
@@ -158,7 +200,7 @@ const Plan = () => {
             return (
               <CustomTooltip
                 key={spot}
-                title={tooltip}
+                title={!edit ? tooltip : ''}
                 placement="right"
                 interactive
                 enterDelay={500}
@@ -166,10 +208,10 @@ const Plan = () => {
                 <Fab
                   className={clsx({
                     [classes.spot]: true,
-                    [classes.locked]: isLocked,
                     [classes.conflict]: isConflict,
                     [classes.occupied]: isOccupied && !isOwnSpot,
                     [classes.ownSpot]: isOwnSpot,
+                    [classes.locked]: isLocked,
                   })}
                   disabled={isPast}
                   component={canClick ? 'div' : 'button'}
@@ -179,7 +221,12 @@ const Plan = () => {
                     borderColor: Type?.color?.replace('-', ''),
                   }}
                   size="small"
+                  draggable={Boolean(edit)}
+                  onMouseDown={edit && handleMouseDown(Spot)}
+                  onDragEnd={edit && handleDragEnd}
                   onClick={() => {
+                    if (edit) { return null; }
+
                     if (!isOccupied && !isLocked) {
                       const { id } = dayPresences?.find(({ tri: t }) => t === tri) || {};
                       return setPresence({ id, day, tri, spot, plan: place });
@@ -192,14 +239,14 @@ const Plan = () => {
                     return null;
                   }}
                 >
-                  {presence?.tri || spot}
+                  {(!edit && presence?.tri) || spot}
                 </Fab>
               </CustomTooltip>
             );
           })}
         </Box>
-      </TransformComponent>
-    </TransformWrapper>
+      </DragComponent>
+    </DragWrapper>
   );
 };
 
