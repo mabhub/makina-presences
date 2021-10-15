@@ -6,11 +6,12 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 import createPersistedState from 'use-persisted-state';
 
-import { Box, Fab, Tooltip, Typography } from '@material-ui/core';
+import { Box, Fab, Tooltip } from '@material-ui/core';
 import { makeStyles, withStyles, alpha } from '@material-ui/core/styles';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import usePresences from '../hooks/usePresences';
+import SpotDescription from './SpotDescription';
 
 const useTriState = createPersistedState('tri');
 const useDayState = createPersistedState('day');
@@ -141,7 +142,8 @@ const Plan = () => {
             <img src={plan.url} alt="" className={classes.plan} />
           )}
 
-          {spots.map(({ Bloqué, Identifiant: spot, x, y, Type, Description }) => {
+          {spots.map(Spot => {
+            const { Bloqué, Identifiant: spot, x, y, Type, Description } = Spot;
             const [presence, ...rest] = spotPresences[spot] || [];
 
             const isLocked = Boolean(Bloqué);
@@ -151,15 +153,7 @@ const Plan = () => {
 
             const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
-            const tooltip = !Description ? '' : (
-              <>
-                {Description && (
-                  <Typography variant="body1" component="pre">
-                    {Description}
-                  </Typography>
-                )}
-              </>
-            );
+            const tooltip = <SpotDescription md={Description} spot={Spot} />;
 
             return (
               <CustomTooltip
