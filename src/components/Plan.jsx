@@ -84,6 +84,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const transformWrapperProps = {
+  minScale: 0.25,
   panning: { velocityDisabled: true },
   doubleClick: { disabled: true },
   zoomAnimation: { disabled: true },

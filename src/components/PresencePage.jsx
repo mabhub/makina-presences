@@ -20,6 +20,7 @@ import LoadIndicator from './LoadIndicator';
 import PresenceCalendar from './PresenceCalendar';
 import usePlans from '../hooks/usePlans';
 import UserMenu from './UserMenu';
+import Legend from './Legend';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -75,7 +76,8 @@ const useStyles = makeStyles(theme => {
     },
     plan: {
       gridArea: 'c',
-      overflow: 'auto',
+      overflow: 'hidden',
+      position: 'relative',
     },
   };
 });
@@ -104,7 +106,7 @@ const PresencePage = () => {
 
       {(isTriValid && place) && (
         <PresenceContext.Provider value={setPresence}>
-          <Container className={classes.container}>
+          <Container className={classes.container} disableGutters>
             <Box
               spacing={2}
               className={classes.wrapper}
@@ -138,6 +140,7 @@ const PresencePage = () => {
               </Grid>
 
               <Box className={classes.plan}>
+                <Legend />
                 <Plan />
               </Box>
             </Box>
