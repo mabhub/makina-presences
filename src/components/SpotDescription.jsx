@@ -75,7 +75,14 @@ const SpotDescription = ({ md = '', body = 'body2', spot = {}, className }) => {
   return (
     <Box className={clsx(classes.root, className)}>
       <Typography variant="body2" className={classes.tech}>
-        Ref: {spot.Identifiant}, type: {spot.Type.value}
+        {spot.Bloqué && (
+          <>
+            <strong>Inscription impossible</strong>
+            <br />
+          </>
+        )}
+        Ref: {spot.Identifiant},{' '}
+        type: {spot.Type.value}
       </Typography>
 
       {Boolean(md) && (

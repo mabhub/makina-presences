@@ -201,7 +201,7 @@ const Plan = ({ edit }) => {
             return (
               <CustomTooltip
                 key={spot}
-                title={!edit ? tooltip : ''}
+                title={(!edit && !isPast) ? tooltip : ''}
                 placement="right"
                 interactive
                 enterDelay={500}

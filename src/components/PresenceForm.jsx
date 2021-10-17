@@ -83,7 +83,7 @@ const PresenceForm = ({ className, ...props }) => {
             Makina Présences
           </Typography>
 
-          <Typography variant="subtitle3">
+          <Typography variant="subtitle2">
             Merci de <strong>choisir agence</strong> et
             de d'indiquer <strong>un trigramme</strong>.
           </Typography>
