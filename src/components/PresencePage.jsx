@@ -11,9 +11,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import usePresences from '../hooks/usePresences';
 
 import PresenceForm from './PresenceForm';
-// import Footer from './Footer';
 
-// import InitialNotice from './InitialNotice';
 import Plan from './Plan';
 import PresenceContext from './PresenceContext';
 import LoadIndicator from './LoadIndicator';

@@ -1,14 +1,9 @@
 import React from 'react';
-// import createPersistedState from 'use-persisted-state';
 
 import { Grid } from '@material-ui/core';
 import { makeStyles, alpha } from '@material-ui/core/styles';
 
-// import { sameLowC } from '../helpers';
-// import PresenceContext from './PresenceContext';
 import TriPresence from './TriPresence';
-
-// const useTriState = createPersistedState('tri');
 
 const useStyles = makeStyles(theme => ({
   moment: {
@@ -44,31 +39,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Moment = ({
-  // moment,
-  // day,
   momentPresences: presences = [],
-  // userPresence,
 }) => {
   const classes = useStyles();
-  // const [tri] = useTriState('');
-
-  // const TRI = 'tri';
-
-  // const showAdd = !presences.some(({ [TRI]: t }) => sameLowC(t, tri));
-  // const canAdd = showAdd && tri.length > 2;
-
-  // const setPresence = React.useContext(PresenceContext);
-
-  // const onAdd = React.useCallback(
-  //   () => setPresence({ tri, date: day, changes: { [moment]: true }, userPresence }),
-  //   [day, moment, setPresence, tri, userPresence],
-  // );
-
-  // const onDelete = React.useCallback(
-  //   () => setPresence({ tri, date: day, changes: { [moment]: false }, userPresence }),
-  //   [day, moment, setPresence, tri, userPresence],
-  // );
-
   return (
     <Grid
       item
@@ -82,7 +55,6 @@ const Moment = ({
             key={id}
             tri={t}
             alt={fake}
-            // onDelete={onDelete}
             className={classes.tri}
           />
         ))}
