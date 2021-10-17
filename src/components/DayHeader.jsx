@@ -2,12 +2,12 @@ import React from 'react';
 import clsx from 'clsx';
 
 import { CardHeader, IconButton } from '@material-ui/core';
+import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/core/styles';
 
 import PresenceContext from './PresenceContext';
 import { Days, Months } from '../settings';
-import { SubscribeIcon, UnsubscribeIcon } from './SubscriptionIcon';
 import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
@@ -72,7 +72,7 @@ const DayHeader = ({
         )}
         action={(!isHoliday && !isPast) && (
           <IconButton onClick={handleAction} size="small">
-            {isPresent ? <UnsubscribeIcon /> : <SubscribeIcon />}
+            {isPresent ? <RemoveCircleOutline /> : <AddCircleOutline />}
           </IconButton>
         )}
         className={clsx(
