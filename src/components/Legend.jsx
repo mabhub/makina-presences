@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, Divider, IconButton } from '@material-ui/core';
 import { makeStyles, useTheme, alpha } from '@material-ui/core/styles';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore, HelpOutline } from '@material-ui/icons';
 import createPersistedState from 'use-persisted-state';
 
 import useFields from '../hooks/useFields';
@@ -31,7 +31,7 @@ const useLegendStyles = makeStyles(theme => ({
 
     transform: ({ hidden }) => (
       hidden
-        ? 'translateY(-150%) rotate(180deg)'
+        ? 'translateY(-150%)'
         : ''
     ),
     transition: theme.transitions.create('transform'),
@@ -62,7 +62,8 @@ const Legend = () => {
           size="small"
           onClick={legendToggle}
         >
-          <ExpandMore />
+          {!legendHidden && <ExpandMore />}
+          {legendHidden && <HelpOutline />}
         </IconButton>
       </Box>
 
