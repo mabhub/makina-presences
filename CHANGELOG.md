@@ -1,4 +1,23 @@
 
+2.1.0 / 2021-10-21
+==================
+
+  * Create .env file example
+  * Improve legend readability
+  * Simplify subscription icons (avoid useless renders)
+  * Cleanup some commented code
+  * Adjust tooltips
+  * Create Legend
+  * Create edit mode for spots
+  * Manage spot description markdown rendering
+  * Adjust "today" calendar stripe style
+  * Adjust spot tooltip display timing
+  * Manage mobile display
+  * Avoid day change when using SpotDialog
+  * Manage spot selection with Dialog when map is not available
+  * Restore ability to toggle presence from day cards
+  * Thicken spots border
+
 2.0.0 / 2021-10-15
 ==================
 
