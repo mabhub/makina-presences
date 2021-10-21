@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   conflict: {
-    backgroundColor: 'red',
+    backgroundColor: 'red !important',
   },
 
   occupied: {
