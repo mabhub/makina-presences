@@ -20,8 +20,8 @@ const timespan = 14;
 
 const usePresences = place => {
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
-  const dayFrom = today.day(1);
-  const dayTo = today.day(timespan);
+  const dayFrom = today.day(1).format('YYYY-MM-DD');
+  const dayTo = today.day(timespan).format('YYYY-MM-DD');
 
   const queryClient = useQueryClient();
   const basePath = `https://api.baserow.io/api/database/rows/table/${32974}/`;
