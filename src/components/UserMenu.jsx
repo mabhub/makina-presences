@@ -9,13 +9,16 @@ const useTriState = createPersistedState('tri');
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
-  // const minWidth = mq => `@media (min-width: ${theme.breakpoints.values[mq]}px)`;
+  const minWidth = mq => `@media (min-width: ${theme.breakpoints.values[mq]}px)`;
 
   return {
+    icon: {
+      [minWidth('md')]: { display: 'none' },
+    },
     text: {
       textTransform: 'none',
       marginLeft: theme.spacing(1),
-      [maxWidth('sm')]: { display: 'none' },
+      [maxWidth('md')]: { display: 'none' },
     },
   };
 });
@@ -34,6 +37,7 @@ const UserMenu = () => {
         onClick={handleClick}
         size="small"
         color="primary"
+        title={tri}
       >
         <Person />
       </IconButton>
@@ -42,6 +46,7 @@ const UserMenu = () => {
         className={classes.text}
         onClick={handleClick}
         color="primary"
+        startIcon={<Person />}
       >
         {tri} (changer)
       </Button>

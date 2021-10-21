@@ -78,6 +78,7 @@ const useStyles = makeStyles(theme => {
       minHeight: 0,
     },
     userMenu: {
+      flex: '0 0 auto',
       textAlign: 'right',
     },
     calendar: {
