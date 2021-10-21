@@ -68,65 +68,65 @@ const PresenceForm = ({ className, ...props }) => {
   };
 
   return (
-    <Grid
-      component={Container}
-      container
-      spacing={2}
-      className={clsx(className, classes.root)}
-      alignItems="center"
-      {...props}
-    >
+    <Container className={clsx(className, classes.root)}>
+      <Grid
+        container
+        spacing={2}
+        alignItems="center"
+        {...props}
+      >
 
-      <Grid item container justifyContent="center" alignItems="flex-end">
-        <Grid item xs={12} className={classes.title}>
-          <Typography variant="h3" component="h1">
-            Makina Présences
-          </Typography>
+        <Grid item container justifyContent="center" alignItems="flex-end">
+          <Grid item xs={12} className={classes.title}>
+            <Typography variant="h3" component="h1">
+              Makina Présences
+            </Typography>
 
-          <Typography variant="subtitle2">
-            Merci de <strong>choisir agence</strong> et
-            de d'indiquer <strong>un trigramme</strong>.
-          </Typography>
-        </Grid>
+            <Typography variant="subtitle2">
+              Merci de <strong>choisir agence</strong> et
+              de d'indiquer <strong>un trigramme</strong>.
+            </Typography>
+          </Grid>
 
-        <Grid item xs={12} sm={4} md={3} lg={2} className={classes.placeButtonsWrapper}>
-          <ToggleButtonGroup
-            size="small"
-            className={classes.placeButtons}
-            onChange={handlePlaceChange}
-            exclusive
-            value={place}
-          >
-            {plans.map(({ Name }) => (
-              <ToggleButton key={Name} value={Name}>{Name}</ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        </Grid>
+          <Grid item xs={12} sm={4} md={3} lg={2} className={classes.placeButtonsWrapper}>
+            <ToggleButtonGroup
+              size="small"
+              className={classes.placeButtons}
+              onChange={handlePlaceChange}
+              exclusive
+              value={place}
+            >
+              {plans.map(({ Name }) => (
+                <ToggleButton key={Name} value={Name}>{Name}</ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Grid>
 
-        <Grid item xs={12} sm={4} md={3} lg={2}>
-          <FormControl>
-            <InputLabel htmlFor="tri">Trigramme</InputLabel>
-            <Input
-              id="tri"
-              value={inputValue}
-              onChange={handleTriChange}
-              onKeyPress={handleKeyPress}
-            />
-          </FormControl>
-        </Grid>
+          <Grid item xs={12} sm={4} md={3} lg={2}>
+            <FormControl>
+              <InputLabel htmlFor="tri">Trigramme</InputLabel>
+              <Input
+                id="tri"
+                value={inputValue}
+                onChange={handleTriChange}
+                onKeyPress={handleKeyPress}
+              />
+            </FormControl>
+          </Grid>
 
-        <Grid item xs={12} className={classes.submit}>
-          <Button
-            variant="contained"
-            color="secondary"
-            disabled={!(place && inputValue?.length > 2 && inputValue?.length < 10)}
-            onClick={handleSubmit}
-          >
-            Valider
-          </Button>
+          <Grid item xs={12} className={classes.submit}>
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={!(place && inputValue?.length > 2 && inputValue?.length < 10)}
+              onClick={handleSubmit}
+            >
+              Valider
+            </Button>
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </Container>
   );
 };
 
