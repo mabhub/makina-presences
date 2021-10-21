@@ -47,10 +47,10 @@ const useStyles = makeStyles(theme => {
       [maxWidth('sm')]: {
         gridTemplateAreas: `
           "a"
-          "c"
-          "b"`,
+          "b"
+          "c"`,
         gridTemplateColumns: 'auto',
-        gridTemplateRows: 'auto',
+        gridTemplateRows: 'auto 1fr 1fr',
       },
     },
     top: {
