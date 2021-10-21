@@ -229,8 +229,12 @@ const Plan = ({ edit }) => {
                     if (edit) { return null; }
 
                     if (!isOccupied && !isLocked) {
-                      const { id } = dayPresences?.find(({ tri: t }) => t === tri) || {};
-                      return setPresence({ id, day, tri, spot, plan: place });
+                      const [firstId, ...extraneous] = dayPresences
+                        ?.filter(({ tri: t }) => t === tri)
+                        ?.map(({ id }) => id);
+
+                      setPresence({ id: firstId, day, tri, spot, plan: place });
+                      extraneous.forEach(i => deletePresence({ id: i }));
                     }
 
                     if (isOwnSpot) {
