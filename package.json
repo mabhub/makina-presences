@@ -1,6 +1,7 @@
 {
   "name": "makina-presences",
   "version": "2.1.0",
+  "repository": "https://github.com/mabhub/makina-presences",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -5,8 +5,9 @@ import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
-import { Box, Container, Grid, Tabs, Tab } from '@material-ui/core';
+import { Box, Container, Grid, Tabs, Tab, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { GitHub } from '@material-ui/icons';
 
 import usePresences from '../hooks/usePresences';
 
@@ -19,6 +20,8 @@ import PresenceCalendar from './PresenceCalendar';
 import usePlans from '../hooks/usePlans';
 import UserMenu from './UserMenu';
 import Legend from './Legend';
+
+import { name, version, repository } from '../../package.json';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -56,6 +59,16 @@ const useStyles = makeStyles(theme => {
     top: {
       gridArea: 'a',
       borderBottom: `1px solid ${theme.palette.primary.main}`,
+    },
+    about: {
+      flex: '0 0 auto',
+      padding: theme.spacing(0, 1),
+    },
+    sourceLink: {
+      display: 'inline-block',
+      '& svg': {
+        verticalAlign: 'middle',
+      },
     },
     tabs: {
       minHeight: 0,
@@ -111,6 +124,15 @@ const PresencePage = () => {
             >
               <Box className={classes.top}>
                 <Grid container alignItems="center">
+                  <Grid item xs={1} className={classes.about}>
+                    <Link
+                      href={repository}
+                      className={classes.sourceLink}
+                      title={`${name} version ${version}`}
+                    >
+                      <GitHub />
+                    </Link>
+                  </Grid>
                   <Tabs
                     component={Grid}
                     item
