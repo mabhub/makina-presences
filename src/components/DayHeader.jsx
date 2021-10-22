@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import dayjs from 'dayjs';
 
 import { CardHeader, IconButton } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
@@ -60,14 +61,16 @@ const DayHeader = ({
     }
   }, [date, place, setPresence, tri]);
 
+  const dateObj = dayjs(date);
+
   return (
     <>
       <CardHeader
         subheader={(
           <>
-            <strong className={classes.dayName}>{Days[(date.day()) % 7]}</strong>{' '}
-            {date.date().toString()}{' '}
-            {Months[date.month()]}
+            <strong className={classes.dayName}>{Days[(dateObj.day()) % 7]}</strong>{' '}
+            {dateObj.date().toString()}{' '}
+            {Months[dateObj.month()]}
           </>
         )}
         action={(!isHoliday && !isPast) && (

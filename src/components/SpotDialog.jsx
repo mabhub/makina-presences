@@ -1,4 +1,5 @@
 import React from 'react';
+import dayjs from 'dayjs';
 
 import {
   Button,
@@ -33,7 +34,7 @@ const SpotDialog = ({
   const spots = useSpots(place)
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
   const { presences } = usePresences(place);
-  const isoDate = date.format('YYYY-MM-DD');
+  const isoDate = dayjs(date).format('YYYY-MM-DD');
   const spotPresences = presences
     .filter(({ day: d }) => (d === isoDate))
     .reduce((acc, { spot, tri }) => ({

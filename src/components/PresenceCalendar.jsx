@@ -112,7 +112,6 @@ const PresenceCalendar = () => {
     const isoDate = date.format('YYYY-MM-DD');
 
     return {
-      date,
       isoDate,
       weekIndex: date.day(1).isoWeek(),
       weekDayIndex: date.day(),
@@ -124,7 +123,6 @@ const PresenceCalendar = () => {
   return (
     <Box spacing={2} className={classes.root}>
       {dayGrid.map(({
-        date,
         isoDate,
         weekIndex,
         weekDayIndex,
@@ -183,7 +181,7 @@ const PresenceCalendar = () => {
             >
               <CardActionArea onClick={() => setDay(isoDate)} disableRipple component="div">
                 <DayHeader
-                  date={date}
+                  date={isoDate}
                   presence={currentTodayPresences}
                   tri={tri}
                   place={place}
