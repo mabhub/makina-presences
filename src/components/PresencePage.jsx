@@ -9,12 +9,9 @@ import { Box, Container, Grid, Tabs, Tab, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { GitHub } from '@material-ui/icons';
 
-import usePresences from '../hooks/usePresences';
-
 import PresenceForm from './PresenceForm';
 
 import Plan from './Plan';
-import PresenceContext from './PresenceContext';
 import LoadIndicator from './LoadIndicator';
 import PresenceCalendar from './PresenceCalendar';
 import usePlans from '../hooks/usePlans';
@@ -102,8 +99,6 @@ const PresencePage = () => {
 
   const isTriValid = tri?.length >= 3;
 
-  const { setPresence } = usePresences(place);
-
   const handlePlaceChange = (event, newPlace) => {
     setPlace(prevPlace => (newPlace || prevPlace));
   };
@@ -117,56 +112,54 @@ const PresencePage = () => {
       )}
 
       {(isTriValid && place) && (
-        <PresenceContext.Provider value={setPresence}>
-          <Container className={classes.container} disableGutters>
-            <Box
-              spacing={2}
-              className={classes.wrapper}
-            >
-              <Box className={classes.top}>
-                <Grid container alignItems="center">
-                  <Grid item xs={1} className={classes.about}>
-                    <Link
-                      href={repository}
-                      className={classes.sourceLink}
-                      title={`${name} version ${version}`}
-                    >
-                      <GitHub />
-                    </Link>
-                  </Grid>
-                  <Tabs
-                    component={Grid}
-                    item
-                    xs
-                    value={place}
-                    onChange={handlePlaceChange}
-                    centered
-                    className={classes.tabs}
-                    indicatorColor="primary"
-                    textColor="primary"
+        <Container className={classes.container} disableGutters>
+          <Box
+            spacing={2}
+            className={classes.wrapper}
+          >
+            <Box className={classes.top}>
+              <Grid container alignItems="center">
+                <Grid item xs={1} className={classes.about}>
+                  <Link
+                    href={repository}
+                    className={classes.sourceLink}
+                    title={`${name} version ${version}`}
                   >
-                    {plans.map(({ Name }) => (
-                      <Tab key={Name} value={Name} label={Name} className={classes.tab} />
-                    ))}
-                  </Tabs>
-
-                  <Grid item xs={2} className={classes.userMenu}>
-                    <UserMenu />
-                  </Grid>
+                    <GitHub />
+                  </Link>
                 </Grid>
-              </Box>
+                <Tabs
+                  component={Grid}
+                  item
+                  xs
+                  value={place}
+                  onChange={handlePlaceChange}
+                  centered
+                  className={classes.tabs}
+                  indicatorColor="primary"
+                  textColor="primary"
+                >
+                  {plans.map(({ Name }) => (
+                    <Tab key={Name} value={Name} label={Name} className={classes.tab} />
+                  ))}
+                </Tabs>
 
-              <Grid container className={classes.calendar}>
-                <PresenceCalendar />
+                <Grid item xs={2} className={classes.userMenu}>
+                  <UserMenu />
+                </Grid>
               </Grid>
-
-              <Box className={classes.plan}>
-                <Legend />
-                <Plan />
-              </Box>
             </Box>
-          </Container>
-        </PresenceContext.Provider>
+
+            <Grid container className={classes.calendar}>
+              <PresenceCalendar />
+            </Grid>
+
+            <Box className={classes.plan}>
+              <Legend />
+              <Plan />
+            </Box>
+          </Box>
+        </Container>
       )}
     </div>
   );

@@ -7,7 +7,7 @@ import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/core/styles';
 
-import PresenceContext from './PresenceContext';
+import usePresences from '../hooks/usePresences';
 import { Days, Months } from '../settings';
 import SpotDialog from './SpotDialog';
 
@@ -39,7 +39,7 @@ const DayHeader = ({
   const isPresent = Boolean(presence?.spot);
   const [dialogOpen, setDialogOpen] = React.useState();
 
-  const setPresence = React.useContext(PresenceContext);
+  const { setPresence } = usePresences(place);
 
   const handleAction = event => {
     if (isPresent) {
@@ -96,4 +96,4 @@ const DayHeader = ({
   );
 };
 
-export default DayHeader;
+export default React.memo(DayHeader);
