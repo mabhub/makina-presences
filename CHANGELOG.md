@@ -1,4 +1,24 @@
 
+2.2.0 / 2021-10-23
+==================
+
+  * Update vite from 2.6.7 to 2.6.10
+  * Update react-query from 3.26.0 to 3.27.0
+  * Remove Material-UI v4 dependencies
+  * Apply codemods to upgrade Material-UI
+  * Install Material-UI v5 peer dependencies
+  * Install Material-UI v5 dependencies
+  * Remove intermediate context providing setPresence to DayHeader
+  * Adjust date management
+  * Insure some component memoization
+  * Show spots implied in conflicts
+  * Insure deleting extraneous presences
+  * Fix date filtering in presences query
+  * Fix PresenceForm alignement issue
+  * Improve UseMenu display & RWD behavior
+  * Add repository link in top bar
+  * Switch map & calendar position in mobile view
+
 2.1.0 / 2021-10-21
 ==================
 
