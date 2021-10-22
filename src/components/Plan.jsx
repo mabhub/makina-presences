@@ -255,4 +255,4 @@ const Plan = ({ edit }) => {
   );
 };
 
-export default Plan;
+export default React.memo(Plan);

@@ -94,4 +94,4 @@ const SpotDescription = ({ md = '', body = 'body2', spot = {}, className }) => {
   );
 };
 
-export default SpotDescription;
+export default React.memo(SpotDescription);

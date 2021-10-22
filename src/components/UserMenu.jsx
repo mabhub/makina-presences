@@ -54,4 +54,4 @@ const UserMenu = () => {
   );
 };
 
-export default UserMenu;
+export default React.memo(UserMenu);

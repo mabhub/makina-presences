@@ -218,4 +218,4 @@ const PresenceCalendar = () => {
   );
 };
 
-export default PresenceCalendar;
+export default React.memo(PresenceCalendar);

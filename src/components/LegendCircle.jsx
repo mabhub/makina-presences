@@ -67,4 +67,4 @@ const Circle = ({
   );
 };
 
-export default Circle;
+export default React.memo(Circle);
