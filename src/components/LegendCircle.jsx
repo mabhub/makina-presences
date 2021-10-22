@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Box, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Grid } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 const useItemStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;

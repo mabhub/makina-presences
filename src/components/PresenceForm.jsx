@@ -9,10 +9,11 @@ import {
   Grid,
   Input,
   InputLabel,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
-} from '@material-ui/core';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 import usePlans from '../hooks/usePlans';
 

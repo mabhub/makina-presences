@@ -1,7 +1,7 @@
 import React from 'react';
-import { Container, Grid, Link } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { GitHub } from '@material-ui/icons';
+import { Container, Grid, Link } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { GitHub } from '@mui/icons-material';
 
 const useStyles = makeStyles(theme => ({
   root: {

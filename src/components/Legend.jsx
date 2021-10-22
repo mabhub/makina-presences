@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { Box, Divider, IconButton } from '@material-ui/core';
-import { makeStyles, useTheme, alpha } from '@material-ui/core/styles';
-import { ExpandMore, HelpOutline } from '@material-ui/icons';
+import { Box, Divider, IconButton } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import { ExpandMore, HelpOutline } from '@mui/icons-material';
 import createPersistedState from 'use-persisted-state';
 
 import useFields from '../hooks/useFields';

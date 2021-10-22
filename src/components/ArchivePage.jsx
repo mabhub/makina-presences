@@ -7,7 +7,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 
-import DateUtils from '@date-io/dayjs';
+import AdapterDayjs from '@mui/lab/AdapterDayjs';
 
 import {
   Card,
@@ -17,15 +17,16 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { Calendar, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import Calendar from '@mui/lab/CalendarPicker';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 import {
   Archive as ArchiveIcon,
   ControlPointDuplicate as ControlPointDuplicateIcon,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 
 import Footer from './Footer';
 import useBackups from '../hooks/useBackup';
@@ -71,14 +72,14 @@ const ArchivePage = () => {
         <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
           <Grid item xs={12} sm={6} md={4} lg={3}>
 
-            <MuiPickersUtilsProvider utils={DateUtils} locale={fr}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} locale={fr}>
               <Calendar
                 disableFuture
                 date={selectedDate}
                 onChange={day => setSelectedDate(dayjs(day))}
                 shouldDisableDate={day => availableDates.every(date => !dayjs(day).isSame(date, 'day'))}
               />
-            </MuiPickersUtilsProvider>
+            </LocalizationProvider>
           </Grid>
 
           <Grid item xs={12} sm={6} md={4} lg={3}>

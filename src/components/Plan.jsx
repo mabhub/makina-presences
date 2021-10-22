@@ -7,8 +7,10 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 import createPersistedState from 'use-persisted-state';
 
-import { Box, Fab, Tooltip } from '@material-ui/core';
-import { makeStyles, withStyles, alpha } from '@material-ui/core/styles';
+import { Box, Fab, Tooltip } from '@mui/material';
+import { alpha } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import withStyles from '@mui/styles/withStyles';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import usePresences from '../hooks/usePresences';
@@ -203,7 +205,6 @@ const Plan = ({ edit }) => {
                 key={spot}
                 title={(!edit && !isPast) ? tooltip : ''}
                 placement="right"
-                interactive
                 enterDelay={500}
               >
                 <Fab

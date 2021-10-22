@@ -2,8 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import { useIsFetching, useIsMutating } from 'react-query';
 
-import { LinearProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { LinearProgress } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles(() => ({
   progress: {

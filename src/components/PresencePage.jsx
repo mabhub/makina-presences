@@ -5,9 +5,9 @@ import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
-import { Box, Container, Grid, Tabs, Tab, Link } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { GitHub } from '@material-ui/icons';
+import { Box, Container, Grid, Tabs, Tab, Link } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { GitHub } from '@mui/icons-material';
 
 import PresenceForm from './PresenceForm';
 

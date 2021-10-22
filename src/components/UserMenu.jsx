@@ -1,9 +1,9 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { IconButton, Button } from '@material-ui/core';
-import { Person } from '@material-ui/icons';
-import { makeStyles } from '@material-ui/core/styles';
+import { IconButton, Button } from '@mui/material';
+import { Person } from '@mui/icons-material';
+import makeStyles from '@mui/styles/makeStyles';
 
 const useTriState = createPersistedState('tri');
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { Chip } from '@material-ui/core';
+import { Chip } from '@mui/material';
 
 import { sameLowC } from '../helpers';
 

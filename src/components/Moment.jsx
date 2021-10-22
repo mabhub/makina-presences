@@ -1,7 +1,9 @@
 import React from 'react';
 
-import { Grid } from '@material-ui/core';
-import { makeStyles, alpha } from '@material-ui/core/styles';
+import { Grid } from '@mui/material';
+import { alpha } from '@mui/material/styles';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import TriPresence from './TriPresence';
 

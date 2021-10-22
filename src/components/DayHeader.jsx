@@ -2,10 +2,11 @@ import React from 'react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 
-import { CardHeader, IconButton } from '@material-ui/core';
-import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
-import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import { makeStyles } from '@material-ui/core/styles';
+import { CardHeader, IconButton } from '@mui/material';
+import { RemoveCircleOutline, AddCircleOutline } from '@mui/icons-material';
+import { emphasize } from '@mui/material/styles';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import usePresences from '../hooks/usePresences';
 import { Days, Months } from '../settings';

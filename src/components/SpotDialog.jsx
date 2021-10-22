@@ -10,8 +10,10 @@ import {
   InputLabel,
   Select,
   useMediaQuery,
-} from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import useSpots from '../hooks/useSpots';
 import usePresences from '../hooks/usePresences';
@@ -29,7 +31,7 @@ const SpotDialog = ({
   const [value, setValue] = React.useState();
 
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const spots = useSpots(place)
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
