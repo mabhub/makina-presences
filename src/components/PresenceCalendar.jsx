@@ -102,7 +102,7 @@ const PresenceCalendar = () => {
   const [place] = usePlaceState('Toulouse');
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
-  const [day, setDay] = useDayState(today);
+  const [day, setDay] = useDayState(today.format('YYYY-MM-DD'));
 
   const { presences } = usePresences(place);
   const holidays = useHolidays();

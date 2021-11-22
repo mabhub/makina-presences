@@ -125,7 +125,7 @@ const Plan = ({ edit }) => {
   const [tri] = useTriState('');
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
-  const [day] = useDayState(today);
+  const [day] = useDayState(today.format('YYYY-MM-DD'));
 
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
