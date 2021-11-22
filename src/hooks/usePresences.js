@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import React from 'react';
 
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { nrmlStr } from '../helpers';
+import { cleanTri } from '../helpers';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
@@ -116,12 +116,11 @@ const usePresences = place => {
   const createPresence = React.useCallback(
     (date, tri, changes) => {
       const isoDate = date?.format?.('YYYY-MM-DD') || date;
-      const cleanTri = tri.length <= 3 ? nrmlStr(tri) : tri.trim();
 
       return createRow.mutate({
-        key: `${isoDate}-${cleanTri}`,
+        key: `${isoDate}-${cleanTri(tri)}`,
         day: isoDate,
-        tri: cleanTri,
+        tri: cleanTri(tri),
         ...changes,
       });
     },

@@ -15,6 +15,7 @@ import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import usePresences from '../hooks/usePresences';
 import SpotDescription from './SpotDescription';
+import { sameLowC } from '../helpers';
 
 const useTriState = createPersistedState('tri');
 const useDayState = createPersistedState('day');
@@ -50,6 +51,9 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.grey[600],
     textTransform: 'none',
     opacity: 0.3,
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
   },
 
   locked: {
@@ -194,7 +198,7 @@ const Plan = ({ edit }) => {
             const isLocked = Boolean(Bloqué);
             const isConflict = Boolean(rest.length);
             const isOccupied = Boolean(presence);
-            const isOwnSpot = Boolean(presence?.tri === tri);
+            const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
 
             const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
@@ -232,7 +236,7 @@ const Plan = ({ edit }) => {
 
                     if (!isOccupied && !isLocked) {
                       const [firstId, ...extraneous] = dayPresences
-                        ?.filter(({ tri: t }) => t === tri)
+                        ?.filter(({ tri: t }) => sameLowC(t, tri))
                         ?.map(({ id }) => id);
 
                       setPresence({ id: firstId, day, tri, spot, plan: place });

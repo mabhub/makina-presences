@@ -16,6 +16,7 @@ import {
 import makeStyles from '@mui/styles/makeStyles';
 
 import usePlans from '../hooks/usePlans';
+import { cleanTri } from '../helpers';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -60,7 +61,7 @@ const PresenceForm = ({ className, ...props }) => {
     setPlace(prevPlace => (newPlace || prevPlace));
   };
 
-  const handleSubmit = () => setTri(inputValue);
+  const handleSubmit = () => setTri(cleanTri(inputValue));
 
   const handleKeyPress = event => {
     if (event.charCode === 13) {
