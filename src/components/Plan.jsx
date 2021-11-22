@@ -214,6 +214,7 @@ const Plan = ({ edit }) => {
                     [classes.occupied]: isOccupied && !isOwnSpot,
                     [classes.ownSpot]: isOwnSpot,
                     [classes.locked]: isLocked,
+                    [`hl-${presence?.tri}`]: presence?.tri,
                   })}
                   disabled={isPast}
                   component={canClick ? 'div' : 'button'}
