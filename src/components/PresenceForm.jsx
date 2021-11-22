@@ -84,8 +84,8 @@ const PresenceForm = ({ className, ...props }) => {
             </Typography>
 
             <Typography variant="subtitle2">
-              Merci de <strong>choisir agence</strong> et
-              de d'indiquer <strong>un trigramme</strong>.
+              Merci de <strong>choisir une agence</strong> et
+              d'indiquer <strong>un trigramme</strong>.
             </Typography>
           </Grid>
 
