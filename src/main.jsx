@@ -16,6 +16,18 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import PresencePage from './components/PresencePage';
 import ArchivePage from './components/ArchivePage';
 
+import { version } from '../package.json';
+
+const { VITE_PROJECT_VERSION = version } = import.meta.env;
+
+if (typeof localStorage.VITE_PROJECT_VERSION === 'undefined' || localStorage.VITE_PROJECT_VERSION === null) {
+  localStorage.setItem('VITE_PROJECT_VERSION', VITE_PROJECT_VERSION);
+}
+
+if (localStorage.VITE_PROJECT_VERSION !== VITE_PROJECT_VERSION) {
+  localStorage.clear();
+}
+
 const theme = responsiveFontSizes(
   createTheme({
     palette: {
