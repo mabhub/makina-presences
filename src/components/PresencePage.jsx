@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
@@ -25,7 +26,6 @@ dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
-const usePlaceState = createPersistedState('place');
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
 
@@ -94,13 +94,16 @@ const useStyles = makeStyles(theme => {
 const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
-  const [place, setPlace] = usePlaceState('Toulouse');
   const plans = usePlans();
+  const { place, day } = useParams();
+  const history = useHistory();
 
   const isTriValid = tri?.length >= 3;
 
   const handlePlaceChange = (event, newPlace) => {
-    setPlace(prevPlace => (newPlace || prevPlace));
+    const path = ['', newPlace || place];
+    if (day) { path.push(day); }
+    history.push(path.join('/'));
   };
 
   return (

@@ -40,7 +40,7 @@ ReactDOM.render(
           <CssBaseline />
           <Router>
             <Switch>
-              <Route exact path="/"><PresencePage /></Route>
+              <Route path={['/', '/:place', '/:place/:day']} exact><PresencePage /></Route>
               <Route path="/archives"><ArchivePage /></Route>
               <Route path="*">Error 404</Route>
             </Switch>

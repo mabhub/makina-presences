@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import { useParams, useHistory } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
 import {
@@ -46,20 +47,18 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useTriState = createPersistedState('tri');
-const usePlaceState = createPersistedState('place');
 
 const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
   const plans = usePlans();
+  const history = useHistory();
 
   const [tri, setTri] = useTriState('');
   const [inputValue, setInputValue] = React.useState(tri);
-  const [place, setPlace] = usePlaceState('');
+  const { place } = useParams();
 
   const handleTriChange = event => setInputValue(event.target.value.substr(0, 255));
-  const handlePlaceChange = (event, newPlace) => {
-    setPlace(prevPlace => (newPlace || prevPlace));
-  };
+  const handlePlaceChange = (event, newPlace) => history.push(`/${newPlace || place}`);
 
   const handleSubmit = () => setTri(cleanTri(inputValue));
 

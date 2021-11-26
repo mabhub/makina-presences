@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import { useHistory, useParams } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
@@ -29,8 +30,6 @@ dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
-const useDayState = createPersistedState('day');
-const usePlaceState = createPersistedState('place');
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -99,10 +98,10 @@ const timespan = 14;
 const PresenceCalendar = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
-  const [place] = usePlaceState('Toulouse');
+  const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
+  const history = useHistory();
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
-  const [day, setDay] = useDayState(today.format('YYYY-MM-DD'));
 
   const { presences } = usePresences(place);
   const holidays = useHolidays();
@@ -179,7 +178,11 @@ const PresenceCalendar = () => {
                 [classes.holidayCard]: isHoliday,
               })}
             >
-              <CardActionArea onClick={() => setDay(isoDate)} disableRipple component="div">
+              <CardActionArea
+                onClick={() => history.push(`/${place}/${isoDate}`)}
+                disableRipple
+                component="div"
+              >
                 <DayHeader
                   date={isoDate}
                   presence={currentTodayPresences}

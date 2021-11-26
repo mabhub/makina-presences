@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { useQueryClient } from 'react-query';
+import { useParams } from 'react-router-dom';
 
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
@@ -18,8 +19,6 @@ import SpotDescription from './SpotDescription';
 import { sameLowC } from '../helpers';
 
 const useTriState = createPersistedState('tri');
-const useDayState = createPersistedState('day');
-const usePlaceState = createPersistedState('place');
 
 const CustomTooltip = withStyles(theme => ({
   tooltip: {
@@ -122,14 +121,12 @@ const Plan = ({ edit }) => {
   const queryClient = useQueryClient();
 
   const plans = usePlans();
-  const [place] = usePlaceState('');
+  const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
+
   const spots = useSpots(place);
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
   const [tri] = useTriState('');
-
-  const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
-  const [day] = useDayState(today.format('YYYY-MM-DD'));
 
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
