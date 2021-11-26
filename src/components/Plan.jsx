@@ -90,7 +90,10 @@ const useStyles = makeStyles(theme => ({
 
 const transformWrapperProps = {
   minScale: 0.25,
-  panning: { velocityDisabled: true },
+  panning: {
+    velocityDisabled: true,
+    excluded: ['MuiButtonBase-root'],
+  },
   doubleClick: { disabled: true },
   zoomAnimation: { disabled: true },
   alignmentAnimation: { disabled: true },
