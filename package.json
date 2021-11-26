@@ -4,7 +4,7 @@
   "repository": "https://github.com/mabhub/makina-presences",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "VITE_PROJECT_VERSION=`git describe` vite build",
     "lint": "eslint . --ext js,jsx",
     "serve": "vite preview",
     "start": "vite",

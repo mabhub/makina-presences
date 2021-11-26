@@ -21,6 +21,8 @@ import Legend from './Legend';
 
 import { name, version, repository } from '../../package.json';
 
+const { VITE_PROJECT_VERSION = version } = import.meta.env;
+
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
@@ -126,7 +128,7 @@ const PresencePage = () => {
                   <Link
                     href={repository}
                     className={classes.sourceLink}
-                    title={`${name} version ${version}`}
+                    title={`${name} version ${VITE_PROJECT_VERSION}`}
                   >
                     <GitHub />
                   </Link>
