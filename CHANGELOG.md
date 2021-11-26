@@ -1,4 +1,13 @@
 
+2.3.0 / 2021-11-26
+==================
+
+  * Avoid case mismatch for tri
+  * Fix a typo on the "login" page (PresenceForm).
+  * Set "today" as default day
+  * Highlight hovered presence tri
+  * Fix "first day" issue
+
 2.2.0 / 2021-10-23
 ==================
 
