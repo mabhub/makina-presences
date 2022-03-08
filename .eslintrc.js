@@ -13,6 +13,9 @@ module.exports = {
     browser: true,
     jest: true,
   },
+  ignorePatterns: [
+    'bin/update.js',
+  ],
   rules: {
     'arrow-parens': [error, 'as-needed'],
     camelcase: [warn],
