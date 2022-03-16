@@ -17,6 +17,7 @@ import PresencePage from './components/PresencePage';
 import ArchivePage from './components/ArchivePage';
 
 import { version } from '../package.json';
+import TTCount from './components/TTCount';
 
 const { VITE_PROJECT_VERSION = version } = import.meta.env;
 
@@ -52,6 +53,7 @@ ReactDOM.render(
           <CssBaseline />
           <Router>
             <Switch>
+              <Route path="/tt"><TTCount /></Route>
               <Route path={['/', '/:place', '/:place/:day']} exact><PresencePage /></Route>
               <Route path="/archives"><ArchivePage /></Route>
               <Route path="*">Error 404</Route>
