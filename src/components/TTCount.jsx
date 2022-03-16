@@ -86,7 +86,13 @@ const TTCount = () => {
 
             <TableBody>
               {users.map((row, index) => (
-                <TableRow key={row.tri} sx={{ background: index % 2 ? 'transparent' : '#00000008' }}>
+                <TableRow
+                  key={row.tri}
+                  sx={{
+                    background: index % 2 ? 'transparent' : '#00000008',
+                    opacity: Number(row.total) ? 1 : 0.5,
+                  }}
+                >
                   <TableCell>
                     {row.tri}
                   </TableCell>
