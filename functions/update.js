@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax */
+const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
 const fetch = async (...args) => {
   const { default: f } = await import('node-fetch');
@@ -48,6 +49,35 @@ const getTTO = results => {
       days,
     };
   });
+};
+
+const getTTR = results => {
+  const validResults = results.filter(({ displayName }) => displayName.match(/^TTR.*/));
+
+  return validResults
+    .filter(({ value: { main: { rrule } } }) => rrule) // Keep only recurring events
+    .filter(({ value: { main } }) => { // Keep only event including "today"
+      const start = new Date(main.dtstart.iso8601).getTime();
+      const end = main?.rrule?.until ? new Date(main.rrule.until.iso8601).getTime() : Infinity;
+      const now = new Date().getTime();
+
+      return (start < now && now < end);
+    })
+    .map(({ value: { main } }) => { // Return an array of { day, len }
+      const start = new Date(main.dtstart.iso8601);
+      const end = new Date(main.dtend.iso8601);
+
+      const delta = end.getTime() - start.getTime();
+      const days = Math.ceil(delta / (1000 * 3600 * 24));
+
+      return main?.rrule?.byDay?.map(({ day }) => ({ day, len: days }));
+    })
+    .flat()
+    .reduce((acc, { day, len } = {}) => {
+      const first = DAYS.indexOf(day);
+      return [...acc, ...[...Array(len)].map((_, index) => ((first + index) % 7))];
+    }, [])
+    .sort();
 };
 
 exports.handler = async () => {
@@ -106,16 +136,16 @@ exports.handler = async () => {
       {
         headers: { ...bmHeaders, 'Content-Type': 'application/json' },
         method: 'POST',
-        body: JSON.stringify(bmQueryTpl(uid, 'TTO')),
+        body: JSON.stringify(bmQueryTpl(uid, 'TTO || TTR')),
       },
     );
 
     const TTO = getTTO(results);
-    const total = TTO.reduce((acc, { days: d = 0 }) => (acc + d), 0);
+    const TTR = getTTR(results);
 
     const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
 
-    if (JSON.stringify(TTO, null, 2) === record.tto) {
+    if (JSON.stringify(TTO, null, 2) === record.tto && JSON.stringify(TTR) === record.ttr) {
       // Data did not change: early return.
       console.info(`No change on ${record.tri} data: skip update.`);
       return;
@@ -126,8 +156,9 @@ exports.handler = async () => {
     const body = JSON.stringify({
       id: record.id,
       tto: JSON.stringify(TTO, null, 2),
+      total: TTO.reduce((acc, { days: d = 0 }) => (acc + d), 0),
+      ttr: JSON.stringify(TTR),
       'last-check': new Date().toISOString(),
-      total,
     });
 
     const response = await fetch(
