@@ -128,7 +128,7 @@ exports.handler = async () => {
    * Do calendar search
    */
   const { default: pLimit } = await import('p-limit');
-  const limit = pLimit(5);
+  const limit = pLimit(7);
 
   const processUid = async uid => {
     const results = await fetchJson(
