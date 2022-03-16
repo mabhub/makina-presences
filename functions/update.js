@@ -101,7 +101,10 @@ exports.handler = async () => {
   /**
    * Do calendar search
    */
-  for await (const { uid } of enabledUids) {
+  const { default: pLimit } = await import('p-limit');
+  const limit = pLimit(5);
+
+  const processUid = async uid => {
     const results = await fetchJson(
       `${bmApiPath}calendars/_search`,
       {
@@ -132,7 +135,10 @@ exports.handler = async () => {
       const errorContent = await response.json();
       process.stderr.write(JSON.stringify(errorContent, null, 2));
     }
-  }
+  };
+
+  const pipe = enabledUids.map(({ uid }) => limit(() => processUid(uid)));
+  await Promise.all(pipe);
 
   return {
     statusCode: 200,

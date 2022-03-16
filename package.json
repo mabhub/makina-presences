@@ -23,6 +23,7 @@
     "dayjs": "^1.10.4",
     "dotenv": "^16.0.0",
     "node-fetch": "^3.2.2",
+    "p-limit": "^4.0.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-query": "^3.16.0",
