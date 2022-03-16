@@ -14,6 +14,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import Footer from './Footer';
 import useTT from '../hooks/useTT';
+import TTOLine from './TTOLine';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -73,13 +74,24 @@ const TTCount = () => {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell onClick={handleSortChange('total')} className={classes.th}>
+                <TableCell onClick={handleSortChange('total')} className={classes.th} align="right">
                   <TableSortLabel
                     direction={sortInvert ? 'asc' : 'desc'}
                     active={sortField === 'total'}
                   >
-                    TTO Agenda
+                    TTO (posé)
                   </TableSortLabel>
+                </TableCell>
+
+                <TableCell onClick={handleSortChange('total')} className={classes.th}>
+                  <TableSortLabel
+                    direction={!sortInvert ? 'asc' : 'desc'}
+                  >
+                    TTO (reste)
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  Timeline
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -97,8 +109,16 @@ const TTCount = () => {
                     {row.tri}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell align="right">
                     {row.total}
+                  </TableCell>
+
+                  <TableCell>
+                    {30 - row.total}
+                  </TableCell>
+
+                  <TableCell>
+                    <TTOLine dates={row.dates} />
                   </TableCell>
                 </TableRow>
               ))}
