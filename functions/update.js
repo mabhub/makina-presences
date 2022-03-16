@@ -91,12 +91,12 @@ exports.handler = async () => {
   }
 
   const enabledUids = cacheTable
-    .filter(({ enabled }) => enabled)
-    .filter(({ 'last-check': last }) => {
-      const then = (new Date(last)).getTime();
-      const now = Date.now();
-      return (now - then) > 3600 * 1000;
-    });
+    .filter(({ enabled }) => enabled);
+    // .filter(({ 'last-check': last }) => {
+    //   const then = (new Date(last)).getTime();
+    //   const now = Date.now();
+    //   return (now - then) > 3600 * 1000;
+    // });
 
   /**
    * Do calendar search
@@ -118,6 +118,14 @@ exports.handler = async () => {
     const total = days.reduce((acc, { days: d = 0 }) => (acc + d), 0);
 
     const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
+
+    if (JSON.stringify(days, null, 2) === record['tt-dates']) {
+      // Data did not change: early return.
+      console.info(`No change on ${record.tri} data: skip update.`);
+      return;
+    }
+
+    console.info(`Do ${record.tri} update !!`);
 
     const body = JSON.stringify({
       id: record.id,
