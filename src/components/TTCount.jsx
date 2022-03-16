@@ -118,7 +118,7 @@ const TTCount = () => {
                   </TableCell>
 
                   <TableCell>
-                    <TTOLine dates={row.dates} />
+                    <TTOLine dates={row.tto} />
                   </TableCell>
                 </TableRow>
               ))}

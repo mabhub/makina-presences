@@ -34,24 +34,20 @@ const bmQueryTpl = (uid, query = 'TTO') => (
   }
 );
 
-const parseEvent = event => {
-  const { value: { main } } = event;
-
-  const start = new Date(main.dtstart.iso8601);
-  const end = new Date(main.dtend.iso8601);
-
-  const delta = end.getTime() - start.getTime();
-  const days = Math.ceil(delta / (1000 * 3600 * 24));
-
-  return {
-    from: main.dtstart.iso8601,
-    days,
-  };
-};
-
-const parseSearchResult = results => {
+const getTTO = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/));
-  return validResults.map(result => parseEvent(result));
+  return validResults.map(({ value: { main } }) => {
+    const start = new Date(main.dtstart.iso8601);
+    const end = new Date(main.dtend.iso8601);
+
+    const delta = end.getTime() - start.getTime();
+    const days = Math.ceil(delta / (1000 * 3600 * 24));
+
+    return {
+      from: main.dtstart.iso8601,
+      days,
+    };
+  });
 };
 
 exports.handler = async () => {
@@ -114,12 +110,12 @@ exports.handler = async () => {
       },
     );
 
-    const days = parseSearchResult(results);
-    const total = days.reduce((acc, { days: d = 0 }) => (acc + d), 0);
+    const TTO = getTTO(results);
+    const total = TTO.reduce((acc, { days: d = 0 }) => (acc + d), 0);
 
     const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
 
-    if (JSON.stringify(days, null, 2) === record['tt-dates']) {
+    if (JSON.stringify(TTO, null, 2) === record.tto) {
       // Data did not change: early return.
       console.info(`No change on ${record.tri} data: skip update.`);
       return;
@@ -129,7 +125,7 @@ exports.handler = async () => {
 
     const body = JSON.stringify({
       id: record.id,
-      'tt-dates': JSON.stringify(days, null, 2),
+      tto: JSON.stringify(TTO, null, 2),
       'last-check': new Date().toISOString(),
       total,
     });

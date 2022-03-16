@@ -18,7 +18,7 @@ exports.handler = async () => {
     [
       `${process.env.TT_BASEROW_TABLE}?`,
       'user_field_names=true',
-      'include=tri,total,enabled,tt-dates',
+      'include=tri,total,enabled,tto',
       'size=200',
     ].join('&'),
     { headers: baserowHeaders },
@@ -26,7 +26,7 @@ exports.handler = async () => {
 
   const results = response.results
     .filter(({ enabled }) => enabled)
-    .map(({ tri, total, 'tt-dates': dates }) => ({ tri, total, dates: JSON.parse(dates) }));
+    .map(({ tri, total, tto }) => ({ tri, total, tto: JSON.parse(tto) }));
 
   return {
     statusCode: 200,
