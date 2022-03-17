@@ -23,18 +23,6 @@ const bmHeaders = {
   'X-BM-ApiKey': process.env.BM_APIKEY,
 };
 
-const bmQueryTpl = (uid, query = 'TTO') => (
-  {
-    containers: [`calendar:Default:${uid}`],
-    eventQuery: {
-      query,
-      dateMin: { precision: 'Date', iso8601: '2022-01-01' },
-      dateMax: { precision: 'Date', iso8601: '2022-12-31' },
-      size: 100,
-    },
-  }
-);
-
 const getTTO = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/));
   return validResults.map(({ value: { main } }) => {
@@ -136,7 +124,15 @@ exports.handler = async () => {
       {
         headers: { ...bmHeaders, 'Content-Type': 'application/json' },
         method: 'POST',
-        body: JSON.stringify(bmQueryTpl(uid, 'TTO || TTR')),
+        body: JSON.stringify({
+          containers: [`calendar:Default:${uid}`],
+          eventQuery: {
+            query: 'TTO || TTR',
+            dateMin: { precision: 'Date', iso8601: '2022-01-01' },
+            dateMax: { precision: 'Date', iso8601: '2022-12-31' },
+            size: 100,
+          },
+        }),
       },
     );
 
