@@ -43,10 +43,15 @@ const getTTR = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTR.*/));
 
   return validResults
-    .filter(({ value: { main: { rrule } } }) => rrule) // Keep only recurring events
-    .filter(({ value: { main } }) => { // Keep only event including "today"
+    .filter(({ value: { main } }) => {
+      // Keep only recurring events
+      if (!main?.rrule) {
+        return false;
+      }
+
+      // Keep only (recurring) event including "today"
       const start = new Date(main.dtstart.iso8601).getTime();
-      const end = main?.rrule?.until ? new Date(main.rrule.until.iso8601).getTime() : Infinity;
+      const end = main.rrule.until ? new Date(main.rrule.until.iso8601).getTime() : Infinity;
       const now = new Date().getTime();
 
       return (start < now && now < end);
@@ -58,7 +63,7 @@ const getTTR = results => {
       const delta = end.getTime() - start.getTime();
       const days = Math.ceil(delta / (1000 * 3600 * 24));
 
-      return main?.rrule?.byDay?.map(({ day }) => ({ day, len: days }));
+      return main.rrule.byDay?.map(({ day }) => ({ day, len: days }));
     })
     .flat()
     .reduce((acc, { day, len } = {}) => {
@@ -137,7 +142,7 @@ exports.handler = async () => {
     );
 
     const TTO = getTTO(results);
-    const TTR = getTTR(results);
+    const TTR = Array.from(new Set(getTTR(results)));
 
     const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
 
