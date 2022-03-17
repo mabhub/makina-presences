@@ -15,6 +15,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import Footer from './Footer';
 import useTT from '../hooks/useTT';
 import TTOLine from './TTOLine';
+import TTRLine from './TTRLine';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -90,8 +91,13 @@ const TTCount = () => {
                     TTO (reste)
                   </TableSortLabel>
                 </TableCell>
+
                 <TableCell>
                   Timeline
+                </TableCell>
+
+                <TableCell>
+                  TTR
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -119,6 +125,10 @@ const TTCount = () => {
 
                   <TableCell>
                     <TTOLine dates={row.tto} />
+                  </TableCell>
+
+                  <TableCell>
+                    <TTRLine days={row.ttr} />
                   </TableCell>
                 </TableRow>
               ))}
