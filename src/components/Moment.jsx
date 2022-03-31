@@ -40,6 +40,20 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const deduplicate = (collection, key) =>
+  collection.reduce((acc, curr) => {
+    const { values = new Set(), store = [] } = acc;
+
+    if (values.has(curr[key])) {
+      return acc;
+    }
+
+    return {
+      values: new Set([...values, curr[key]]),
+      store: [...store, curr],
+    };
+  }, {}).store || [];
+
 const Moment = ({
   momentPresences: presences = [],
 }) => {
@@ -50,7 +64,7 @@ const Moment = ({
       xs={12}
       className={classes.moment}
     >
-      {presences
+      {deduplicate(presences, 'tri')
         .sort(({ tri: a }, { tri: b }) => (a.localeCompare(b)))
         .map(({ id, tri: t, fake }) => (
           <TriPresence
