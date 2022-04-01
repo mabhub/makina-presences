@@ -6,4 +6,4 @@
 require('dotenv').config({ path: '.env.local' });
 const { handler: update } = require('../functions/update');
 
-update();
+update().then(console.log);

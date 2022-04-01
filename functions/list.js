@@ -26,7 +26,8 @@ exports.handler = async () => {
 
   const results = response.results
     .filter(({ enabled }) => enabled)
-    .map(({ tri, total, tto, ttr }) => ({ tri, total, tto: JSON.parse(tto), ttr: JSON.parse(ttr) }));
+    .map(({ tri, total, tto, ttr }) =>
+      ({ tri, total, tto: JSON.parse(tto), ttr: JSON.parse(ttr) }));
 
   return {
     statusCode: 200,

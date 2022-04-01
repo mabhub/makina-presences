@@ -86,6 +86,8 @@ exports.handler = async () => {
     { headers: bmHeaders },
   );
 
+  const updates = [];
+
   /**
    * Create new entries
    */
@@ -148,11 +150,12 @@ exports.handler = async () => {
 
     if (JSON.stringify(TTO, null, 2) === record.tto && JSON.stringify(TTR) === record.ttr) {
       // Data did not change: early return.
-      console.info(`No change on ${record.tri} data: skip update.`);
+      // console.info(`No change on ${record.tri} data: skip update.`);
       return;
     }
 
-    console.info(`Do ${record.tri} update !!`);
+    // console.info(`Do ${record.tri} update !!`);
+    updates.push(record.tri);
 
     const body = JSON.stringify({
       id: record.id,
@@ -168,8 +171,8 @@ exports.handler = async () => {
     );
 
     if (response.status !== 200) {
-      const errorContent = await response.json();
-      process.stderr.write(JSON.stringify(errorContent, null, 2));
+      const errorContent = await response.text();
+      process.stderr.write(errorContent);
     }
   };
 
@@ -178,6 +181,6 @@ exports.handler = async () => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ updateCount: enabledUids.length }),
+    body: JSON.stringify(updates),
   };
 };
