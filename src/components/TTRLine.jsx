@@ -3,7 +3,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-const SIZE = 0.75;
+const SIZE = 1.2;
 
 const TTRLine = ({ days = [] }) => (
   <>
@@ -12,20 +12,23 @@ const TTRLine = ({ days = [] }) => (
         key={day}
         title={day}
         sx={{
-          // width: `calc(${date.days} * ${SIZE}em + ${date.days - 1}px)`,
           width: `${SIZE}em`,
           height: `${SIZE}em`,
           display: 'inline-block',
-          border: '1px solid #55aa55',
-          background: days.includes(day) ? '#55aa55' : 'transparent',
+          borderRadius: `calc(${SIZE}em / 2)`,
+          background: days.includes(day) ? '#55aa55' : '#11aa1122',
           mr: '1px',
           verticalAlign: 'middle',
         }}
       >
         <Box
           sx={{
-            fontSize: 7,
+            pt: '0.3em',
+            fontSize: 9,
             textAlign: 'center',
+            opacity: days.includes(day) ? 1 : 0.5,
+            fontWeight: 'bold',
+            color: days.includes(day) ? 'white' : 'inherit',
           }}
         >
           {d}
