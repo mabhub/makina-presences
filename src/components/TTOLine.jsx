@@ -11,19 +11,37 @@ const TTOLine = ({ dates = [] }) => {
   return (
     <>
       {dates.map(date => (
-        <Box
-          key={date.from}
-          title={date.from}
-          sx={{
-            width: `calc(${date.days} * ${SIZE}em + ${date.days - 1}px)`,
-            height: `${SIZE}em`,
-            display: 'inline-block',
-            border: '1px solid #55aa55',
-            background: '#55aa55',
-            mr: '1px',
-            verticalAlign: 'middle',
-          }}
-        />
+        <React.Fragment key={date.from}>
+          {[...Array(date.days)].map((_, index) => (
+            <React.Fragment
+              key={date.from + index}
+            >
+              {Boolean(index) && (
+                <Box
+                  sx={{
+                    display: 'inline-block',
+                    width: '1px',
+                    height: `${SIZE}em`,
+                    background: 'orange',
+                    verticalAlign: 'middle',
+                  }}
+                />
+              )}
+              <Box
+                title={date.from}
+                sx={{
+                  width: `${SIZE}em`,
+                  height: `${SIZE}em`,
+                  display: 'inline-block',
+                  border: '1px solid #55aa55',
+                  background: '#55aa55',
+                  ml: !index ? '1px' : 0,
+                  verticalAlign: 'middle',
+                }}
+              />
+            </React.Fragment>
+          ))}
+        </React.Fragment>
       ))}
 
       {[...Array(30 - total)].map((_, index) => (
@@ -34,7 +52,7 @@ const TTOLine = ({ dates = [] }) => {
             height: `${SIZE}em`,
             display: 'inline-block',
             border: '1px solid #ddddee',
-            mr: '1px',
+            ml: '1px',
             verticalAlign: 'middle',
           }}
         />
