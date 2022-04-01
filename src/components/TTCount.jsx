@@ -16,6 +16,7 @@ import Footer from './Footer';
 import useTT from '../hooks/useTT';
 import TTOLine from './TTOLine';
 import TTRLine from './TTRLine';
+import LoadIndicator from './LoadIndicator';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +62,8 @@ const TTCount = () => {
 
   return (
     <div className="TTCount">
+      <LoadIndicator />
+
       <Container className={classes.root}>
         <TableContainer>
           <Table size="small">
