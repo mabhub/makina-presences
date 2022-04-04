@@ -19,8 +19,7 @@ const useLegendStyles = makeStyles(theme => ({
     zIndex: 1,
     transform: ({ hidden }) => `translateX(-50%) translateY(${hidden ? 100 : 0}%)`,
     transition: theme.transitions.create('transform'),
-
-    background: 'rgba(255, 255, 255, 0.8)',
+    background: alpha(theme.palette.primary.bg, 0.8),
     padding: theme.spacing(0.5, 1, 1),
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[1],

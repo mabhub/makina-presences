@@ -9,7 +9,7 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import createPersistedState from 'use-persisted-state';
 
 import { Box, Fab, Tooltip } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
 import usePlans from '../hooks/usePlans';
@@ -40,19 +40,24 @@ const useStyles = makeStyles(theme => ({
   planWrapper: {
     position: 'relative',
   },
-  plan: {},
+  plan: {
+    filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
+  },
 
   spot: {
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
     border: '2px solid transparent',
-    backgroundColor: 'white',
-    color: theme.palette.grey[600],
+    backgroundColor: theme.palette.primary.bg,
+    color: theme.palette.primary.fg,
     textTransform: 'none',
     opacity: 0.3,
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.fg, 0.25),
+    }
   },
 
   locked: {
@@ -69,7 +74,7 @@ const useStyles = makeStyles(theme => ({
 
   occupied: {
     backgroundColor: alpha(theme.palette.primary.main, 0.25),
-    color: theme.palette.primary.main,
+    color: lighten(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.75 : 0),
     opacity: 1,
     cursor: 'default',
     boxShadow: 'none',
