@@ -78,7 +78,7 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     display: 'flex',
 
-    background: '#f5f5f5',
+    background: theme.palette.secondary.bg,
     fontSize: theme.typography.pxToRem(10),
     padding: theme.spacing(1),
     '&:last-child': {
