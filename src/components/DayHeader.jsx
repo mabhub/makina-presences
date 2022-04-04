@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   highlight: {
-    backgroundColor: emphasize(theme.palette.primary.main, 0.25),
+    backgroundColor: emphasize(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0 : 0.25),
   },
 }));
 
