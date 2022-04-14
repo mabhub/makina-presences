@@ -1,7 +1,7 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Tooltip, Typography } from '@mui/material';
+import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography } from '@mui/material';
 import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown } from '@mui/icons-material';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => {
     },
     themeIcon: {
       marginRight: 7,
-      fill: theme.palette.mode === 'dark' ? 'white' : 'black',
+      fill: 'currentColor',
     },
     themeLabel: {
       textTransform: 'none',
@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => {
 
 const UserMenu = () => {
   const [tri, setTri] = useTriState();
-  const [themePrefs, setThemePrefs] = useThemePrefs();
+  const [themePrefs, setThemePrefs] = useThemePrefs('system');
 
   const classes = useStyles();
 
@@ -41,7 +41,7 @@ const UserMenu = () => {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
+  const handleClick = event => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -78,24 +78,27 @@ const UserMenu = () => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <Typography style={{ paddingLeft: 10}} variant="overline" display="block" gutterBottom>
+        <Typography style={{ paddingLeft: 10 }} variant="overline" display="block" gutterBottom>
           Thème
         </Typography>
         <ToggleButtonGroup
-          size="small" 
+          size="small"
           value={themePrefs}
           exclusive
           style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 10 }}
           fullWidth
         >
           <ToggleButton onClick={() => setThemePrefs('dark')} value="dark">
-            <DarkMode className={classes.themeIcon} /><span className={classes.themeLabel}>Sombre</span>
+            <DarkMode className={classes.themeIcon} />
+            <span className={classes.themeLabel}>Sombre</span>
           </ToggleButton>
           <ToggleButton onClick={() => setThemePrefs('system')} value="system">
-            <SettingsBrightness className={classes.themeIcon} /><span className={classes.themeLabel}>Système</span>
+            <SettingsBrightness className={classes.themeIcon} />
+            <span className={classes.themeLabel}>Système</span>
           </ToggleButton>
           <ToggleButton onClick={() => setThemePrefs('light')} value="light">
-            <WbSunny className={classes.themeIcon} /><span className={classes.themeLabel}>Clair</span>
+            <WbSunny className={classes.themeIcon} />
+            <span className={classes.themeLabel}>Clair</span>
           </ToggleButton>
         </ToggleButtonGroup>
         <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem>

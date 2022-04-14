@@ -57,7 +57,7 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     '&:hover': {
       backgroundColor: alpha(theme.palette.primary.fg, 0.25),
-    }
+    },
   },
 
   locked: {
