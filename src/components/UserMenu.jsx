@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => {
     },
     themeIcon: {
       marginRight: 7,
-      fill: theme.palette.mode === 'dark' ? 'white' : 'black',
+      fill: 'currentColor',
     },
     themeLabel: {
       textTransform: 'none',
@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => {
 
 const UserMenu = () => {
   const [tri, setTri] = useTriState();
-  const [themePrefs, setThemePrefs] = useThemePrefs();
+  const [themePrefs, setThemePrefs] = useThemePrefs('system');
 
   const classes = useStyles();
 
