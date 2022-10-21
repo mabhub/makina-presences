@@ -143,12 +143,22 @@ exports.handler = async () => {
       },
     );
 
-    const TTO = getTTO(results);
-    const TTR = Array.from(new Set(getTTR(results)));
+    const data = {};
+
+    if (results.errorCode) {
+      data.error = results;
+    } else {
+      data.tto = getTTO(results);
+      data.ttr = Array.from(new Set(getTTR(results)));
+    }
 
     const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
 
-    if (JSON.stringify(TTO, null, 2) === record.tto && JSON.stringify(TTR) === record.ttr) {
+    if (
+      JSON.stringify(data.tto, null, 2) === record.tto
+      && JSON.stringify(data.ttr) === record.ttr
+      && !data.error
+    ) {
       // Data did not change: early return.
       // console.info(`No change on ${record.tri} data: skip update.`);
       return;
@@ -159,14 +169,15 @@ exports.handler = async () => {
 
     const body = JSON.stringify({
       id: record.id,
-      tto: JSON.stringify(TTO, null, 2),
-      total: TTO.reduce((acc, { days: d = 0 }) => (acc + d), 0),
-      ttr: JSON.stringify(TTR),
+      tto: JSON.stringify((data.tto || []), null, 2),
+      total: (data.tto || []).reduce((acc, { days: d = 0 }) => (acc + d), 0),
+      ttr: JSON.stringify(data.ttr || []),
       'last-check': new Date().toISOString(),
+      log: data?.error?.message,
     });
 
     const response = await fetch(
-      `${baserowTablePath}${record.id}?user_field_names=true`,
+      `${baserowTablePath}${record.id}/?user_field_names=true`,
       { headers: baserowHeaders, method: 'PATCH', body },
     );
 
