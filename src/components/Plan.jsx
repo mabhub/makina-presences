@@ -45,6 +45,10 @@ const useStyles = makeStyles(theme => ({
   },
 
   spot: {
+    width: 35,
+    minWidth: 35,
+    height: 35,
+    minHeight: 35,
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
     border: '2px solid transparent',
@@ -55,6 +59,7 @@ const useStyles = makeStyles(theme => ({
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
+    fontSize: '0.75em',
     '&:hover': {
       backgroundColor: alpha(theme.palette.primary.fg, 0.25),
     },
