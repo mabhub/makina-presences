@@ -24,7 +24,7 @@ const bmHeaders = {
 };
 
 const getTTO = results => {
-  const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/));
+  const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/i));
   return validResults.map(({ value: { main } }) => {
     const start = new Date(main.dtstart.iso8601);
     const end = new Date(main.dtend.iso8601);
@@ -40,7 +40,7 @@ const getTTO = results => {
 };
 
 const getTTR = results => {
-  const validResults = results.filter(({ displayName }) => displayName.match(/^TTR.*/));
+  const validResults = results.filter(({ displayName }) => displayName.match(/^TTR.*/i));
 
   return validResults
     .filter(({ value: { main } }) => {
