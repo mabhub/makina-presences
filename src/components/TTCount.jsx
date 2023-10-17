@@ -47,16 +47,21 @@ const TTCount = () => {
   const { data = [] } = useTT();
 
   const users = React.useMemo(
-    () => data.sort(({ [sortField]: a }, { [sortField]: b }) => {
-      const A = sortInvert ? a : b;
-      const B = sortInvert ? b : a;
+    () => data
+      .map(user => {
+        user.tto.sort(({ from: a }, { from: b }) => a.localeCompare(b));
+        return user;
+      })
+      .sort(({ [sortField]: a }, { [sortField]: b }) => {
+        const A = sortInvert ? a : b;
+        const B = sortInvert ? b : a;
 
-      if (['total'].includes(sortField)) {
-        return Number(B) - Number(A);
-      }
+        if (['total'].includes(sortField)) {
+          return Number(B) - Number(A);
+        }
 
-      return B.localeCompare(A);
-    }),
+        return B.localeCompare(A);
+      }),
     [data, sortField, sortInvert],
   );
 
