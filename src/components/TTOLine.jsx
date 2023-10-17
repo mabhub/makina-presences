@@ -44,7 +44,7 @@ const TTOLine = ({ dates = [] }) => {
         </React.Fragment>
       ))}
 
-      {[...Array(30 - total)].map((_, index) => (
+      {[...Array(Math.max(30 - total, 0))].map((_, index) => (
         <Box
           key={index}
           sx={{
