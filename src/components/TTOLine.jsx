@@ -3,10 +3,22 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
+const findDuplicates = arr => {
+  const sorted_arr = arr.slice().sort();
+  const results = [];
+  for (let i = 0; i < sorted_arr.length - 1; i++) {
+    if (sorted_arr[i + 1] == sorted_arr[i]) {
+      results.push(sorted_arr[i]);
+    }
+  }
+  return results;
+};
+
 const SIZE = 0.75;
 
 const TTOLine = ({ dates = [] }) => {
   const total = dates.reduce((acc, { days: d = 0 }) => (acc + d), 0);
+  const dups = findDuplicates(dates.map(({ from }) => from));
 
   let inc = 0;
   return (
@@ -41,6 +53,7 @@ const TTOLine = ({ dates = [] }) => {
                     background: inc <= 30 ? '#5a5' : '#daa',
                     ml: !index ? '1px' : 0,
                     verticalAlign: 'middle',
+                    ...(dups.includes(date.from) ? { borderColor: 'blue' } : {}),
                   }}
                 />
               </React.Fragment>
