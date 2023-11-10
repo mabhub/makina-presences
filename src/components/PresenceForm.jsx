@@ -30,9 +30,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(0, 2, 2),
   },
 
-  placeButtonsWrapper: {
-    textAlign: 'center',
-  },
   placeButtons: {
     '& .Mui-selected': {
       background: theme.palette.primary.main,
@@ -47,6 +44,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useTriState = createPersistedState('tri');
+
+const draftPlaceSx = {
+  position: 'absolute',
+  visibility: 'hidden',
+  width: 0,
+  height: 0,
+  overflow: 'hidden',
+};
 
 const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
@@ -89,7 +94,18 @@ const PresenceForm = ({ className, ...props }) => {
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={4} md={3} lg={2} className={classes.placeButtonsWrapper}>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            sx={{
+              padding: 1,
+              textAlign: {
+                xs: 'center',
+                sm: 'right',
+              },
+            }}
+          >
             <ToggleButtonGroup
               size="small"
               className={classes.placeButtons}
@@ -97,13 +113,31 @@ const PresenceForm = ({ className, ...props }) => {
               exclusive
               value={place}
             >
-              {plans.map(({ Name }) => (
-                <ToggleButton key={Name} value={Name}>{Name}</ToggleButton>
+              {plans.map(({ Name, Brouillon }) => (
+                <ToggleButton
+                  key={Name}
+                  value={Name}
+                  sx={Brouillon ? draftPlaceSx : {}}
+                >
+                  {Name}
+                </ToggleButton>
               ))}
             </ToggleButtonGroup>
           </Grid>
 
-          <Grid item xs={12} sm={4} md={3} lg={2}>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            className={classes.formWrapper}
+            sx={{
+              padding: 1,
+              textAlign: {
+                xs: 'center',
+                sm: 'left',
+              },
+            }}
+          >
             <FormControl>
               <InputLabel htmlFor="tri">Trigramme</InputLabel>
               <Input
