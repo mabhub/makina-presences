@@ -93,6 +93,11 @@ const useStyles = makeStyles(theme => {
   };
 });
 
+const draftStyle = {
+  position: 'absolute',
+  visibility: 'hidden',
+};
+
 const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
@@ -144,9 +149,16 @@ const PresencePage = () => {
                   indicatorColor="primary"
                   textColor="primary"
                 >
-                  {plans.map(({ Name }) => (
-                    <Tab key={Name} value={Name} label={Name} className={classes.tab} />
-                  ))}
+                  {plans
+                    .map(({ Name, Brouillon }) => (
+                      <Tab
+                        key={Name}
+                        value={Name}
+                        label={Name}
+                        className={classes.tab}
+                        sx={Brouillon ? draftStyle : {}}
+                      />
+                    ))}
                 </Tabs>
 
                 <Grid item xs={2} className={classes.userMenu}>
