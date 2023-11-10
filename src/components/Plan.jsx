@@ -137,6 +137,12 @@ const Plan = ({ edit }) => {
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
   const spots = useSpots(place);
+  const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
+  const isCumulativeSpot = React.useCallback(
+    identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),
+    [cumulativeSpots],
+  );
+
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
   const [tri] = useTriState('');
@@ -202,13 +208,14 @@ const Plan = ({ edit }) => {
           )}
 
           {spots.map(Spot => {
-            const { Bloqué, Identifiant: spot, x, y, Type, Description } = Spot;
+            const { Bloqué, Identifiant: spot, x, y, Type, Description, Cumul } = Spot;
             const [presence, ...rest] = spotPresences[spot] || [];
 
             const isLocked = Boolean(Bloqué);
             const isConflict = Boolean(rest.length);
             const isOccupied = Boolean(presence);
             const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
+            const isCumulative = Boolean(Cumul);
 
             const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
@@ -246,7 +253,9 @@ const Plan = ({ edit }) => {
 
                     if (!isOccupied && !isLocked) {
                       const [firstId, ...extraneous] = dayPresences
-                        ?.filter(({ tri: t }) => sameLowC(t, tri))
+                        ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
+                        ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
+                        ?.filter(() => !isCumulative)
                         ?.map(({ id }) => id);
 
                       setPresence({ id: firstId, day, tri, spot, plan: place });
