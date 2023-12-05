@@ -17,6 +17,8 @@ const findDuplicates = arr => {
 const SIZE = 0.75;
 
 const TTOLine = ({ dates = [] }) => {
+  if (!dates) { return null; }
+
   const total = dates.reduce((acc, { days: d = 0 }) => (acc + d), 0);
   const dups = findDuplicates(dates.map(({ from }) => from));
 

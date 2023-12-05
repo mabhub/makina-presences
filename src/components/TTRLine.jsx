@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 
 const SIZE = 1.2;
 
-const TTRLine = ({ days = [] }) => (
+const TTRLine = ({ days = [] }) => days && (
   <>
     {'LMMJV'.split('').map((d, day) => (
       <Box

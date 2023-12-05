@@ -49,7 +49,7 @@ const TTCount = () => {
   const users = React.useMemo(
     () => data
       .map(user => {
-        user.tto.sort(({ from: a }, { from: b }) => a.localeCompare(b));
+        user.tto?.sort(({ from: a }, { from: b }) => a.localeCompare(b));
         return user;
       })
       .sort(({ [sortField]: a }, { [sortField]: b }) => {
