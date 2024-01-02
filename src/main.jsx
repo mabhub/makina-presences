@@ -38,8 +38,8 @@ ReactDOM.render(
           <Router>
             <Switch>
               <Route path="/tt"><TTCount /></Route>
-              <Route path={['/', '/:place', '/:place/:day']} exact><PresencePage /></Route>
               <Route path="/archives"><ArchivePage /></Route>
+              <Route path={['/', '/:place', '/:place/:day']} exact><PresencePage /></Route>
               <Route path="*">Error 404</Route>
             </Switch>
           </Router>
