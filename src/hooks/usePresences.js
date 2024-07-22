@@ -4,7 +4,7 @@ import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
 
-const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+const { VITE_BASEROW_TOKEN: token, VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
 const headers = {
   Authorization: `Token ${token}`,
@@ -24,7 +24,7 @@ const usePresences = place => {
   const dayTo = today.day(timespan).format('YYYY-MM-DD');
 
   const queryClient = useQueryClient();
-  const basePath = `https://api.baserow.io/api/database/rows/table/${32974}/`;
+  const basePath = `https://api.baserow.io/api/database/rows/table/${presencesTableId}/`;
 
   const queryKey = ['presences', place, dayFrom, dayTo];
 

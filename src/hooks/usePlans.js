@@ -1,5 +1,7 @@
 import useTable from './useTable';
 
-const usePlans = () => useTable('32972');
+const { VITE_TABLE_ID_PLANS: tableId } = import.meta.env;
+
+const usePlans = () => useTable(tableId);
 
 export default usePlans;

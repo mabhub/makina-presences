@@ -18,6 +18,8 @@ import usePresences from '../hooks/usePresences';
 import SpotDescription from './SpotDescription';
 import { sameLowC } from '../helpers';
 
+const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
+
 const useTriState = createPersistedState('tri');
 
 const CustomTooltip = withStyles(theme => ({
@@ -114,7 +116,7 @@ export const createSpot = async e => {
   const { VITE_BASEROW_TOKEN: token } = import.meta.env;
   const rect = e.target.getBoundingClientRect();
   await fetch(
-    `https://api.baserow.io/api/database/rows/table/${32973}/?user_field_names=true`,
+    `https://api.baserow.io/api/database/rows/table/${spotsTableId}/?user_field_names=true`,
     {
       method: 'POST',
       headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
@@ -179,7 +181,7 @@ const Plan = ({ edit }) => {
     const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
     await fetch(
-      `https://api.baserow.io/api/database/rows/table/${32973}/${spot.id}/?user_field_names=true`,
+      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
       {
         method: 'PATCH',
         headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
@@ -190,7 +192,7 @@ const Plan = ({ edit }) => {
       },
     );
 
-    queryClient.invalidateQueries([`${32973}`]);
+    queryClient.invalidateQueries([`${spotsTableId}`]);
   };
 
   return (
