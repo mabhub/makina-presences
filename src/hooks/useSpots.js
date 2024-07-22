@@ -1,9 +1,9 @@
 import useTable from './useTable';
 
-const { VITE_TABLE_ID_SPOTS: tableId } = import.meta.env;
+const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
 const useSpots = place => {
-  const allSpots = useTable(tableId);
+  const allSpots = useTable(Number(spotsTableId));
 
   return allSpots
     .filter(({ Plan: [{ value } = {}] = [] }) => value === place);
