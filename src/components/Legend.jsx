@@ -9,6 +9,8 @@ import createPersistedState from 'use-persisted-state';
 import useFields from '../hooks/useFields';
 import Circle from './LegendCircle';
 
+const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
+
 const useLegendState = createPersistedState('legend');
 
 const useLegendStyles = makeStyles(theme => ({
@@ -44,7 +46,7 @@ const useLegendStyles = makeStyles(theme => ({
 
 const Legend = () => {
   const theme = useTheme();
-  const fields = useFields(32973);
+  const fields = useFields(spotsTableId);
 
   const [legendHidden, setLegendHidden] = useLegendState(false);
   const legendToggle = () => setLegendHidden(p => !p);
