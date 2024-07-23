@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid } from '@mui/material';
-import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline } from '@mui/icons-material';
+import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid, Switch, ListItemIcon, TextField, FormControl, InputAdornment, Box, InputLabel } from '@mui/material';
+import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline, Fullscreen, ControlPoint } from '@mui/icons-material';
 import makeStyles from '@mui/styles/makeStyles';
 
 import SpotDialog from './SpotDialog';
@@ -11,6 +11,8 @@ import useSpots from '../hooks/useSpots';
 
 const useTriState = createPersistedState('tri');
 const useThemePrefs = createPersistedState('themePref');
+const useMaxWidthState = createPersistedState('useMaxWidth');
+const useFavoritesState = createPersistedState('favorites');
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
@@ -37,6 +39,8 @@ const useStyles = makeStyles(theme => {
 
 const UserMenu = () => {
   const [tri, setTri] = useTriState();
+  const [useMaxWidth, setUseMaxWidth] = useMaxWidthState()
+  const [favorites, setFavorites] = useFavoritesState([]);
   const [themePrefs, setThemePrefs] = useThemePrefs('system');
 
   const classes = useStyles();
@@ -54,26 +58,21 @@ const UserMenu = () => {
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const { place } = useParams();
-  const [favorites, setFavorites] = React.useState(
-    JSON.parse(localStorage.getItem('favorites')) || []
-  );
   const spots = useSpots(place)
 
-  const handleDialogClose = value =>{
+  const handleDialogClose = value => {
     setDialogOpen(false);
-    if(!value || favorites.includes(value)) return null;
+    if (!value || favorites.includes(value)) return null;
     favorites.push(value);
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    setFavorites(favorites);
   };
 
 
   const removeFavorite = value => {
-    const newFavorite = favorites.filter(favorite => favorite !== value);
-    localStorage.setItem("favorites", JSON.stringify(newFavorite));
-    setFavorites(newFavorite)
+    setFavorites(favorites.filter(favorite => favorite !== value));
   };
 
-  return (  
+  return (
     <>
       <IconButton
         className={classes.icon}
@@ -106,30 +105,55 @@ const UserMenu = () => {
         <Typography style={{ paddingLeft: 10, paddingTop: 10 }} gutterBottom variant='h6'>
           Préferences
         </Typography>
-        <Divider textAlign='left' >Thème</Divider>
-        <ToggleButtonGroup
-          size="small"
-          value={themePrefs}
-          exclusive
-          style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 20, marginTop: 10 }}
-          fullWidth
-        >
-          <ToggleButton onClick={() => setThemePrefs('dark')} value="dark">
-            <DarkMode className={classes.themeIcon} />
-            <span className={classes.themeLabel}>Sombre</span>
-          </ToggleButton>
-          <ToggleButton onClick={() => setThemePrefs('system')} value="system">
-            <SettingsBrightness className={classes.themeIcon} />
-            <span className={classes.themeLabel}>Système</span>
-          </ToggleButton>
-          <ToggleButton onClick={() => setThemePrefs('light')} value="light">
-            <WbSunny className={classes.themeIcon} />
-            <span className={classes.themeLabel}>Clair</span>
-          </ToggleButton>
-        </ToggleButtonGroup>
+        <Divider textAlign='left' >Affichage</Divider>
+        <List dense >
+          <ListItem>
+            <ToggleButtonGroup
+              size="small"
+              value={themePrefs}
+              exclusive
+              fullWidth
+            >
+              <ToggleButton onClick={() => setThemePrefs('dark')} value="dark">
+                <DarkMode className={classes.themeIcon} />
+                <span className={classes.themeLabel}>Sombre</span>
+              </ToggleButton>
+              <ToggleButton onClick={() => setThemePrefs('system')} value="system">
+                <SettingsBrightness className={classes.themeIcon} />
+                <span className={classes.themeLabel}>Système</span>
+              </ToggleButton>
+              <ToggleButton onClick={() => setThemePrefs('light')} value="light">
+                <WbSunny className={classes.themeIcon} />
+                <span className={classes.themeLabel}>Clair</span>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </ListItem>
+          <ListItem>
+            <ListItemIcon sx={{marginRight: "-25px"}}><Fullscreen/></ListItemIcon>
+            <ListItemText primary="Pleine largeur"/>
+            <Switch
+              checked={useMaxWidth} 
+              onChange={() => {
+                setUseMaxWidth(!useMaxWidth)
+              }}/>
+          </ListItem>
+        </List>
 
-        <Divider textAlign='left'>Postes Favoris</Divider>
-        <List disablePadding dense>
+        <Divider textAlign='left'>
+          Postes Favoris
+          <Chip 
+                label="Ajouter"  
+                size="small" 
+                variant="outlined" 
+                color='primary' 
+                icon={<Add/>}
+                sx={{ml: 2}}
+                component={'button'}
+                onClick={() => setDialogOpen(!dialogOpen)} />
+          </Divider>
+
+          
+        <List dense sx={{pb: '12px'}}>
           {favorites.length === 0 && (
             <Typography sx={{opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px'}} >
               Aucun postes favoris.
@@ -163,18 +187,7 @@ const UserMenu = () => {
             </ListItem>
           })}
         </List>
-
-        <Grid container justifyContent="flex-end" sx={{paddingRight: "10px", marginTop: "5px"}}>
-          <Chip 
-              label="Ajouter"  
-              size="small" 
-              variant="outlined" 
-              color='primary' 
-              icon={<Add/>}
-              component={'button'}
-              onClick={() => setDialogOpen(!dialogOpen)} />
-        </Grid>       
-        {/* <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem> */}
+        <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem>
       </Menu>
 
       {dialogOpen && (

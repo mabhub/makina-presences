@@ -28,6 +28,7 @@ dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
+const useMaxWidthState = createPersistedState('useMaxWidth');
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
 
@@ -107,6 +108,8 @@ const PresencePage = () => {
 
   const isTriValid = tri?.length >= 3;
 
+  const [useMaxWidth] = useMaxWidthState()
+
   const handlePlaceChange = (event, newPlace) => {
     const path = ['', newPlace || place];
     if (day) { path.push(day); }
@@ -122,7 +125,7 @@ const PresencePage = () => {
       )}
 
       {(isTriValid && place) && (
-        <Container className={classes.container} disableGutters>
+        <Container className={classes.container} disableGutters maxWidth={ useMaxWidth ? false : 'lg'}>
           <Box
             spacing={2}
             className={classes.wrapper}
