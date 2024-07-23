@@ -1,8 +1,8 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid } from '@mui/material';
-import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline } from '@mui/icons-material';
+import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid, Switch, ListItemIcon } from '@mui/material';
+import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline, Fullscreen } from '@mui/icons-material';
 import makeStyles from '@mui/styles/makeStyles';
 
 import SpotDialog from './SpotDialog';
@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-const UserMenu = () => {
+const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
   const [tri, setTri] = useTriState();
   const [themePrefs, setThemePrefs] = useThemePrefs('system');
 
@@ -106,27 +106,42 @@ const UserMenu = () => {
         <Typography style={{ paddingLeft: 10, paddingTop: 10 }} gutterBottom variant='h6'>
           Préferences
         </Typography>
-        <Divider textAlign='left' >Thème</Divider>
-        <ToggleButtonGroup
-          size="small"
-          value={themePrefs}
-          exclusive
-          style={{ paddingLeft: 10, paddingRight: 10, marginBottom: 20, marginTop: 10 }}
-          fullWidth
-        >
-          <ToggleButton onClick={() => setThemePrefs('dark')} value="dark">
-            <DarkMode className={classes.themeIcon} />
-            <span className={classes.themeLabel}>Sombre</span>
-          </ToggleButton>
-          <ToggleButton onClick={() => setThemePrefs('system')} value="system">
-            <SettingsBrightness className={classes.themeIcon} />
-            <span className={classes.themeLabel}>Système</span>
-          </ToggleButton>
-          <ToggleButton onClick={() => setThemePrefs('light')} value="light">
-            <WbSunny className={classes.themeIcon} />
-            <span className={classes.themeLabel}>Clair</span>
-          </ToggleButton>
-        </ToggleButtonGroup>
+        <Divider textAlign='left' >Affichage</Divider>
+        <List dense>
+          <ListItem>
+            <ToggleButtonGroup
+              size="small"
+              value={themePrefs}
+              exclusive
+              fullWidth
+            >
+              <ToggleButton onClick={() => setThemePrefs('dark')} value="dark">
+                <DarkMode className={classes.themeIcon} />
+                <span className={classes.themeLabel}>Sombre</span>
+              </ToggleButton>
+              <ToggleButton onClick={() => setThemePrefs('system')} value="system">
+                <SettingsBrightness className={classes.themeIcon} />
+                <span className={classes.themeLabel}>Système</span>
+              </ToggleButton>
+              <ToggleButton onClick={() => setThemePrefs('light')} value="light">
+                <WbSunny className={classes.themeIcon} />
+                <span className={classes.themeLabel}>Clair</span>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </ListItem>
+          <ListItem>
+            <ListItemIcon sx={{marginRight: "-25px"}}><Fullscreen/></ListItemIcon>
+            <ListItemText primary="Pleine largeur"/>
+            <Switch
+              checked={useMaxWidth} 
+              onChange={() => {
+                localStorage.setItem("useMaxWidth", !useMaxWidth)
+                setUseMaxWidth(!useMaxWidth)
+              }}/>
+          </ListItem>
+        </List>
+
+        
 
         <Divider textAlign='left'>Postes Favoris</Divider>
         <List disablePadding dense>
@@ -174,7 +189,7 @@ const UserMenu = () => {
               component={'button'}
               onClick={() => setDialogOpen(!dialogOpen)} />
         </Grid>       
-        {/* <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem> */}
+        <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem>
       </Menu>
 
       {dialogOpen && (
