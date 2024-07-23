@@ -91,6 +91,7 @@ const DayHeader = ({
           onClose={handleDialogClose}
           place={place}
           date={date}
+          displayFavorite
         />
       )}
     </>
