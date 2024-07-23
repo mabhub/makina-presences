@@ -107,6 +107,10 @@ const PresencePage = () => {
 
   const isTriValid = tri?.length >= 3;
 
+  const [useMaxWidth, setUseMaxWidth] = React.useState(
+    localStorage.getItem("useMaxWidth") || false
+  );
+
   const handlePlaceChange = (event, newPlace) => {
     const path = ['', newPlace || place];
     if (day) { path.push(day); }
@@ -122,7 +126,7 @@ const PresencePage = () => {
       )}
 
       {(isTriValid && place) && (
-        <Container className={classes.container} disableGutters>
+        <Container className={classes.container} disableGutters maxWidth={ useMaxWidth ? true : 'lg'}>
           <Box
             spacing={2}
             className={classes.wrapper}
@@ -162,7 +166,7 @@ const PresencePage = () => {
                 </Tabs>
 
                 <Grid item xs={2} className={classes.userMenu}>
-                  <UserMenu />
+                  <UserMenu useMaxWidth={useMaxWidth} setUseMaxWidth={setUseMaxWidth}/>
                 </Grid>
               </Grid>
             </Box>
