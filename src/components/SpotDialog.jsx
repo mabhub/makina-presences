@@ -26,6 +26,7 @@ const SpotDialog = ({
   onClose = () => {},
   place,
   date,
+  displayFavorite = false
 }) => {
   const classes = useStyles();
   const [value, setValue] = React.useState();
@@ -35,6 +36,9 @@ const SpotDialog = ({
 
   const spots = useSpots(place)
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
+  const favorites = spots
+    .filter(({Identifiant: id}) => (JSON.parse(localStorage.getItem("favorites")) || []).includes(id))
+
   const { presences } = usePresences(place);
   const isoDate = dayjs(date).format('YYYY-MM-DD');
   const spotPresences = presences
@@ -43,6 +47,29 @@ const SpotDialog = ({
       ...acc,
       [spot]: tri,
     }), {});
+
+  const createSelectOption = (id, spot, type, locked) => {
+    const tri = spotPresences[spot];
+    const icons = {
+      Nu: '🔵',
+      Flex: '🟢',
+      Réservé: '🔴',
+      Priorisé: '🟠',
+    };
+    
+    return (
+      <option
+        key={id}
+        value={spot}
+        disabled={spotPresences[spot] || locked}
+      >
+        {locked ? '🔒' : icons[type]}{' '}
+        {spot}
+        {tri && ` → ${tri}`}
+      </option>
+    );
+  }
+    
 
   const handleCancel = () => {
     onClose();
@@ -78,32 +105,26 @@ const SpotDialog = ({
             }}
           >
             <option aria-label="Aucun" value="" />
-            {spots.map(({
+            {displayFavorite && favorites.length >= 1&& (
+              <optgroup label='Vos Favoris'>
+                {favorites.map(({
+                    id, 
+                    Identifiant: spot, 
+                    Type: {value: type}, 
+                    Bloqué: locked
+                  }) => createSelectOption(id, spot, type, locked))}
+                
+              </optgroup>
+            )}
+            {displayFavorite && favorites.length >= 1 && <option disabled>────────────</option>}
+            {spots
+              .filter(spot => !favorites.includes(spot) || !displayFavorite )
+              .map(({
               id,
               Identifiant: spot,
               Type: { value: type },
               Bloqué: locked,
-            }) => {
-              const tri = spotPresences[spot];
-              const icons = {
-                Nu: '🔵',
-                Flex: '🟢',
-                Réservé: '🔴',
-                Priorisé: '🟠',
-              };
-
-              return (
-                <option
-                  key={id}
-                  value={spot}
-                  disabled={spotPresences[spot] || locked}
-                >
-                  {locked ? '🔒' : icons[type]}{' '}
-                  {spot}
-                  {tri && ` → ${tri}`}
-                </option>
-              );
-            })}
+            }) => createSelectOption(id, spot, type, locked))}
           </Select>
         </FormControl>
       </DialogContent>
