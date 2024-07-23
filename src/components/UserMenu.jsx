@@ -135,7 +135,7 @@ const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
             <Switch
               checked={useMaxWidth} 
               onChange={() => {
-                localStorage.setItem("useMaxWidth", useMaxWidth)
+                localStorage.setItem("useMaxWidth", !useMaxWidth)
                 setUseMaxWidth(!useMaxWidth)
               }}/>
           </ListItem>
@@ -189,7 +189,7 @@ const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
               component={'button'}
               onClick={() => setDialogOpen(!dialogOpen)} />
         </Grid>       
-        {/* <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem> */}
+        <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem>
       </Menu>
 
       {dialogOpen && (

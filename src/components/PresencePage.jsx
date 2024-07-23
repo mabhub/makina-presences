@@ -108,7 +108,7 @@ const PresencePage = () => {
   const isTriValid = tri?.length >= 3;
 
   const [useMaxWidth, setUseMaxWidth] = React.useState(
-    localStorage.getItem("useMaxWidth") || false
+    JSON.parse(localStorage.getItem("useMaxWidth")) || false
   );
 
   const handlePlaceChange = (event, newPlace) => {
@@ -126,7 +126,7 @@ const PresencePage = () => {
       )}
 
       {(isTriValid && place) && (
-        <Container className={classes.container} disableGutters maxWidth={ useMaxWidth ? true : 'lg'}>
+        <Container className={classes.container} disableGutters maxWidth={ useMaxWidth ? false : 'lg'}>
           <Box
             spacing={2}
             className={classes.wrapper}
