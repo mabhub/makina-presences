@@ -125,7 +125,7 @@ const PresencePage = () => {
       )}
 
       {(isTriValid && place) && (
-        <Container className={classes.container} disableGutters maxWidth={useMaxWidth ? false : 'lg'}>
+        <Container className={classes.container} disableGutters maxWidth={useMaxWidth ? 'unset' : 'lg'}>
           <Box
             spacing={2}
             className={classes.wrapper}

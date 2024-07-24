@@ -63,8 +63,10 @@ const UserMenu = () => {
   const handleDialogClose = value => {
     setDialogOpen(false);
     if (!value || favorites.includes(value)) return;
-    favorites.push(value);
-    setFavorites(favorites);
+    setFavorites([
+      ...favorites,
+      value,
+    ]);
   };
 
   const removeFavorite = value => {
