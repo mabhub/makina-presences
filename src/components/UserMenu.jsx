@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid, Switch, ListItemIcon } from '@mui/material';
-import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline, Fullscreen } from '@mui/icons-material';
+import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid, Switch, ListItemIcon, TextField, FormControl, InputAdornment, Box, InputLabel } from '@mui/material';
+import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline, Fullscreen, ControlPoint } from '@mui/icons-material';
 import makeStyles from '@mui/styles/makeStyles';
 
 import SpotDialog from './SpotDialog';
@@ -11,6 +11,8 @@ import useSpots from '../hooks/useSpots';
 
 const useTriState = createPersistedState('tri');
 const useThemePrefs = createPersistedState('themePref');
+const useMaxWidthState = createPersistedState('useMaxWidth')
+const useFavoritesState = createPersistedState('favorites')
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
@@ -35,8 +37,10 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
+const UserMenu = () => {
   const [tri, setTri] = useTriState();
+  const [useMaxWidth, setUseMaxWidth] = useMaxWidthState()
+  const [favorites, setFavorites] = useFavoritesState([]);
   const [themePrefs, setThemePrefs] = useThemePrefs('system');
 
   const classes = useStyles();
@@ -54,23 +58,18 @@ const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const { place } = useParams();
-  const [favorites, setFavorites] = React.useState(
-    JSON.parse(localStorage.getItem('favorites')) || []
-  );
   const spots = useSpots(place)
   
   const handleDialogClose = (value) =>{
     setDialogOpen(false)
     if(!value || favorites.includes(value)) return null
     favorites.push(value)
-    localStorage.setItem("favorites", JSON.stringify(favorites))
+    setFavorites(favorites)
   }
 
 
   const removeFavorite = (value) => {
-    const newFavorite = favorites.filter(favorite => favorite !== value)
-    localStorage.setItem("favorites", JSON.stringify(newFavorite))
-    setFavorites(newFavorite)
+    setFavorites(favorites.filter(favorite => favorite !== value))
   }
 
   return (  
@@ -107,7 +106,7 @@ const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
           Préferences
         </Typography>
         <Divider textAlign='left' >Affichage</Divider>
-        <List dense>
+        <List dense >
           <ListItem>
             <ToggleButtonGroup
               size="small"
@@ -135,16 +134,26 @@ const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
             <Switch
               checked={useMaxWidth} 
               onChange={() => {
-                localStorage.setItem("useMaxWidth", !useMaxWidth)
                 setUseMaxWidth(!useMaxWidth)
               }}/>
           </ListItem>
         </List>
 
-        
+        <Divider textAlign='left'>
+          Postes Favoris
+          <Chip 
+                label="Ajouter"  
+                size="small" 
+                variant="outlined" 
+                color='primary' 
+                icon={<Add/>}
+                sx={{ml: 2}}
+                component={'button'}
+                onClick={() => setDialogOpen(!dialogOpen)} />
+          </Divider>
 
-        <Divider textAlign='left'>Postes Favoris</Divider>
-        <List disablePadding dense>
+          
+        <List dense sx={{pb: '12px'}}>
           {favorites.length === 0 && (
             <Typography sx={{opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px'}} >
               Aucun postes favoris.
@@ -178,17 +187,6 @@ const UserMenu = ({useMaxWidth, setUseMaxWidth}) => {
             </ListItem>
           })}
         </List>
-
-        <Grid container justifyContent="flex-end" sx={{paddingRight: "10px", marginTop: "5px"}}>
-          <Chip 
-              label="Ajouter"  
-              size="small" 
-              variant="outlined" 
-              color='primary' 
-              icon={<Add/>}
-              component={'button'}
-              onClick={() => setDialogOpen(!dialogOpen)} />
-        </Grid>       
         <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem>
       </Menu>
 
