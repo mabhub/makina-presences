@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import createPersistedState from 'use-persisted-state';
 
 import { IconButton, Button, Menu, MenuItem, ToggleButtonGroup, ToggleButton, Typography, Divider, Chip, List, ListItem, ListItemText, Grid, Switch, ListItemIcon, TextField, FormControl, InputAdornment, Box, InputLabel } from '@mui/material';
-import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline, Fullscreen, ControlPoint } from '@mui/icons-material';
+import { Person, DarkMode, WbSunny, SettingsBrightness, ArrowDropDown, Add, RemoveCircleOutline, Fullscreen, Edit, Done  } from '@mui/icons-material';
 import makeStyles from '@mui/styles/makeStyles';
 
 import SpotDialog from './SpotDialog';
@@ -42,6 +42,8 @@ const UserMenu = () => {
   const [useMaxWidth, setUseMaxWidth] = useMaxWidthState()
   const [favorites, setFavorites] = useFavoritesState([]);
   const [themePrefs, setThemePrefs] = useThemePrefs('system');
+  const [disableInput, setDisableInput] = React.useState(true)
+  const [textValue, setTextValue] = React.useState(tri)
 
   const classes = useStyles();
 
@@ -67,9 +69,19 @@ const UserMenu = () => {
     setFavorites(favorites);
   };
 
-
   const removeFavorite = value => {
     setFavorites(favorites.filter(favorite => favorite !== value));
+  }
+
+  const handleSubmit = () => {
+    if (!disableInput) setTri(textValue);
+    setDisableInput(!disableInput);
+  }
+
+  const handleKeyPress = event => {
+    if (event.charCode === 13) {
+      handleSubmit();
+    }
   };
 
   return (
@@ -187,7 +199,29 @@ const UserMenu = () => {
             </ListItem>
           })}
         </List>
-        <MenuItem onClick={handleChangeTri}>Changer trigramme</MenuItem>
+        <Divider textAlign='left'>Trigramme</Divider>
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', mx: '16px', my: '10px'}}>
+          <TextField 
+            fullWidth
+            size='small'
+            defaultValue={textValue}
+            inputProps={{
+              maxLength: 10,
+            }}
+            inputRef={input => input && input.focus()}
+            disabled={disableInput}
+            onKeyPress={handleKeyPress}
+            onChange={event => (setTextValue(event.target.value))}/>
+            <IconButton 
+              sx={{ml: 1}}
+              onClick={handleSubmit}>
+              {disableInput 
+                ? <Edit color='primary'/>
+                : <Done 
+                    color='primary'/>}
+            </IconButton>
+        </Box>
+
       </Menu>
 
       {dialogOpen && (
