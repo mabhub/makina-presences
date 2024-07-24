@@ -55,7 +55,7 @@ const SpotDialog = ({
     .findIndex(({ Identifiant: spot }) => !spotPresences[spot])];
 
   const [value, setValue] = React.useState((
-    defaultFavoriteSpot ? defaultFavoriteSpot.Identifiant : ''
+    defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
   ));
 
   const addDefaultSelect = () => {
