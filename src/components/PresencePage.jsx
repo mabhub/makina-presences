@@ -27,6 +27,7 @@ dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
+const useMaxWidthState = createPersistedState('useMaxWidth')
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
 
@@ -106,9 +107,7 @@ const PresencePage = () => {
 
   const isTriValid = tri?.length >= 3;
 
-  const [useMaxWidth, setUseMaxWidth] = React.useState(
-    JSON.parse(localStorage.getItem("useMaxWidth")) || false
-  );
+  const [useMaxWidth] = useMaxWidthState()
 
   const handlePlaceChange = (event, newPlace) => {
     const path = ['', newPlace || place];
@@ -165,7 +164,7 @@ const PresencePage = () => {
                 </Tabs>
 
                 <Grid item xs={2} className={classes.userMenu}>
-                  <UserMenu useMaxWidth={useMaxWidth} setUseMaxWidth={setUseMaxWidth}/>
+                  <UserMenu />
                 </Grid>
               </Grid>
             </Box>
