@@ -22,12 +22,15 @@ const PreferencesSpot = () => {
     if (!value || favorites.includes(value)) return;
     setFavorites([
       ...favorites,
-      value,
+      {
+        name: value,
+        place: spots.filter(spot => spot.Identifiant === value)[0].Plan[0].value,
+      },
     ]);
   };
 
   const removeFavorite = value => {
-    setFavorites(favorites.filter(favorite => favorite !== value));
+    setFavorites(favorites.filter(favorite => favorite.name !== value));
   };
 
   return (
@@ -47,53 +50,55 @@ const PreferencesSpot = () => {
       </Divider>
 
       <List dense>
-        {favorites.length === 0 && (
+        {favorites.filter(({ place: spotPlace }) => spotPlace === place).length === 0 && (
         <Typography sx={{ opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px' }}>
           Aucun postes favoris.
         </Typography>
         )}
-        {favorites.map(name => {
-          const icons = {
-            Nu: '🔵',
-            Flex: '🟢',
-            Réservé: '🔴',
-            Priorisé: '🟠',
-          };
-          const spotIcon = spots
-            .filter(spot => spot.Identifiant === name)
-            .map(({ Type: { value: type } }) => (icons[type]));
+        {favorites
+          .filter(({ place: spotPlace }) => spotPlace === place)
+          .map(({ name }) => {
+            const icons = {
+              Nu: '🔵',
+              Flex: '🟢',
+              Réservé: '🔴',
+              Priorisé: '🟠',
+            };
+            const spotIcon = spots
+              .filter(spot => spot.Identifiant === name)
+              .map(({ Type: { value: type } }) => (icons[type]));
 
-          return (
-            <ListItem
-              key={name}
-              secondaryAction={(
-                <IconButton
-                  edge="end"
-                  aria-label="remove"
-                  sx={{ color: 'red', opacity: '.5' }}
-                  component="button"
-                  onClick={() => removeFavorite(name)}
-                >
-                  <RemoveCircleOutline />
-                </IconButton>
+            return (
+              <ListItem
+                key={name}
+                secondaryAction={(
+                  <IconButton
+                    edge="end"
+                    aria-label="remove"
+                    sx={{ color: 'red', opacity: '.5' }}
+                    component="button"
+                    onClick={() => removeFavorite(name)}
+                  >
+                    <RemoveCircleOutline />
+                  </IconButton>
               )}
-            >
-              {favorites
-                .filter(id => !spots.map(spot => spot.Identifiant).includes(id))
-                .includes(name) && (
+              >
+                {favorites
+                  .filter(({ spotName }) => !spots.map(spot => spot.Identifiant).includes(spotName))
+                  .includes(name) && (
                   <Tooltip title="Ce poste n'existe plus" placement="left">
                     <ListItemIcon>
                       <ErrorOutline color="error" />
                     </ListItemIcon>
                   </Tooltip>
 
-              )}
-              <ListItemText
-                primary={`${spotIcon} ${name}`}
-              />
-            </ListItem>
-          );
-        })}
+                )}
+                <ListItemText
+                  primary={`${spotIcon} ${name}`}
+                />
+              </ListItem>
+            );
+          })}
       </List>
 
       {dialogOpen && (
