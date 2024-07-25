@@ -84,8 +84,10 @@ const PreferencesSpot = () => {
               )}
               >
                 {favorites
-                  .filter(({ spotName }) => !spots.map(spot => spot.Identifiant).includes(spotName))
-                  .includes(name) && (
+                  .filter(
+                    ({ name: spotName }) => !spots.map(spot => spot.Identifiant).includes(spotName),
+                  )
+                  .some(({ name: spotName }) => spotName === name) && (
                   <Tooltip title="Ce poste n'existe plus" placement="left">
                     <ListItemIcon>
                       <ErrorOutline color="error" />
