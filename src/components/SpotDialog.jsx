@@ -1,4 +1,5 @@
 import React from 'react';
+import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
 
 import {
@@ -20,21 +21,24 @@ import usePresences from '../hooks/usePresences';
 
 const useStyles = makeStyles(() => ({
 }));
+const useFavoritesState = createPersistedState('favorites');
 
 const SpotDialog = ({
   open,
   onClose = () => {},
   place,
   date,
+  displayFavorite = false,
 }) => {
   const classes = useStyles();
-  const [value, setValue] = React.useState();
+  const [favorites] = useFavoritesState([]);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const spots = useSpots(place)
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
+
   const { presences } = usePresences(place);
   const isoDate = dayjs(date).format('YYYY-MM-DD');
   const spotPresences = presences
@@ -43,6 +47,46 @@ const SpotDialog = ({
       ...acc,
       [spot]: tri,
     }), {});
+
+  const favoriteSpots = spots
+    .filter(({ Identifiant: id }) => favorites.includes(id))
+    .sort(({ Identifiant: a }, { Identifiant: b }) => favorites.indexOf(a) - favorites.indexOf(b));
+  const defaultFavoriteSpot = favoriteSpots[favoriteSpots
+    .findIndex(({ Identifiant: spot }) => !spotPresences[spot])];
+
+  const [value, setValue] = React.useState((
+    defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
+  ));
+
+  const addDefaultSelect = () => {
+    if (favoriteSpots.filter(({ Identifiant: spot }) => !spotPresences[spot]).length >= 1
+        && displayFavorite) {
+      return '';
+    }
+    return <option aria-label="Aucun" value="" />;
+  };
+
+  const createSelectOption = (id, spot, type, locked) => {
+    const tri = spotPresences[spot];
+    const icons = {
+      Nu: '🔵',
+      Flex: '🟢',
+      Réservé: '🔴',
+      Priorisé: '🟠',
+    };
+
+    return (
+      <option
+        key={id}
+        value={spot}
+        disabled={spotPresences[spot] || locked}
+      >
+        {locked ? '🔒' : icons[type]}{' '}
+        {spot}
+        {tri && ` → ${tri}`}
+      </option>
+    );
+  };
 
   const handleCancel = () => {
     onClose();
@@ -77,33 +121,27 @@ const SpotDialog = ({
               id: 'spot-native-select',
             }}
           >
-            <option aria-label="Aucun" value="" />
-            {spots.map(({
-              id,
-              Identifiant: spot,
-              Type: { value: type },
-              Bloqué: locked,
-            }) => {
-              const tri = spotPresences[spot];
-              const icons = {
-                Nu: '🔵',
-                Flex: '🟢',
-                Réservé: '🔴',
-                Priorisé: '🟠',
-              };
+            {addDefaultSelect()}
+            {displayFavorite && favoriteSpots.length >= 1 && (
+              <optgroup label="Vos Favoris">
+                {favoriteSpots.map(({
+                  id,
+                  Identifiant: spot,
+                  Type: { value: type },
+                  Bloqué: locked,
+                }) => createSelectOption(id, spot, type, locked))}
 
-              return (
-                <option
-                  key={id}
-                  value={spot}
-                  disabled={spotPresences[spot] || locked}
-                >
-                  {locked ? '🔒' : icons[type]}{' '}
-                  {spot}
-                  {tri && ` → ${tri}`}
-                </option>
-              );
-            })}
+              </optgroup>
+            )}
+            {displayFavorite && favoriteSpots.length >= 1 && <option disabled>────────────</option>}
+            {spots
+              .filter(spot => !favoriteSpots.includes(spot) || !displayFavorite)
+              .map(({
+                id,
+                Identifiant: spot,
+                Type: { value: type },
+                Bloqué: locked,
+              }) => createSelectOption(id, spot, type, locked))}
           </Select>
         </FormControl>
       </DialogContent>
