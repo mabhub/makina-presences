@@ -36,9 +36,6 @@ const SpotDialog = ({
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  const spots = useSpots(place)
-    .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
-
   const { presences } = usePresences(place);
   const isoDate = dayjs(date).format('YYYY-MM-DD');
   const spotPresences = presences
@@ -48,13 +45,21 @@ const SpotDialog = ({
       [spot]: tri,
     }), {});
 
+  const spots = useSpots(place)
+    .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
+  const favoriteName = favorites
+    .filter(({ place: spotPLace }) => spotPLace === place)
+    .reduce((acc, curr) => [...acc, curr.name], []);
   const favoriteSpots = spots
-    .filter(({ Identifiant: id }) => favorites.includes(id))
-    .sort(({ Identifiant: a }, { Identifiant: b }) => favorites.indexOf(a) - favorites.indexOf(b));
+    .filter(({ Identifiant: id }) => favoriteName.includes(id))
+    .sort(
+      ({ Identifiant: a }, { Identifiant: b }) => favoriteName.indexOf(a) - favoriteName.indexOf(b),
+    );
+
   const defaultFavoriteSpot = favoriteSpots[favoriteSpots
     .findIndex(({ Identifiant: spot }) => !spotPresences[spot])];
 
-  const [value, setValue] = React.useState((
+  const [defaultValue, setDefaultValue] = React.useState((
     defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
   ));
 
@@ -93,11 +98,11 @@ const SpotDialog = ({
   };
 
   const handleOk = () => {
-    onClose(value);
+    onClose(defaultValue);
   };
 
   const handleChange = event => {
-    setValue(event.target.value);
+    setDefaultValue(event.target.value);
   };
 
   return (
@@ -113,7 +118,7 @@ const SpotDialog = ({
           <InputLabel htmlFor="spot-native-select">Poste</InputLabel>
           <Select
             native
-            value={value}
+            value={defaultValue}
             onChange={handleChange}
             label="Poste"
             inputProps={{
@@ -151,7 +156,7 @@ const SpotDialog = ({
           Annuler
         </Button>
 
-        <Button onClick={handleOk} color="primary" disabled={!value}>
+        <Button onClick={handleOk} color="primary" disabled={!defaultValue}>
           Enregistrer
         </Button>
       </DialogActions>
