@@ -1,12 +1,13 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { ArrowDropDown, Done, Edit, Person } from '@mui/icons-material';
-import { Box, Button, Divider, IconButton, Menu, TextField, Typography } from '@mui/material';
+import { ArrowDropDown, Person } from '@mui/icons-material';
+import { Button, IconButton, Menu, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
 import PreferencesDisplay from './PreferencesDisplay';
 import PreferencesSpot from './PreferencesSpot';
+import PreferencesTri from './PreferencesTri';
 
 const useTriState = createPersistedState('tri');
 
@@ -27,9 +28,7 @@ const useStyles = makeStyles(theme => {
 });
 
 const UserMenu = () => {
-  const [tri, setTri] = useTriState();
-  const [disableInput, setDisableInput] = React.useState(true);
-  const [textValue, setTextValue] = React.useState(tri);
+  const [tri] = useTriState();
 
   const classes = useStyles();
 
@@ -40,17 +39,6 @@ const UserMenu = () => {
   };
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleSubmit = () => {
-    if (!disableInput) setTri(textValue);
-    setDisableInput(!disableInput);
-  };
-
-  const handleKeyPress = event => {
-    if (event.charCode === 13) {
-      handleSubmit();
-    }
   };
 
   return (
@@ -86,39 +74,9 @@ const UserMenu = () => {
         <Typography style={{ paddingLeft: 10, paddingTop: 10 }} gutterBottom variant="h6">
           Préferences
         </Typography>
-
         <PreferencesDisplay />
-
         <PreferencesSpot />
-
-        <Divider textAlign="left">Trigramme</Divider>
-        <Box sx={{ display: 'flex', alignItems: 'flex-end', mx: '16px', my: '10px' }}>
-          <TextField
-            fullWidth
-            size="small"
-            defaultValue={textValue}
-            inputProps={{
-              maxLength: 10,
-            }}
-            inputRef={input => input && input.focus()}
-            disabled={disableInput}
-            onKeyPress={handleKeyPress}
-            onChange={event => (setTextValue(event.target.value))}
-          />
-          <IconButton
-            sx={{ ml: 1 }}
-            onClick={handleSubmit}
-          >
-            {disableInput
-              ? <Edit color="primary" />
-              : (
-                <Done
-                  color="primary"
-                />
-              )}
-          </IconButton>
-        </Box>
-
+        <PreferencesTri />
       </Menu>
     </>
   );
