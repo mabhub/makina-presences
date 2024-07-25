@@ -1,17 +1,14 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { Add, ArrowDropDown, Done, Edit, Person, RemoveCircleOutline } from '@mui/icons-material';
-import { Box, Button, Chip, Divider, IconButton, List, ListItem, ListItemText, Menu, TextField, Typography } from '@mui/material';
+import { ArrowDropDown, Done, Edit, Person } from '@mui/icons-material';
+import { Box, Button, Divider, IconButton, Menu, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
-import useSpots from '../hooks/useSpots';
-import SpotDialog from './SpotDialog';
 import PreferencesDisplay from './PreferencesDisplay';
+import PreferencesSpot from './PreferencesSpot';
 
 const useTriState = createPersistedState('tri');
-const useFavoritesState = createPersistedState('favorites');
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
@@ -31,7 +28,6 @@ const useStyles = makeStyles(theme => {
 
 const UserMenu = () => {
   const [tri, setTri] = useTriState();
-  const [favorites, setFavorites] = useFavoritesState([]);
   const [disableInput, setDisableInput] = React.useState(true);
   const [textValue, setTextValue] = React.useState(tri);
 
@@ -44,23 +40,6 @@ const UserMenu = () => {
   };
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const { place } = useParams();
-  const spots = useSpots(place);
-
-  const handleDialogClose = value => {
-    setDialogOpen(false);
-    if (!value || favorites.includes(value)) return;
-    setFavorites([
-      ...favorites,
-      value,
-    ]);
-  };
-
-  const removeFavorite = value => {
-    setFavorites(favorites.filter(favorite => favorite !== value));
   };
 
   const handleSubmit = () => {
@@ -110,56 +89,7 @@ const UserMenu = () => {
 
         <PreferencesDisplay />
 
-        <Divider textAlign="left">
-          Postes Favoris
-          <Chip
-            label="Ajouter"
-            size="small"
-            variant="outlined"
-            color="primary"
-            icon={<Add />}
-            sx={{ ml: 2 }}
-            component="button"
-            onClick={() => setDialogOpen(!dialogOpen)}
-          />
-        </Divider>
-        <List dense sx={{ pb: '12px' }}>
-          {favorites.length === 0 && (
-            <Typography sx={{ opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px' }}>
-              Aucun postes favoris.
-            </Typography>
-          )}
-          {favorites.map(name => {
-            const icons = {
-              Nu: '🔵',
-              Flex: '🟢',
-              Réservé: '🔴',
-              Priorisé: '🟠',
-            };
-            const spotIcon = spots
-              .filter(spot => spot.Identifiant === name)
-              .map(({ Type: { value: type } }) => (icons[type]));
-
-            return (
-              <ListItem
-                key={name}
-                secondaryAction={(
-                  <IconButton
-                    edge="end"
-                    aria-label="remove"
-                    sx={{ color: 'red', opacity: '.5' }}
-                    component="button"
-                    onClick={() => removeFavorite(name)}
-                  >
-                    <RemoveCircleOutline />
-                  </IconButton>
-              )}
-              >
-                <ListItemText primary={`${spotIcon} ${name}`} />
-              </ListItem>
-            );
-          })}
-        </List>
+        <PreferencesSpot />
 
         <Divider textAlign="left">Trigramme</Divider>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', mx: '16px', my: '10px' }}>
@@ -190,15 +120,6 @@ const UserMenu = () => {
         </Box>
 
       </Menu>
-
-      {dialogOpen && (
-        <SpotDialog
-          open={dialogOpen}
-          onClose={handleDialogClose}
-          place={place}
-          date={null}
-        />
-      )}
     </>
   );
 };

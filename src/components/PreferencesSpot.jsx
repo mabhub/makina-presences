@@ -1,0 +1,99 @@
+import React from 'react';
+import createPersistedState from 'use-persisted-state';
+
+import { Add, RemoveCircleOutline } from '@mui/icons-material';
+import { Chip, Divider, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
+
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import useSpots from '../hooks/useSpots';
+import SpotDialog from './SpotDialog';
+
+const useFavoritesState = createPersistedState('favorites');
+
+const PreferencesSpot = () => {
+  const [favorites, setFavorites] = useFavoritesState([]);
+  const { place } = useParams();
+  const spots = useSpots(place);
+
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
+  const handleDialogClose = value => {
+    setDialogOpen(false);
+    if (!value || favorites.includes(value)) return;
+    setFavorites([
+      ...favorites,
+      value,
+    ]);
+  };
+
+  const removeFavorite = value => {
+    setFavorites(favorites.filter(favorite => favorite !== value));
+  };
+
+  return (
+    <>
+      <Divider textAlign="left">
+        Postes Favoris
+        <Chip
+          label="Ajouter"
+          size="small"
+          variant="outlined"
+          color="primary"
+          icon={<Add />}
+          sx={{ ml: 2 }}
+          component="button"
+          onClick={() => setDialogOpen(!dialogOpen)}
+        />
+      </Divider>
+
+      <List dense>
+        {favorites.length === 0 && (
+        <Typography sx={{ opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px' }}>
+          Aucun postes favoris.
+        </Typography>
+        )}
+        {favorites.map(name => {
+          const icons = {
+            Nu: '🔵',
+            Flex: '🟢',
+            Réservé: '🔴',
+            Priorisé: '🟠',
+          };
+          const spotIcon = spots
+            .filter(spot => spot.Identifiant === name)
+            .map(({ Type: { value: type } }) => (icons[type]));
+
+          return (
+            <ListItem
+              key={name}
+              secondaryAction={(
+                <IconButton
+                  edge="end"
+                  aria-label="remove"
+                  sx={{ color: 'red', opacity: '.5' }}
+                  component="button"
+                  onClick={() => removeFavorite(name)}
+                >
+                  <RemoveCircleOutline />
+                </IconButton>
+              )}
+            >
+              <ListItemText primary={`${spotIcon} ${name}`} />
+            </ListItem>
+          );
+        })}
+      </List>
+
+      {dialogOpen && (
+        <SpotDialog
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          place={place}
+          date={null}
+        />
+      )}
+    </>
+  );
+};
+
+export default React.memo(PreferencesSpot);
