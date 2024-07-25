@@ -1,8 +1,8 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { Add, RemoveCircleOutline } from '@mui/icons-material';
-import { Chip, Divider, IconButton, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Add, ErrorOutline, RemoveCircleOutline } from '@mui/icons-material';
+import { Chip, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Tooltip, Typography } from '@mui/material';
 
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import useSpots from '../hooks/useSpots';
@@ -78,7 +78,19 @@ const PreferencesSpot = () => {
                 </IconButton>
               )}
             >
-              <ListItemText primary={`${spotIcon} ${name}`} />
+              {favorites
+                .filter(id => !spots.map(spot => spot.Identifiant).includes(id))
+                .includes(name) && (
+                  <Tooltip title="Ce poste n'existe plus" placement="left">
+                    <ListItemIcon>
+                      <ErrorOutline color="error" />
+                    </ListItemIcon>
+                  </Tooltip>
+
+              )}
+              <ListItemText
+                primary={`${spotIcon} ${name}`}
+              />
             </ListItem>
           );
         })}
