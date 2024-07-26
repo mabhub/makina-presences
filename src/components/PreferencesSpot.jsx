@@ -40,7 +40,7 @@ const PreferencesSpot = () => {
   };
 
   const removeFavorite = value => {
-    setFavorites(favorites.filter(favorite => favorite.name !== value));
+    setFavorites(favorites.filter(favorite => favorite.name !== value || favorite.place !== place));
   };
 
   return (
