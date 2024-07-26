@@ -30,6 +30,7 @@ dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
+const useWeekPrefs = createPersistedState('weekPref');
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -93,9 +94,12 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const timespan = 14;
-
 const PresenceCalendar = () => {
+  const [weekPref] = useWeekPrefs('2');
+
+  let timespan = 14;
+  if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
+
   const classes = useStyles();
   const [tri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
