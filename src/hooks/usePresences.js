@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import React from 'react';
 
+import createPersistedState from 'use-persisted-state';
+
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
 
@@ -19,9 +21,14 @@ const fields = {
   plan: `field_${planFieldID}`,
 };
 
-const timespan = 14;
+const useWeekPrefs = createPersistedState('weekPref');
 
 const usePresences = place => {
+  const [weekPref] = useWeekPrefs('2');
+
+  let timespan = 14;
+  if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
+
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
   const dayFrom = today.day(0).format('YYYY-MM-DD');
   const dayTo = today.day(timespan).format('YYYY-MM-DD');
