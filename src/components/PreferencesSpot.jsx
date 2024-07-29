@@ -16,7 +16,7 @@ const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 const useFavoritesState = createPersistedState('favorites');
 const useStyles = makeStyles({
   favoriteList: {
-    paddingTop: 'O',
+    marginTop: '-8px',
     paddingBottom: '12px',
   },
   favoriteItem: {
@@ -142,7 +142,7 @@ const PreferencesSpot = () => {
       </Divider>
 
       <List dense className={clsx({ [classes.favoriteList]: hasFavorite() })}>
-        {hasFavorite() && (
+        {!hasFavorite() && (
           <Typography sx={{ opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px' }}>
             Aucun postes favoris.
           </Typography>
