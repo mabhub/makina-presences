@@ -68,8 +68,7 @@ const PreferencesSpot = () => {
     .filter(favorite => favorite.agency !== agency)
     .reduce((acc, curr) => acc || curr.favs.length > 0, false);
 
-  const hasFavorite = () =>
-    sortedFavorite.reduce((acc, curr) => acc && curr.favs.length === 0, true);
+  const hasFavorite = () => sortedFavorite.some(e => e.favs.length > 0);
 
   const createListItem = (favs, agency) => {
     const removedFavorites = favs
@@ -149,16 +148,16 @@ const PreferencesSpot = () => {
           </Typography>
         )}
         {sortedFavorite.map(({ agency, favs }) => (
-          <>
+          <React.Fragment key={agency}>
             {favs.length > 0
             && displayTitle(agency)
             && (
-              <ListItem key={agency} sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
+              <ListItem sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
                 <ListItemText primary={agency} />
               </ListItem>
             )}
             {createListItem(favs, agency)}
-          </>
+          </React.Fragment>
         ))}
       </List>
 
