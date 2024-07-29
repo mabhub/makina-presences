@@ -4,12 +4,11 @@ import createPersistedState from 'use-persisted-state';
 import { Add, ErrorOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { Chip, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Tooltip, Typography } from '@mui/material';
 
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { makeStyles } from '@mui/styles';
-import clsx from 'clsx';
-import SpotDialog from './SpotDialog';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
+import SpotDialog from './SpotDialog';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -41,20 +40,14 @@ const PreferencesSpot = () => {
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  const handleDialogClose = value => {
+  const handleDialogClose = (value, spotPlace) => {
     setDialogOpen(false);
     if (!value || favorites.includes(value)) return;
     setFavorites([
       ...favorites,
       {
         name: value,
-        place: spots
-          .filter(
-            ({
-              Identifiant: id,
-              Plan: [{ value: plan } = {}] = [],
-            }) => id === value && plan === place,
-          )[0].Plan[0].value,
+        place: spotPlace,
       },
     ]);
   };
@@ -64,14 +57,10 @@ const PreferencesSpot = () => {
       .filter(fav => (fav.name === spotName && fav.place !== spotPlace) || fav.name !== spotName));
   };
 
-  const displayTitle = agency => sortedFavorite
-    .filter(favorite => favorite.agency !== agency)
-    .reduce((acc, curr) => acc || curr.favs.length > 0, false);
-
   const hasFavorite = () =>
     sortedFavorite.reduce((acc, curr) => acc || curr.favs.length > 0, false);
 
-  const createListItem = (favs, agency) => {
+  const createListItem = favs => {
     const removedFavorites = favs
       .filter(spot => Object.hasOwn(spot, 'name'))
       .filter(({ name: spotName }) => !spots.map(spot => spot.Identifiant).includes(spotName));
@@ -98,7 +87,7 @@ const PreferencesSpot = () => {
       return (
         <ListItem
           key={`${name}${spotPlace}`}
-          className={clsx({ [classes.favoriteItem]: displayTitle(agency) })}
+          className={classes.favoriteItem}
           secondaryAction={(
             <IconButton
               edge="end"
@@ -142,7 +131,10 @@ const PreferencesSpot = () => {
         />
       </Divider>
 
-      <List dense className={clsx({ [classes.favoriteList]: hasFavorite() })}>
+      <List
+        dense
+        className={classes.favoriteList}
+      >
         {!hasFavorite() && (
           <Typography sx={{ opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px' }}>
             Aucun postes favoris.
@@ -151,13 +143,12 @@ const PreferencesSpot = () => {
         {sortedFavorite.map(({ agency, favs }) => (
           <React.Fragment key={agency}>
             {favs.length > 0
-            && displayTitle(agency)
             && (
               <ListItem sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
                 <ListItemText primary={agency} />
               </ListItem>
             )}
-            {createListItem(favs, agency)}
+            {createListItem(favs)}
           </React.Fragment>
         ))}
       </List>
