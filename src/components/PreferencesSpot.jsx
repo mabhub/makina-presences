@@ -149,16 +149,16 @@ const PreferencesSpot = () => {
           </Typography>
         )}
         {sortedFavorite.map(({ agency, favs }) => (
-          <>
+          <React.Fragment key={agency}>
             {favs.length > 0
             && displayTitle(agency)
             && (
-              <ListItem key={agency} sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
+              <ListItem sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
                 <ListItemText primary={agency} />
               </ListItem>
             )}
             {createListItem(favs, agency)}
-          </>
+          </React.Fragment>
         ))}
       </List>
 
