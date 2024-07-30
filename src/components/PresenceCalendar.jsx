@@ -15,7 +15,6 @@ import {
   Collapse,
   Divider,
   Grid,
-  Typography,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -219,7 +218,7 @@ const PresenceCalendar = () => {
                         </Grid>
                       )}
                       {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
-                        <Grid item spacing="unset" sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
+                        <Grid item sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
                           Aucune personnes présente
                         </Grid>
                       )}
