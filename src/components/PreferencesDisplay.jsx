@@ -1,13 +1,14 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { DarkMode, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
-import { Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { CalendarToday, DarkMode, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
+import { Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
 const useMaxWidthState = createPersistedState('useMaxWidth');
 const useThemePrefs = createPersistedState('themePref');
 const useWeekPrefs = createPersistedState('weekPref');
+const useDayPrefs = createPersistedState('dayPrefs');
 
 const useStyles = makeStyles(() => ({
   themeIcon: {
@@ -25,11 +26,25 @@ const useStyles = makeStyles(() => ({
 }));
 
 const PreferenceDisplay = () => {
+  const weekDay = ['L', 'M', 'Me', 'J', 'V'];
+
   const [useMaxWidth, setUseMaxWidth] = useMaxWidthState();
   const [themePrefs, setThemePrefs] = useThemePrefs('system');
   const [weekPrefs, setWeekprefs] = useWeekPrefs('2');
+  const [dayPrefs, setDayPrefs] = useDayPrefs(weekDay);
 
   const classes = useStyles();
+
+  const handleDayPref = day => {
+    if (dayPrefs.includes(day)) {
+      setDayPrefs(dayPrefs.filter(d => d !== day));
+    } else {
+      setDayPrefs([
+        ...dayPrefs,
+        day,
+      ]);
+    }
+  };
 
   return (
     <>
@@ -78,6 +93,41 @@ const PreferenceDisplay = () => {
           </ToggleButtonGroup>
         </ListItem>
         <ListItem>
+          <ListItemIcon sx={{ marginRight: '-25px' }}><CalendarToday /></ListItemIcon>
+          <ListItemText>Jours </ListItemText>
+          <Box sx={{ display: 'flex', gap: '3px' }}>
+            {weekDay.map(day => {
+              const SIZE = 30;
+              return (
+                <Box
+                  component="button"
+                  key={day}
+                  sx={{
+                    background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.08)' : '#FFFFFF'),
+                    filter: theme => (theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)'),
+                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    borderRadius: '8px',
+                    width: `${SIZE}px`,
+                    height: `${SIZE}px`,
+                    fontSize: `calc(${SIZE}px / 2.2)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '&:hover': {
+                      cursor: 'pointer',
+                      background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.12)' : 'rgba(0, 0, 0, 0.04)'),
+                    },
+                  }}
+                  onClick={() => handleDayPref(day)}
+                >
+                  {day}
+                </Box>
+              );
+            })}
+
+          </Box>
+        </ListItem>
+        <ListItem>
           <ListItemIcon sx={{ marginRight: '-25px' }}><Fullscreen /></ListItemIcon>
           <ListItemText primary="Pleine largeur" />
           <Switch
@@ -87,6 +137,7 @@ const PreferenceDisplay = () => {
             }}
           />
         </ListItem>
+
       </List>
     </>
   );
