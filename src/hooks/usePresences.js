@@ -4,7 +4,10 @@ import React from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
 
-const { VITE_BASEROW_TOKEN: token, VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
+const { VITE_BASEROW_TOKEN: token,
+  VITE_TABLE_ID_PRESENCES: presencesTableId,
+  VITE_FIELD_PRESENCES_DAY: dayFieldId,
+  VITE_FIELD_PRESENCES_PLAN: planFieldID } = import.meta.env;
 
 const headers = {
   Authorization: `Token ${token}`,
@@ -12,8 +15,8 @@ const headers = {
 };
 
 const fields = {
-  day: 'field_175674',
-  plan: 'field_175698',
+  day: `field_${dayFieldId}`,
+  plan: `field_${planFieldID}`,
 };
 
 const timespan = 14;
@@ -82,7 +85,9 @@ const usePresences = place => {
         ],
       }));
     },
-    onSettled: () => queryClient.invalidateQueries(queryKey),
+    onSettled: () => {
+      queryClient.invalidateQueries(queryKey);
+    },
   });
 
   const updateRow = useMutation(record => fetch(

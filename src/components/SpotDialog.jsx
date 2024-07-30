@@ -1,6 +1,6 @@
-import React from 'react';
-import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
+import React, { useState } from 'react';
+import createPersistedState from 'use-persisted-state';
 
 import {
   Button,
@@ -10,14 +10,17 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Tab,
+  Tabs,
   useMediaQuery,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import useSpots from '../hooks/useSpots';
+import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
+import useSpots from '../hooks/useSpots';
 
 const useStyles = makeStyles(() => ({
 }));
@@ -32,14 +35,13 @@ const SpotDialog = ({
 }) => {
   const classes = useStyles();
   const [favorites] = useFavoritesState([]);
+  const plans = usePlans();
+  const [selectedPlace, setSelectedPlace] = useState(place);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  const spots = useSpots(place)
-    .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
-
-  const { presences } = usePresences(place);
+  const { presences } = usePresences(selectedPlace);
   const isoDate = dayjs(date).format('YYYY-MM-DD');
   const spotPresences = presences
     .filter(({ day: d }) => (d === isoDate))
@@ -48,13 +50,21 @@ const SpotDialog = ({
       [spot]: tri,
     }), {});
 
+  const spots = useSpots(selectedPlace)
+    .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
+  const favoriteName = favorites
+    .filter(({ place: spotPLace }) => spotPLace === selectedPlace)
+    .reduce((acc, curr) => [...acc, curr.name], []);
   const favoriteSpots = spots
-    .filter(({ Identifiant: id }) => favorites.includes(id))
-    .sort(({ Identifiant: a }, { Identifiant: b }) => favorites.indexOf(a) - favorites.indexOf(b));
+    .filter(({ Identifiant: id }) => favoriteName.includes(id))
+    .sort(
+      ({ Identifiant: a }, { Identifiant: b }) => favoriteName.indexOf(a) - favoriteName.indexOf(b),
+    );
+
   const defaultFavoriteSpot = favoriteSpots[favoriteSpots
     .findIndex(({ Identifiant: spot }) => !spotPresences[spot])];
 
-  const [value, setValue] = React.useState((
+  const [selectedValue, setSelectedValue] = React.useState((
     defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
   ));
 
@@ -93,11 +103,16 @@ const SpotDialog = ({
   };
 
   const handleOk = () => {
-    onClose(value);
+    onClose(selectedValue, selectedPlace);
   };
 
   const handleChange = event => {
-    setValue(event.target.value);
+    setSelectedValue(event.target.value);
+  };
+
+  const handleTabChange = (event, newPlace) => {
+    setSelectedPlace(newPlace);
+    handleChange({ target: { value: '' } });
   };
 
   return (
@@ -108,12 +123,31 @@ const SpotDialog = ({
       open={open}
       onClick={event => event.stopPropagation()}
     >
+      {!displayFavorite && (
+        <Tabs
+          onChange={handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          centered
+          value={selectedPlace}
+        >
+          {plans.map(({ Name, Brouillon }) => (
+            <Tab
+              key={Name}
+              value={Name}
+              label={Name}
+              sx={Brouillon ? { display: 'none' } : { textTransform: 'none' }}
+            />
+          ))}
+        </Tabs>
+      )}
+
       <DialogContent dividers>
         <FormControl variant="outlined" fullWidth>
           <InputLabel htmlFor="spot-native-select">Poste</InputLabel>
           <Select
             native
-            value={value}
+            value={selectedValue}
             onChange={handleChange}
             label="Poste"
             inputProps={{
@@ -151,7 +185,7 @@ const SpotDialog = ({
           Annuler
         </Button>
 
-        <Button onClick={handleOk} color="primary" disabled={!value}>
+        <Button onClick={handleOk} color="primary" disabled={!selectedValue}>
           Enregistrer
         </Button>
       </DialogActions>
