@@ -14,11 +14,14 @@ import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
-    padding: theme.spacing(1.5, 1.5, 0.25, 2),
+    padding: theme.spacing(1, 1.5, 1, 2),
+    background: theme.palette.secondary.bg,
   },
 
   dayName: {
     textTransform: 'capitalize',
+    color: 'black',
+    filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
   },
 
   highlight: {
