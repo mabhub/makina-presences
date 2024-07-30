@@ -52,6 +52,9 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(2.5),
     marginBottom: theme.spacing(0.5),
   },
+  weekTextSeparator: {
+    opacity: '.7',
+  },
   holidayCard: {
     opacity: 0.85,
   },
@@ -63,6 +66,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    borderRadius: '10px',
   },
   todayCard: {
     border: `3px solid ${theme.palette.primary.main}`,
@@ -90,11 +94,9 @@ const PresenceCalendar = () => {
   const [tri] = useTriState('');
   const [weekPref] = useWeekPrefs('2');
   const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
-  let [showPastDays] = usePastDays();
+  const [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
   const history = useHistory();
-
-  showPastDays = showPastDays || typeof showPastDays === 'undefined';
 
   let timespan = 14;
   if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
@@ -105,6 +107,7 @@ const PresenceCalendar = () => {
   const holidays = useHolidays();
 
   const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {
+    if (showPastDays === undefined) return true;
     if (isoDate === day || isHoliday) return true;
     if (dayIsFavorite && (!isPast || showPastDays)) return true;
     if (!dayIsFavorite && showPastDays && isPast) return true;
@@ -177,12 +180,7 @@ const PresenceCalendar = () => {
                 className={classes.weekSeparator}
                 textAlign="right"
               >
-                <Chip
-                  label={`s${weekIndex}`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
+                <span className={classes.weekTextSeparator}>{`Semaine ${weekIndex}`}</span>
               </Divider>
             )}
 
