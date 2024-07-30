@@ -27,6 +27,12 @@ const useStyles = makeStyles(theme => ({
   highlight: {
     backgroundColor: emphasize(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0 : 0.25),
   },
+
+  personsPresent: {
+    marginLeft: 8,
+    fontSize: '10px',
+    color: theme.palette.primary.main,
+  },
 }));
 
 const DayHeader = ({
@@ -37,6 +43,8 @@ const DayHeader = ({
   tri,
   place,
   isPast,
+  isClosed,
+  persons,
   ...props
 }) => {
   const classes = useStyles();
@@ -75,6 +83,9 @@ const DayHeader = ({
             <strong className={classes.dayName}>{Days[(dateObj.day()) % 7]}</strong>{' '}
             {dateObj.date().toString()}{' '}
             {Months[dateObj.month()]}
+            {isClosed && (
+              <span className={classes.personsPresent}>{`(${persons})`}</span>
+            )}
           </>
         )}
         action={(!isHoliday && !isPast) && (
