@@ -219,7 +219,7 @@ const PresenceCalendar = () => {
                       )}
                       {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
                         <Grid item sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
-                          Aucune personnes présente
+                          Aucune personne présente
                         </Grid>
                       )}
 
