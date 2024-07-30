@@ -1,7 +1,7 @@
 import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { CalendarToday, DarkMode, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
+import { CalendarToday, DarkMode, EventBusy, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
 import { Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -9,6 +9,7 @@ const useMaxWidthState = createPersistedState('useMaxWidth');
 const useThemePrefs = createPersistedState('themePref');
 const useWeekPrefs = createPersistedState('weekPref');
 const useDayPrefs = createPersistedState('dayPrefs');
+const usePastDays = createPersistedState('pastDays');
 
 const useStyles = makeStyles(() => ({
   themeIcon: {
@@ -32,6 +33,7 @@ const PreferenceDisplay = () => {
   const [themePrefs, setThemePrefs] = useThemePrefs('system');
   const [weekPrefs, setWeekprefs] = useWeekPrefs('2');
   const [dayPrefs, setDayPrefs] = useDayPrefs(weekDay);
+  const [pastDays, setPastDays] = usePastDays(true);
 
   const classes = useStyles();
 
@@ -92,7 +94,7 @@ const PreferenceDisplay = () => {
             </ToggleButton>
           </ToggleButtonGroup>
         </ListItem>
-        <ListItem>
+        <ListItem sx={{ height: '46px' }}>
           <ListItemIcon sx={{ marginRight: '-25px' }}><CalendarToday /></ListItemIcon>
           <ListItemText>Jours </ListItemText>
           <Box sx={{ display: 'flex', gap: '3px' }}>
@@ -127,7 +129,17 @@ const PreferenceDisplay = () => {
 
           </Box>
         </ListItem>
-        <ListItem>
+        <ListItem sx={{ height: '38px' }}>
+          <ListItemIcon sx={{ marginRight: '-25px' }}><EventBusy /></ListItemIcon>
+          <ListItemText>Jours passés</ListItemText>
+          <Switch
+            checked={pastDays}
+            onChange={() => {
+              setPastDays(!pastDays);
+            }}
+          />
+        </ListItem>
+        <ListItem sx={{ height: '38px' }}>
           <ListItemIcon sx={{ marginRight: '-25px' }}><Fullscreen /></ListItemIcon>
           <ListItemText primary="Pleine largeur" />
           <Switch

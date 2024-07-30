@@ -34,6 +34,7 @@ dayjs.extend(dayOfYear);
 const useTriState = createPersistedState('tri');
 const useWeekPrefs = createPersistedState('weekPref');
 const useDayPrefs = createPersistedState('dayPrefs');
+const usePastDays = createPersistedState('pastDays');
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -87,10 +88,13 @@ const useStyles = makeStyles(theme => ({
 const PresenceCalendar = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
-  const [dayPrefs] = useDayPrefs();
   const [weekPref] = useWeekPrefs('2');
+  const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
+  let [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
   const history = useHistory();
+
+  showPastDays = showPastDays || typeof showPastDays === 'undefined';
 
   let timespan = 14;
   if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
@@ -99,6 +103,13 @@ const PresenceCalendar = () => {
 
   const { presences } = usePresences(place);
   const holidays = useHolidays();
+
+  const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {
+    if (isoDate === day || isHoliday) return true;
+    if (dayIsFavorite && (!isPast || showPastDays)) return true;
+    if (!dayIsFavorite && showPastDays && isPast) return true;
+    return false;
+  };
 
   const dayGrid = [...Array(timespan).keys()].map(index => {
     const date = today.day(index);
@@ -140,7 +151,7 @@ const PresenceCalendar = () => {
         }
 
         const dayLabel = days[weekDayIndex];
-        const diplayCardContent = dayPrefs.find(d => d === dayLabel);
+        const dayIsFavorite = dayPrefs.some(d => d === dayLabel);
 
         const holiday = holidays[isoDate];
         const isHoliday = Boolean(holiday);
@@ -198,8 +209,7 @@ const PresenceCalendar = () => {
                   highlight={day === isoDate}
                   isPast={isPast}
                 />
-
-                <Collapse in={(diplayCardContent || isoDate === day || isHoliday)}>
+                <Collapse in={displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}>
                   <CardContent className={classes.cardContent}>
                     <Grid container spacing={2}>
                       {isHoliday && (
