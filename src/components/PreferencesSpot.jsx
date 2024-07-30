@@ -57,8 +57,7 @@ const PreferencesSpot = () => {
       .filter(fav => (fav.name === spotName && fav.place !== spotPlace) || fav.name !== spotName));
   };
 
-  const hasFavorite = () =>
-    sortedFavorite.reduce((acc, curr) => acc || curr.favs.length > 0, false);
+  const hasFavorite = () => sortedFavorite.some(e => e.favs.length > 0);
 
   const createListItem = favs => {
     const removedFavorites = favs
