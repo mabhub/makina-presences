@@ -205,14 +205,21 @@ const PresenceCalendar = () => {
                   isHoliday={isHoliday}
                   highlight={day === isoDate}
                   isPast={isPast}
+                  isClosed={!displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}
+                  persons={todayPresences.filter(({ spot: m }) => m).length}
                 />
                 <Collapse in={displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}>
                   <CardContent className={classes.cardContent}>
-                    <Grid container spacing={2}>
+                    <Grid container>
                       {isHoliday && (
                         <Grid item xs={12} className={classes.holiday}>
                           Jour férié<br />
                           ({holiday})
+                        </Grid>
+                      )}
+                      {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
+                        <Grid item spacing="unset" sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
+                          Aucune personne présente
                         </Grid>
                       )}
 
