@@ -36,7 +36,7 @@ const DarkThemeProvider = ({ children }) => {
               bg: mode === 'dark' ? '#000000' : '#ffffff',
             },
             secondary: {
-              main: '#f50057',
+              main: '#211BB3',
               bg: mode === 'dark' ? '#333333' : '#f5f5f5',
             },
           },

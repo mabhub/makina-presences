@@ -12,6 +12,8 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Collapse,
+  Divider,
   Grid,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
@@ -23,13 +25,15 @@ import { sameLowC } from '../helpers';
 
 import Moment from './Moment';
 import DayHeader from './DayHeader';
-import TodayBadge from './TodayBadge';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
 const useTriState = createPersistedState('tri');
+const useWeekPrefs = createPersistedState('weekPref');
+const useDayPrefs = createPersistedState('dayPrefs');
+const usePastDays = createPersistedState('pastDays');
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,30 +42,17 @@ const useStyles = makeStyles(theme => ({
 
   dayBox: {
     position: 'relative',
-    margin: theme.spacing(2, 0),
+    margin: theme.spacing(1, 0),
     width: '100%',
   },
 
   newWeek: {},
-  weekIndex: {
-    fontStyle: 'italic',
-    fontSize: '0.7em',
-    position: 'absolute',
-    top: 0,
-    right: theme.spacing(2),
-    zIndex: 1,
-    transform: 'translateY(-50%)',
-    borderRadius: '5px',
-    padding: theme.spacing(0, 1),
-    background: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    boxShadow: theme.shadows[1],
-    opacity: 0.2,
-    transition: theme.transitions.create('opacity'),
-    cursor: 'default',
-    '&:hover': {
-      opacity: 0.8,
-    },
+  weekSeparator: {
+    marginTop: theme.spacing(2.5),
+    marginBottom: theme.spacing(0.5),
+  },
+  weekTextSeparator: {
+    opacity: '.7',
   },
   holidayCard: {
     opacity: 0.85,
@@ -73,12 +64,16 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    borderRadius: '10px',
+  },
+  todayCard: {
+    border: `3px solid ${theme.palette.primary.main}`,
   },
   cardContent: {
     flex: 1,
     display: 'flex',
-
-    background: theme.palette.secondary.bg,
+    background: theme.palette.secondary.fg,
     fontSize: theme.typography.pxToRem(10),
     padding: theme.spacing(1),
     '&:last-child': {
@@ -93,18 +88,30 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const timespan = 14;
-
 const PresenceCalendar = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
+  const [weekPref] = useWeekPrefs('2');
+  const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
+  const [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
   const history = useHistory();
+
+  let timespan = 14;
+  if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
 
   const { presences } = usePresences(place);
   const holidays = useHolidays();
+
+  const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {
+    if (showPastDays === undefined) return true;
+    if (isoDate === day || isHoliday) return true;
+    if (dayIsFavorite && (!isPast || showPastDays)) return true;
+    if (!dayIsFavorite && showPastDays && isPast) return true;
+    return false;
+  };
 
   const dayGrid = [...Array(timespan).keys()].map(index => {
     const date = today.day(index);
@@ -118,6 +125,9 @@ const PresenceCalendar = () => {
       isDateToday: date.isSame(today),
     };
   });
+
+  // 0 = sunday, 6 = saturday
+  const days = ['S', 'L', 'M', 'Me', 'J', 'V', 'S'];
 
   return (
     <Box spacing={2} className={classes.root}>
@@ -142,6 +152,9 @@ const PresenceCalendar = () => {
           return <React.Fragment key={isoDate} />;
         }
 
+        const dayLabel = days[weekDayIndex];
+        const dayIsFavorite = dayPrefs.some(d => d === dayLabel);
+
         const holiday = holidays[isoDate];
         const isHoliday = Boolean(holiday);
 
@@ -162,21 +175,22 @@ const PresenceCalendar = () => {
             )}
           >
             {newWeek && (
-              <Box className={classes.weekIndex}>
-                <>s{weekIndex}</>
-              </Box>
-            )}
-
-            {isToday && (
-              <TodayBadge />
+              <Divider
+                className={classes.weekSeparator}
+                textAlign="right"
+              >
+                <span className={classes.weekTextSeparator}>{`Semaine ${weekIndex}`}</span>
+              </Divider>
             )}
 
             <Card
               className={clsx({
                 [classes.dayCard]: true,
+                [classes.todayCard]: isToday,
                 [classes.past]: isPast,
                 [classes.holidayCard]: isHoliday,
               })}
+              elevation={0}
             >
               <CardActionArea
                 onClick={() => history.push(`/${place}/${isoDate}`)}
@@ -191,25 +205,33 @@ const PresenceCalendar = () => {
                   isHoliday={isHoliday}
                   highlight={day === isoDate}
                   isPast={isPast}
+                  isClosed={!displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}
+                  persons={todayPresences.filter(({ spot: m }) => m).length}
                 />
+                <Collapse in={displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}>
+                  <CardContent className={classes.cardContent}>
+                    <Grid container>
+                      {isHoliday && (
+                        <Grid item xs={12} className={classes.holiday}>
+                          Jour férié<br />
+                          ({holiday})
+                        </Grid>
+                      )}
+                      {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
+                        <Grid item sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
+                          Aucune personne présente
+                        </Grid>
+                      )}
 
-                <CardContent className={classes.cardContent}>
-                  <Grid container spacing={2}>
-                    {isHoliday && (
-                      <Grid item xs={12} className={classes.holiday}>
-                        Jour férié<br />
-                        ({holiday})
-                      </Grid>
-                    )}
-
-                    {!isHoliday && (
-                      <Moment
-                        momentPresences={todayPresences.filter(({ spot: m }) => m)}
-                        userPresence={currentTodayPresences}
-                      />
-                    )}
-                  </Grid>
-                </CardContent>
+                      {!isHoliday && (
+                        <Moment
+                          momentPresences={todayPresences.filter(({ spot: m }) => m)}
+                          userPresence={currentTodayPresences}
+                        />
+                      )}
+                    </Grid>
+                  </CardContent>
+                </Collapse>
               </CardActionArea>
             </Card>
           </Box>

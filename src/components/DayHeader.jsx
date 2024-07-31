@@ -14,15 +14,24 @@ import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
-    padding: theme.spacing(1.5, 1.5, 0.25, 2),
+    padding: theme.spacing(1, 1.5, 1, 2),
+    background: theme.palette.secondary.bg,
   },
 
   dayName: {
     textTransform: 'capitalize',
+    color: 'black',
+    filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
   },
 
   highlight: {
     backgroundColor: emphasize(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0 : 0.25),
+  },
+
+  personsPresent: {
+    marginLeft: 8,
+    fontSize: '10px',
+    color: theme.palette.primary.main,
   },
 }));
 
@@ -34,6 +43,8 @@ const DayHeader = ({
   tri,
   place,
   isPast,
+  isClosed,
+  persons,
   ...props
 }) => {
   const classes = useStyles();
@@ -72,6 +83,9 @@ const DayHeader = ({
             <strong className={classes.dayName}>{Days[(dateObj.day()) % 7]}</strong>{' '}
             {dateObj.date().toString()}{' '}
             {Months[dateObj.month()]}
+            {isClosed && (
+              <span className={classes.personsPresent}>{`(${persons})`}</span>
+            )}
           </>
         )}
         action={(!isHoliday && !isPast) && (
@@ -91,7 +105,7 @@ const DayHeader = ({
           onClose={handleDialogClose}
           place={place}
           date={date}
-          displayFavorite={true}
+          displayFavorite
         />
       )}
     </>
