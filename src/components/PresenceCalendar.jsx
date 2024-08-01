@@ -1,12 +1,7 @@
-import React from 'react';
 import clsx from 'clsx';
+import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import createPersistedState from 'use-persisted-state';
-import dayjs from 'dayjs';
-import weekOfYear from 'dayjs/plugin/weekOfYear';
-import isoWeek from 'dayjs/plugin/isoWeek';
-import dayOfYear from 'dayjs/plugin/dayOfYear';
 import {
   Box,
   Card,
@@ -17,14 +12,19 @@ import {
   Grid,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import dayjs from 'dayjs';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import createPersistedState from 'use-persisted-state';
 
-import usePresences from '../hooks/usePresences';
 import useHolidays from '../hooks/useHolidays';
+import usePresences from '../hooks/usePresences';
 
 import { sameLowC } from '../helpers';
 
-import Moment from './Moment';
 import DayHeader from './DayHeader';
+import Moment from './Moment';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -35,8 +35,9 @@ const useWeekPrefs = createPersistedState('weekPref');
 const useDayPrefs = createPersistedState('dayPrefs');
 const usePastDays = createPersistedState('pastDays');
 
-const useStyles = makeStyles(theme => ({
-  root: {
+const useStyles = makeStyles(theme => {
+  const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
+  return { root: {
     width: '100%',
   },
 
@@ -53,6 +54,11 @@ const useStyles = makeStyles(theme => ({
   },
   weekTextSeparator: {
     opacity: '.7',
+  },
+  firstWeek: {
+    [maxWidth('sm')]: {
+      marginTop: theme.spacing(0),
+    },
   },
   holidayCard: {
     opacity: 0.85,
@@ -85,8 +91,8 @@ const useStyles = makeStyles(theme => ({
     fontSize: '1rem',
     fontStyle: 'italic',
     alignSelf: 'center',
-  },
-}));
+  } };
+});
 
 const PresenceCalendar = () => {
   const classes = useStyles();
@@ -136,7 +142,7 @@ const PresenceCalendar = () => {
         weekIndex,
         weekDayIndex,
         isPast,
-      }) => {
+      }, index) => {
         /**
         * saturday,
         * last day of (sunday started) week
@@ -165,7 +171,6 @@ const PresenceCalendar = () => {
         const isToday = isoDate === today.format('YYYY-MM-DD');
 
         const newWeek = Boolean(weekDayIndex === 1);
-
         return (
           <Box
             key={isoDate}
@@ -176,7 +181,10 @@ const PresenceCalendar = () => {
           >
             {newWeek && (
               <Divider
-                className={classes.weekSeparator}
+                className={clsx({
+                  [classes.weekSeparator]: true,
+                  [classes.firstWeek]: index === 1,
+                })}
                 textAlign="right"
               >
                 <span className={classes.weekTextSeparator}>{`Semaine ${weekIndex}`}</span>
