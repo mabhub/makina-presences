@@ -1,11 +1,12 @@
 import React from 'react';
 
-import { Box, Divider, IconButton } from '@mui/material';
-import { useTheme, alpha } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
 import { ExpandMore, HelpOutline } from '@mui/icons-material';
+import { Box, Divider, IconButton } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import createPersistedState from 'use-persisted-state';
 
+import clsx from 'clsx';
 import useFields from '../hooks/useFields';
 import Circle from './LegendCircle';
 
@@ -13,8 +14,10 @@ const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
 const useLegendState = createPersistedState('legend');
 
-const useLegendStyles = makeStyles(theme => ({
-  root: {
+const useLegendStyles = makeStyles(theme => {
+  const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
+
+  return { root: {
     position: 'absolute',
     bottom: 0,
     left: '50%',
@@ -37,12 +40,25 @@ const useLegendStyles = makeStyles(theme => ({
         : ''
     ),
     transition: theme.transitions.create('transform'),
+    [maxWidth('sm')]: {
+      bottom: '30px',
+    },
+  },
+  toggled: {
+    [maxWidth('sm')]: {
+      bottom: '25px',
+    },
+  },
+  handleToggled: {
+    [maxWidth('sm')]: {
+      bottom: 0,
+    },
   },
 
   divider: {
     margin: theme.spacing(1),
-  },
-}));
+  } };
+});
 
 const Legend = () => {
   const theme = useTheme();
@@ -58,8 +74,16 @@ const Legend = () => {
     ?.select_options || [];
 
   return (
-    <Box className={classes.root}>
-      <Box className={classes.handle}>
+    <Box className={clsx({
+      [classes.root]: true,
+      [classes.toggled]: !legendHidden,
+    })}
+    >
+      <Box className={clsx({
+        [classes.handle]: true,
+        [classes.handleToggled]: !legendHidden,
+      })}
+      >
         <IconButton
           size="small"
           onClick={legendToggle}

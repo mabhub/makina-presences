@@ -151,7 +151,6 @@ const SpotButton = ({
   const isCumulative = Boolean(Cumul);
 
   useEffect(() => {
-    // console.log(spotId, 'Changement', isConflict);
     if (isConflict) {
       onConflict(isConflict,
         spotPresences[spotId].find(({ tri: t }) => tri !== t).tri,

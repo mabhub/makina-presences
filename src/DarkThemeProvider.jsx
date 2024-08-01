@@ -34,6 +34,7 @@ const DarkThemeProvider = ({ children }) => {
               contrastText: '#fff',
               fg: mode === 'dark' ? '#ffffff' : grey[600],
               bg: mode === 'dark' ? '#000000' : '#ffffff',
+              elevated: mode === 'dark' ? '#1f1e1e' : '#fcfafa',
             },
             secondary: {
               main: '#211BB3',
