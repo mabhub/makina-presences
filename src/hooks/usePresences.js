@@ -7,18 +7,11 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
 
 const { VITE_BASEROW_TOKEN: token,
-  VITE_TABLE_ID_PRESENCES: presencesTableId,
-  VITE_FIELD_PRESENCES_DAY: dayFieldId,
-  VITE_FIELD_PRESENCES_PLAN: planFieldID } = import.meta.env;
+  VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
 const headers = {
   Authorization: `Token ${token}`,
   'Content-Type': 'application/json',
-};
-
-const fields = {
-  day: `field_${dayFieldId}`,
-  plan: `field_${planFieldID}`,
 };
 
 const useWeekPrefs = createPersistedState('weekPref');
@@ -41,9 +34,9 @@ const usePresences = place => {
   const qs = [
     '?',
     'user_field_names=true',
-    `filter__${fields.day}__date_after=${dayFrom}`,
-    `filter__${fields.day}__date_before=${dayTo}`,
-    `filter__${fields.plan}__equal=${place}`,
+    `filter__day__date_after=${dayFrom}`,
+    `filter__day__date_before=${dayTo}`,
+    `filter__plan__equal=${place}`,
     'size=200',
   ].join('&');
 
