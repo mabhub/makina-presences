@@ -16,14 +16,12 @@ npm ci
 
 - **Add your token & table**
 
-Create a `.env` file at the root of the projet, then complete the following line with your private TOKEN and IDs :
+Create a `.env` file at the root of the projet, then complete the following lines with your private TOKEN and IDs :
 ```
 VITE_BASEROW_TOKEN=YOUR_TOKEN_HERE
 VITE_TABLE_ID_SPOTS=
 VITE_TABLE_ID_PRESENCES=
 VITE_TABLE_ID_PLANS=
-VITE_FIELD_PRESENCES_DAY=
-VITE_FIELD_PRESENCES_PLAN=
 ```
 
 - **Start the projet**
