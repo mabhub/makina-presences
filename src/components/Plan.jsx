@@ -1,101 +1,35 @@
-import React from 'react';
-import clsx from 'clsx';
-import dayjs from 'dayjs';
-import { useQueryClient } from 'react-query';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
-import createPersistedState from 'use-persisted-state';
-
-import { Box, Fab, Tooltip } from '@mui/material';
-import { alpha, lighten } from '@mui/material/styles';
+import { Alert, AlertTitle, Box, Snackbar } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
-import usePresences from '../hooks/usePresences';
-import SpotDescription from './SpotDescription';
-import { sameLowC } from '../helpers';
+import SpotButton from './SpotButton';
+import TriPresence from './TriPresence';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
-
-const useTriState = createPersistedState('tri');
-
-const CustomTooltip = withStyles(theme => ({
-  tooltip: {
-    backgroundColor: theme.palette.background.default,
-    color: theme.palette.getContrastText(theme.palette.background.default),
-    boxShadow: theme.shadows[2],
-  },
-}))(Tooltip);
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
     width: '100%',
     height: '100%',
   },
-
   content: {
   },
-
   planWrapper: {
     position: 'relative',
   },
   plan: {
     filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
   },
-
-  spot: {
-    width: 35,
-    minWidth: 35,
-    height: 35,
-    minHeight: 35,
-    position: 'absolute',
-    transform: 'translate(-50%, -50%)',
-    border: '2px solid transparent',
-    backgroundColor: theme.palette.primary.bg,
-    color: theme.palette.primary.fg,
-    textTransform: 'none',
-    opacity: 0.3,
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    fontSize: '0.75em',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.fg, 0.25),
-    },
-  },
-
-  locked: {
-    opacity: 0.3,
-    boxShadow: 'none',
-    cursor: 'not-allowed',
-
-    borderColor: 'silver !important',
-  },
-
-  conflict: {
-    backgroundColor: 'red !important',
-  },
-
-  occupied: {
-    backgroundColor: alpha(theme.palette.primary.main, 0.25),
-    color: lighten(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.75 : 0),
-    opacity: 1,
-    cursor: 'default',
-    boxShadow: 'none',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.25),
-    },
-  },
-
-  ownSpot: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    opacity: 1,
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.5),
+  tri: {
+    marginRight: theme.spacing(0.5),
+    height: theme.spacing(2.5),
+    '& .MuiChip-label': {
+      padding: theme.spacing(0.5, 1, 0.5, 1),
     },
   },
 }));
@@ -133,153 +67,83 @@ const Children = ({ children }) => children;
 
 const Plan = ({ edit }) => {
   const classes = useStyles();
-  const queryClient = useQueryClient();
 
   const plans = usePlans();
-  const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
+  const { place } = useParams();
 
   const spots = useSpots(place);
-  const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
-  const isCumulativeSpot = React.useCallback(
-    identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),
-    [cumulativeSpots],
-  );
-
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
-
-  const [tri] = useTriState('');
-
-  const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
-
-  const { presences, setPresence, deletePresence } = usePresences(place);
-  const dayPresences = presences.filter(presence => presence.day === day);
-  const spotPresences = dayPresences
-    .reduce((acc, { spot, ...presence }) => ({
-      ...acc,
-      [spot]: [...(acc[spot] || []), presence],
-    }), {});
 
   const DragWrapper = edit ? Children : TransformWrapper;
   const DragComponent = edit ? Children : TransformComponent;
-  const [movingSpot, setMovingSpot] = React.useState();
 
-  const snap = (v, a = 5) => Math.round(v / a) * a;
-
-  const handleMouseDown = s => ({ screenX, screenY }) => {
-    if (!edit) { return null; }
-    return setMovingSpot({ spot: s, from: [screenX, screenY] });
+  const [snackBarInfo, setSnackBarInfo] = useState({
+    showSnackBar: false,
+    currentTri: '',
+    currentSpot: '',
+    isClosed: false,
+  });
+  const snackBarPosition = {
+    vertical: 'top',
+    horizontal: 'left',
   };
 
-  const handleDragEnd = async ({ screenX: x2, screenY: y2 }) => {
-    if (!movingSpot || !edit) { return; }
-
-    const { spot, from: [x1, y1] = [] } = movingSpot;
-    const deltas = { x: x2 - x1, y: y2 - y1 };
-
-    setMovingSpot();
-
-    const { VITE_BASEROW_TOKEN: token } = import.meta.env;
-
-    await fetch(
-      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
-      {
-        method: 'PATCH',
-        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          x: snap(deltas.x + Number(spot.x)),
-          y: snap(deltas.y + Number(spot.y)),
-        }),
-      },
-    );
-
-    queryClient.invalidateQueries([`${spotsTableId}`]);
+  const handleConflict = (value, tri, spot) => {
+    if (!snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
+      setSnackBarInfo({
+        showSnackBar: value,
+        currentTri: tri,
+        currentSpot: spot,
+      });
+    }
   };
 
   return (
-    <DragWrapper {...transformWrapperProps}>
-      <DragComponent
-        wrapperClass={classes.wrapper}
-        contentClass={classes.content}
-      >
-        <Box
-          className={classes.planWrapper}
-          // onClick={createSpot}
+    <>
+      <DragWrapper {...transformWrapperProps}>
+        <DragComponent
+          wrapperClass={classes.wrapper}
+          contentClass={classes.content}
         >
-          {plan?.url && (
+          <Box
+            className={classes.planWrapper}
+          >
+            {plan?.url && (
             <img src={plan.url} alt="" className={classes.plan} />
-          )}
+            )}
 
-          {spots.map(Spot => {
-            const { Bloqué, Identifiant: spot, x, y, Type, Description, Cumul } = Spot;
-            const [presence, ...rest] = spotPresences[spot] || [];
-
-            const isLocked = Boolean(Bloqué);
-            const isConflict = Boolean(rest.length);
-            const isOccupied = Boolean(presence);
-            const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
-            const isCumulative = Boolean(Cumul);
-
-            const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
-
-            const tooltip = <SpotDescription md={Description} spot={Spot} />;
-
-            return (
-              <CustomTooltip
-                key={spot}
-                title={(!edit && !isPast) ? tooltip : ''}
-                placement="right"
-                enterDelay={500}
-              >
-                <Fab
-                  className={clsx({
-                    [classes.spot]: true,
-                    [classes.conflict]: isConflict,
-                    [classes.occupied]: isOccupied && !isOwnSpot,
-                    [classes.ownSpot]: isOwnSpot,
-                    [classes.locked]: isLocked,
-                    [`hl-${presence?.tri}`]: presence?.tri,
-                  })}
-                  disabled={isPast}
-                  component={canClick ? 'div' : 'button'}
-                  style={{
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    borderColor: Type?.color?.replace('-', ''),
-                  }}
-                  size="small"
-                  draggable={Boolean(edit)}
-                  onMouseDown={edit && handleMouseDown(Spot)}
-                  onDragEnd={edit && handleDragEnd}
-                  onClick={() => {
-                    if (edit) { return null; }
-
-                    if (!isOccupied && !isLocked) {
-                      // eslint-disable-next-line no-unsafe-optional-chaining
-                      const [firstId, ...extraneous] = dayPresences
-                        ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
-                        ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
-                        ?.filter(() => !isCumulative)
-                        ?.map(({ id }) => id);
-
-                      setPresence({ id: firstId, day, tri, spot, plan: place });
-                      extraneous.forEach(i => deletePresence({ id: i }));
-                    }
-
-                    if (isOwnSpot) {
-                      return deletePresence(presence);
-                    }
-
-                    return null;
-                  }}
-                >
-                  {(!edit && presence?.tri) || spot}
-                </Fab>
-              </CustomTooltip>
-            );
-          })}
-        </Box>
-      </DragComponent>
-    </DragWrapper>
+            {spots.map(Spot => (
+              <SpotButton
+                key={Spot.Identifiant}
+                Spot={Spot}
+                onConflict={handleConflict}
+              />
+            ))}
+          </Box>
+        </DragComponent>
+      </DragWrapper>
+      <Snackbar
+        open={snackBarInfo.showSnackBar}
+        anchorOrigin={snackBarPosition}
+      >
+        <Alert
+          severity="error"
+          onClose={() => (setSnackBarInfo({
+            ...snackBarInfo,
+            showSnackBar: !snackBarInfo.showSnackBar,
+            isClosed: true,
+          }))}
+        >
+          <AlertTitle><strong>Veuillez changer de poste.</strong></AlertTitle>
+          <TriPresence
+            tri={snackBarInfo.currentTri}
+            alt
+            className={classes.tri}
+          />
+          vient de réserver le poste <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
