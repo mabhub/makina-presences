@@ -8,7 +8,8 @@ const useBackups = () => {
     async () => {
       const response = await fetch(`${VITE_ARCHIVE_ROOT}/liste.json`);
       return response.json();
-    }, {
+    },
+    {
       staleTime: 1000 * 60 * 60,
       cacheTime: 1000 * 60 * 60,
       retryDelay: 10 * 1000,

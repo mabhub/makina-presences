@@ -254,6 +254,7 @@ const Plan = ({ edit }) => {
                     if (edit) { return null; }
 
                     if (!isOccupied && !isLocked) {
+                      // eslint-disable-next-line no-unsafe-optional-chaining
                       const [firstId, ...extraneous] = dayPresences
                         ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
                         ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative

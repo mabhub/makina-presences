@@ -45,6 +45,7 @@ const SpotDescription = ({ md = '', body = 'body2', spot = {}, className }) => {
       .use(Rehype2react, {
         createElement: React.createElement,
         components: {
+          /* eslint-disable react/no-unstable-nested-components */
           h1: props => <Typography variant="h1" {...props} />,
           h2: props => <Typography variant="h2" {...props} />,
           h3: props => <Typography variant="h3" {...props} />,
@@ -62,6 +63,7 @@ const SpotDescription = ({ md = '', body = 'body2', spot = {}, className }) => {
           tr: props => <TableRow {...props} />,
           td: props => <TableCell {...props} />,
           th: props => <TableCell component="th" {...props} />,
+          /* eslint-enable react/no-unstable-nested-components */
         },
       }),
     [body, classes.divider],

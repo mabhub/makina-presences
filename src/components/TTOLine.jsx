@@ -4,14 +4,16 @@ import React from 'react';
 import { Box } from '@mui/material';
 
 const findDuplicates = arr => {
+  /* eslint-disable camelcase */
   const sorted_arr = arr.slice().sort();
   const results = [];
-  for (let i = 0; i < sorted_arr.length - 1; i++) {
-    if (sorted_arr[i + 1] == sorted_arr[i]) {
+  for (let i = 0; i < sorted_arr.length - 1; i += 1) {
+    if (sorted_arr[i + 1] == sorted_arr[i]) { // eslint-disable-line eqeqeq
       results.push(sorted_arr[i]);
     }
   }
   return results;
+  /* eslint-enable camelcase */
 };
 
 const SIZE = 0.75;
