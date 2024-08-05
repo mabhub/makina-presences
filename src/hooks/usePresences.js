@@ -139,7 +139,7 @@ const usePresences = place => {
 
   const setPresence = React.useCallback(
     presence => {
-      const { id, day, tri, plan, spot } = presence;
+      const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {
         return deleteRow.mutate(presence);
       }
@@ -149,7 +149,7 @@ const usePresences = place => {
       }
 
       if (!id && (day && tri && plan && spot)) {
-        createPresence(day, tri, { spot, plan });
+        createPresence(day, tri, { spot, plan, period });
       }
 
       return null;
