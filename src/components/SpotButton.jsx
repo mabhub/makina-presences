@@ -1,12 +1,12 @@
 import clsx from 'clsx';
 import dayjs from 'dayjs';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
 
-import { Fab, Tooltip } from '@mui/material';
+import { Divider, Fab, Grid, Tooltip } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
@@ -14,10 +14,15 @@ import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import SpotDescription from './SpotDescription';
+import ContextualMenu from './ContextualMenu';
 
 const useTriState = createPersistedState('tri');
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
+
+const FULLDAY_PERIOD = 'fullday';
+const MORNING_PERIOD = 'morning';
+const AFTERNOON_PERIOD = 'afternoon';
 
 const useStyles = makeStyles(theme => ({
   spot: {
@@ -36,9 +41,44 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     fontSize: '0.75em',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.fg, 0.25),
+    '&.MuiButtonBase-root:hover': {
+      backgroundColor: 'transparent',
     },
+  },
+
+  visible: {
+    opacity: 1,
+  },
+
+  fullSpot: {
+    width: 35,
+    height: 35,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  top: {
+    position: 'absolute',
+    top: 0,
+    height: 15,
+    width: '100%',
+    textAlign: 'center',
+    lineHeight: 'normal',
+    all: 'unset',
+  },
+
+  divider: {
+    width: '100%',
+  },
+
+  bottom: {
+    position: 'absolute',
+    bottom: 0,
+    height: 15,
+    width: '100%',
+    textAlign: 'center',
+    lineHeight: 'normal',
   },
 
   locked: {
@@ -53,25 +93,30 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: 'red !important',
   },
 
+  empty: {
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.fg, 0.25),
+    },
+  },
+
   occupied: {
     backgroundColor: alpha(theme.palette.primary.main, 0.25),
     color: lighten(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.75 : 0),
-    opacity: 1,
     cursor: 'default',
     boxShadow: 'none',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.25),
-    },
+    // '&:hover': {
+    //   backgroundColor: alpha(theme.palette.primary.main, 0.25),
+    // },
   },
 
   ownSpot: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
-    opacity: 1,
     '&:hover': {
       backgroundColor: alpha(theme.palette.primary.main, 0.5),
     },
   },
+
 }));
 
 const CustomTooltip = withStyles(theme => ({
@@ -144,11 +189,49 @@ const SpotButton = ({
 
   const [presence, ...rest] = spotPresences[spotId] || [];
 
+  let reservationPeriod = FULLDAY_PERIOD;
+  if (presence) {
+    reservationPeriod = presence.period;
+  }
+
+  const getPresence = () => {
+    const [presence] = spotPresences[spotId] || [];
+
+    let morningPresence;
+    let afternoonPresence;
+    if (presence && presence.period !== FULLDAY_PERIOD) {
+      morningPresence = (spotPresences[spotId] || [])
+        .find(p => p.period === MORNING_PERIOD);
+      afternoonPresence = (spotPresences[spotId] || [])
+        .find(p => p.period === AFTERNOON_PERIOD);
+
+      return [morningPresence, afternoonPresence];
+    }
+
+    return [presence];
+  };
+
+  // TODO
+  // const isConflict = () => {
+  //   const presence = getPresence();
+  //   if(presence.length == 1) {
+  //     const [_, ...rest] = spotPresences[spotId] || [];
+  //     return rest.length && rest.some(({ period }) => period === presence[0].period);
+  //   }
+  //   return (spotPresences[spotId] || [])
+  //     .some(({ period, t }) => period === (presence[0].period || presence[1].period) && t !==tri)
+  // }
+
   const isLocked = Boolean(blocked);
-  const isConflict = Boolean(rest.length);
+  const isConflict = Boolean(rest.length
+    && rest.some(({ period }) => period === reservationPeriod));
   const isOccupied = Boolean(presence);
   const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
   const isCumulative = Boolean(Cumul);
+
+  const isMorning = reservationPeriod === MORNING_PERIOD;
+  const isAfternoon = reservationPeriod === AFTERNOON_PERIOD;
+  const isFullDay = !isMorning && !isAfternoon;
 
   useEffect(() => {
     if (isConflict) {
@@ -162,6 +245,46 @@ const SpotButton = ({
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
   const tooltip = <SpotDescription md={Description} spot={spot} />;
+
+  const handleClick = p => {
+    if (edit) { return null; }
+
+    if (!isOccupied && !isLocked) {
+      const [firstId, ...extraneous] = dayPresences
+        ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
+        ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
+        ?.filter(() => !isCumulative)
+        ?.map(({ id }) => id);
+
+      setPresence({ id: firstId, day, tri, spot: spotId, plan: place, period: p });
+      extraneous.forEach(i => deletePresence({ id: i }));
+    }
+
+    if (isOwnSpot) {
+      return deletePresence(presence);
+    }
+
+    return null;
+  };
+
+  const [contextualMenu, setContextualMenu] = useState(false);
+  const [anchor, setAnchor] = useState(null);
+
+  const fullDay = () => {
+    handleClick(FULLDAY_PERIOD);
+  };
+  const morningOnly = () => {
+    handleClick(MORNING_PERIOD);
+  };
+  const afternoonOnly = () => {
+    handleClick(AFTERNOON_PERIOD);
+  };
+
+  const contextualMenuItems = [
+    { item: 'Journée entière', action: fullDay },
+    { item: 'Matinée uniquement', action: morningOnly },
+    { item: 'Après-midi uniquement', action: afternoonOnly },
+  ];
 
   return (
     <>
@@ -191,30 +314,38 @@ const SpotButton = ({
           draggable={Boolean(edit)}
           onMouseDown={edit && handleMouseDown(spot)}
           onDragEnd={edit && handleDragEnd}
-          onClick={() => {
-            if (edit) { return null; }
-
-            if (!isOccupied && !isLocked) {
-              const [firstId, ...extraneous] = dayPresences
-                ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
-                ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
-                ?.filter(() => !isCumulative)
-                ?.map(({ id }) => id);
-
-              setPresence({ id: firstId, day, tri, spot: spotId, plan: place });
-              extraneous.forEach(i => deletePresence({ id: i }));
-            }
-
-            if (isOwnSpot) {
-              return deletePresence(presence);
-            }
-
-            return null;
+          onClick={fullDay}
+          onContextMenu={event => {
+            event.preventDefault();
+            setContextualMenu(true);
+            console.log(event.target);
+            setAnchor(event.target);
           }}
         >
-          {(!edit && presence?.tri) || spotId}
+          {/* <Grid container>
+            <Grid
+              item
+              className={clsx({
+                [classes.top]: isMorning,
+                [classes.fullSpot]: isFullDay,
+              })}
+            >
+              {(isMorning || isFullDay) && ((!edit && presence?.tri) || spotId)}
+            </Grid>
+            {!isFullDay && (<Divider className={classes.divider} />)}
+            <Grid
+              item
+              className={clsx({
+                [classes.bottom]: isAfternoon,
+              })}
+            >
+              {isAfternoon && ((!edit && presence?.tri) || spotId)}
+            </Grid>
+          </Grid> */}
+          {((!edit && presence?.tri) || spotId)}
         </Fab>
       </CustomTooltip>
+      {contextualMenu && (<ContextualMenu anchor={anchor} title="Réserver pour :" items={contextualMenuItems} />)}
     </>
   );
 };
