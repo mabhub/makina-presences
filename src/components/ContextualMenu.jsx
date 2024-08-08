@@ -1,4 +1,4 @@
-import { Menu, MenuItem, Typography } from '@mui/material';
+import { Divider, Menu, MenuItem, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -18,12 +18,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const ContextualMenu = ({ anchor, title, items }) => {
+const ContextualMenu = ({ anchor, title, items, onClose }) => {
   const classes = useStyles();
 
   const [anchorEl, setAnchorEl] = useState(anchor);
 
   const handleClose = () => {
+    onClose(false);
     setAnchorEl(null);
   };
 
@@ -41,14 +42,20 @@ const ContextualMenu = ({ anchor, title, items }) => {
       MenuListProps={{ sx: { py: 0.5 } }}
     >
       {title && (<Typography className={classes.title}>{title}</Typography>)}
-      {items.map(({ item, action }) => (
-        <MenuItem
-          key={item}
-          className={classes.actions}
-          onClick={() => { handleClick(action); }}
-          component="button"
-        >{item}
-        </MenuItem>
+      {items.map(({ item, action, disabled = false, separator = false }) => (
+        separator
+          ? <Divider key={item} />
+          : (
+            <MenuItem
+              key={item}
+              className={classes.actions}
+              onClick={() => { handleClick(action); }}
+              component="button"
+              disabled={disabled}
+            >{item}
+            </MenuItem>
+          )
+
       ))}
     </Menu>
   );
