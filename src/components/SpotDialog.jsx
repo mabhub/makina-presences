@@ -1,28 +1,59 @@
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import createPersistedState from 'use-persisted-state';
 
 import {
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
+  Divider,
   FormControl,
   InputLabel,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
   Select,
   Tab,
   Tabs,
+  ToggleButton,
+  ToggleButtonGroup,
   useMediaQuery,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { Brightness4, Brightness5, Brightness7, ExpandLess, ExpandMore, Settings } from '@mui/icons-material';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
+import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
+  buttonGroup: {
+    marginBottom: theme.spacing(2),
+  },
+  toggleLabel: {
+    textTransform: 'none',
+  },
+  toggleIcon: {
+    marginRight: 7,
+    fill: 'currentColor',
+  },
+  optionsWrapper: {
+    marginTop: theme.spacing(1),
+  },
+  optionSummary: {
+    marginLeft: '-16px',
+    marginRight: '-16px',
+    '&.MuiExpansionPanel-root:before': {
+      display: 'none',
+    },
+  },
 }));
 const useFavoritesState = createPersistedState('favorites');
 
@@ -38,6 +69,9 @@ const SpotDialog = ({
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
 
+  const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -45,6 +79,9 @@ const SpotDialog = ({
   const isoDate = dayjs(date).format('YYYY-MM-DD');
   const spotPresences = presences
     .filter(({ day: d }) => (d === isoDate))
+    .filter(({ period }) => (periodPref === FULLDAY_PERIOD
+      ? true
+      : (period === periodPref || period === FULLDAY_PERIOD)))
     .reduce((acc, { spot, tri }) => ({
       ...acc,
       [spot]: tri,
@@ -103,17 +140,27 @@ const SpotDialog = ({
   };
 
   const handleOk = () => {
-    onClose(selectedValue, selectedPlace);
+    onClose(selectedValue, selectedPlace, periodPref);
   };
 
   const handleChange = event => {
+    console.log(event.target.value);
     setSelectedValue(event.target.value);
   };
 
   const handleTabChange = (event, newPlace) => {
     setSelectedPlace(newPlace);
     handleChange({ target: { value: '' } });
+    setSelectedValue('');
   };
+
+  useEffect(() => {
+    if (defaultFavoriteSpot) {
+      setSelectedValue(defaultFavoriteSpot.Identifiant);
+    } else {
+      setSelectedValue('');
+    }
+  }, [periodPref]);
 
   return (
     <Dialog
@@ -143,6 +190,62 @@ const SpotDialog = ({
       )}
 
       <DialogContent dividers>
+        {fullScreen ? displayFavorite && (
+          <ToggleButtonGroup
+            value={periodPref}
+            exclusive
+            size="small"
+            className={classes.buttonGroup}
+            fullWidth
+          >
+            <ToggleButton onClick={() => setPeriodPref(FULLDAY_PERIOD)} value={FULLDAY_PERIOD}>
+              <Brightness7 className={classes.toggleIcon} />
+              <span className={classes.toggleLabel}>Journée</span>
+            </ToggleButton>
+            <ToggleButton onClick={() => setPeriodPref(MORNING_PERIOD)} value={MORNING_PERIOD}>
+              <Brightness5 className={classes.toggleIcon} />
+              <span className={classes.toggleLabel}>Matinée</span>
+            </ToggleButton>
+            <ToggleButton onClick={() => setPeriodPref(AFTERNOON_PERIOD)} value={AFTERNOON_PERIOD}>
+              <Brightness4 className={classes.toggleIcon} />
+              <span className={classes.toggleLabel}>Après-midi</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        ) : displayFavorite && (
+          <List dense disablePadding>
+            <ListItemButton onClick={() => { setOptionsOpen(!optionsOpen); }} disableGutters>
+              <ListItemIcon><Settings /></ListItemIcon>
+              <ListItemText primary="Options" sx={{ ml: '-24px' }} />
+              {optionsOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+            <Collapse in={optionsOpen} timeout="auto" unmountOnExit>
+              <List component="div" sx={{ pl: '18px' }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Période</InputLabel>
+                  <Select
+                    label="Période"
+                    value={periodPref}
+                    onChange={event => { setPeriodPref(event.target.value); }}
+                  >
+                    <MenuItem value={FULLDAY_PERIOD}>Journée</MenuItem>
+                    <MenuItem value={MORNING_PERIOD}>Matiné</MenuItem>
+                    <MenuItem value={AFTERNOON_PERIOD}>Après-midi</MenuItem>
+                  </Select>
+                </FormControl>
+              </List>
+            </Collapse>
+          </List>
+        )}
+
+        {displayFavorite && (
+        <Divider sx={{
+          mb: t => t.spacing(2.5),
+          mt: t => t.spacing(1),
+          mx: '-24px',
+        }}
+        />
+        )}
+
         <FormControl variant="outlined" fullWidth>
           <InputLabel htmlFor="spot-native-select">Poste</InputLabel>
           <Select

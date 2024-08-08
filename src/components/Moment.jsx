@@ -66,12 +66,13 @@ const Moment = ({
     >
       {deduplicate(presences, 'tri')
         .sort(({ tri: a }, { tri: b }) => (a.localeCompare(b)))
-        .map(({ id, tri: t, fake }) => (
+        .map(({ id, tri: t, fake, period }) => (
           <TriPresence
             key={id}
             tri={t}
             alt={fake}
             className={classes.tri}
+            period={period}
           />
         ))}
     </Grid>
