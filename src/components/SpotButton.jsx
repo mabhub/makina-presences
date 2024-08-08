@@ -220,10 +220,12 @@ const SpotButton = ({
 
   useEffect(() => {
     if (isConflict) {
-      // onConflict(isConflict,
-      //   fullDays.find(({ tri: t }) => tri !== t).tri,
-      //   spotId);
-      // deletePresence({ id: fullDays.find(({ tri: t }) => t === tri).id });
+      onConflict(
+        isConflict,
+        fullDays.find(({ tri: t }) => tri !== t).tri,
+        spotId,
+      );
+      deletePresence({ id: fullDays.find(({ tri: t }) => t === tri).id });
     }
   }, [isConflict]);
 
@@ -325,15 +327,15 @@ const SpotButton = ({
           onMouseDown={edit && handleMouseDown(spot)}
           onDragEnd={edit && handleDragEnd}
           onClick={event => {
-            if (mornings.length === 1 && mornings[0].tri !== tri) {
-              afternoonOnly();
-            } else if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
-              morningOnly();
-            } else if (sameLowC(afternoons[0]?.tri, tri) || sameLowC(mornings[0]?.tri, tri)) {
-              handleClick(currentTriPeriod());
-            } else {
-              fullDay();
+            if (isCumulative && currentTriPeriod()) return unsubscribe();
+            if (mornings.length === 1 && mornings[0].tri !== tri) return afternoonOnly();
+            if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
+              return morningOnly();
             }
+            if (sameLowC(afternoons[0]?.tri, tri) || sameLowC(mornings[0]?.tri, tri)) {
+              return handleClick(currentTriPeriod());
+            }
+            return fullDay();
           }}
           onContextMenu={event => {
             event.preventDefault();

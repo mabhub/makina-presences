@@ -154,7 +154,7 @@ const Plan = ({ edit }) => {
             alt
             className={classes.tri}
           />
-          vient de réserver le poste <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
+          vient de réserver <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
         </Alert>
       </Snackbar>
     </>

@@ -62,10 +62,12 @@ const SpotButtonAfternoon = ({ presences, onConflict, spot, disabled }) => {
 
   useEffect(() => {
     if (isConflict) {
-      // onConflict(isConflict,
-      //   presences.find(({ tri: t }) => tri !== t).tri,
-      //   spotId);
-      // deletePresence({ id: presences.find(({ tri: t }) => t === tri).id });
+      onConflict(
+        isConflict,
+        presences.find(({ tri: t }) => tri !== t).tri,
+        spotId,
+      );
+      deletePresence({ id: presences.find(({ tri: t }) => t === tri).id });
     }
   }, [isConflict]);
 
