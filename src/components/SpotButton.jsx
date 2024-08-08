@@ -15,14 +15,16 @@ import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import SpotDescription from './SpotDescription';
 import ContextualMenu from './ContextualMenu';
+import SpotButtonMorning from './SpotButtonMorning';
+import SpotButtonAfternoon from './SpotButtonAfternoon';
 
 const useTriState = createPersistedState('tri');
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
-const FULLDAY_PERIOD = 'fullday';
-const MORNING_PERIOD = 'morning';
-const AFTERNOON_PERIOD = 'afternoon';
+export const FULLDAY_PERIOD = 'fullday';
+export const MORNING_PERIOD = 'morning';
+export const AFTERNOON_PERIOD = 'afternoon';
 
 const useStyles = makeStyles(theme => ({
   spot: {
@@ -36,49 +38,52 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.bg,
     color: theme.palette.primary.fg,
     textTransform: 'none',
-    opacity: 0.3,
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     fontSize: '0.75em',
-    '&.MuiButtonBase-root:hover': {
-      backgroundColor: 'transparent',
+  },
+
+  fullDayAvailable: {
+    opacity: 0.3,
+
+    '&:hover ': {
+      background: alpha(theme.palette.primary.fg, 0.5),
     },
   },
 
-  visible: {
-    opacity: 1,
+  morningAvailable: {
+    '&:hover *[class^="makeStyles-top"]': {
+      background: alpha(theme.palette.primary.fg, 0.5),
+      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
+      opacity: 0.5,
+    },
+  },
+  afternoonAvailable: {
+    '&:hover *[class^="makeStyles-bottom"]': {
+      background: alpha(theme.palette.primary.fg, 0.5),
+      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
+      opacity: 0.5,
+    },
   },
 
-  fullSpot: {
-    width: 35,
-    height: 35,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+  morning: {
+    '&:hover *[class^="makeStyles-top"]': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.25),
+      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
   },
-
-  top: {
-    position: 'absolute',
-    top: 0,
-    height: 15,
-    width: '100%',
-    textAlign: 'center',
-    lineHeight: 'normal',
-    all: 'unset',
+  afternoon: {
+    cursor: 'pointer',
+    '&:hover *[class^="makeStyles-bottom"]': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.25),
+      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
   },
 
   divider: {
     width: '100%',
-  },
-
-  bottom: {
-    position: 'absolute',
-    bottom: 0,
-    height: 15,
-    width: '100%',
-    textAlign: 'center',
-    lineHeight: 'normal',
+    zIndex: 1,
   },
 
   locked: {
@@ -89,29 +94,21 @@ const useStyles = makeStyles(theme => ({
     borderColor: 'silver !important',
   },
 
-  conflict: {
-    backgroundColor: 'red !important',
-  },
-
-  empty: {
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.fg, 0.25),
-    },
-  },
-
   occupied: {
     backgroundColor: alpha(theme.palette.primary.main, 0.25),
     color: lighten(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.75 : 0),
+    opacity: 1,
     cursor: 'default',
     boxShadow: 'none',
-    // '&:hover': {
-    //   backgroundColor: alpha(theme.palette.primary.main, 0.25),
-    // },
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.25),
+    },
   },
 
-  ownSpot: {
+  fullDay: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
+    opacity: 1,
     '&:hover': {
       backgroundColor: alpha(theme.palette.primary.main, 0.5),
     },
@@ -187,88 +184,88 @@ const SpotButton = ({
 
   const { Bloqué, Identifiant: spotId, x, y, Type, Description, Cumul } = Spot;
 
-  const [presence, ...rest] = spotPresences[spotId] || [];
-
-  let reservationPeriod = FULLDAY_PERIOD;
-  if (presence) {
-    reservationPeriod = presence.period;
-  }
-
   const getPresence = () => {
-    const [presence] = spotPresences[spotId] || [];
+    const spotIdPresences = spotPresences[spotId] || [];
 
-    let morningPresence;
-    let afternoonPresence;
-    if (presence && presence.period !== FULLDAY_PERIOD) {
-      morningPresence = (spotPresences[spotId] || [])
-        .find(p => p.period === MORNING_PERIOD);
-      afternoonPresence = (spotPresences[spotId] || [])
-        .find(p => p.period === AFTERNOON_PERIOD);
+    const morningPresences = spotIdPresences.filter(p => p.period === MORNING_PERIOD);
+    const afternoonPresences = spotIdPresences.filter(p => p.period === AFTERNOON_PERIOD);
+    const fullDayPresences = spotIdPresences.filter(p => p.period === FULLDAY_PERIOD);
 
-      return [morningPresence, afternoonPresence];
-    }
-
-    return [presence];
+    return [fullDayPresences, morningPresences, afternoonPresences];
   };
 
-  // TODO
-  // const isConflict = () => {
-  //   const presence = getPresence();
-  //   if(presence.length == 1) {
-  //     const [_, ...rest] = spotPresences[spotId] || [];
-  //     return rest.length && rest.some(({ period }) => period === presence[0].period);
-  //   }
-  //   return (spotPresences[spotId] || [])
-  //     .some(({ period, t }) => period === (presence[0].period || presence[1].period) && t !==tri)
-  // }
+  const currentTriPeriod = () => {
+    const spoIdtPresences = getPresence();
+    if (spoIdtPresences[0].some(({ tri: t }) => t === tri)) return FULLDAY_PERIOD;
+    if (spoIdtPresences[1].some(({ tri: t }) => t === tri)) return MORNING_PERIOD;
+    if (spoIdtPresences[2].some(({ tri: t }) => t === tri)) return AFTERNOON_PERIOD;
+    return undefined;
+  };
+
+  const [fullDays, mornings, afternoons] = getPresence();
+
+  // console.log(spotId);
+  // console.log(getPresence());
+
+  const [presenceFullDay, ...restFullDay] = fullDays;
+  const [presenceMorning] = mornings;
+  const [presenceAfternon] = afternoons;
 
   const isLocked = Boolean(Bloqué);
-  const isConflict = Boolean(rest.length
-    && rest.some(({ period }) => period === reservationPeriod));
-  const isOccupied = Boolean(presence);
-  const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
+  const isConflict = Boolean(restFullDay.length);
+  const isOccupied = Boolean(presenceFullDay || (mornings.length === 1 && afternoons.length === 1));
+  const isOwnSpot = Boolean(sameLowC(presenceFullDay?.tri, tri)
+    || sameLowC(presenceMorning?.tri, tri)
+    || sameLowC(presenceAfternon?.tri, tri));
   const isCumulative = Boolean(Cumul);
-
-  const isMorning = reservationPeriod === MORNING_PERIOD;
-  const isAfternoon = reservationPeriod === AFTERNOON_PERIOD;
-  const isFullDay = !isMorning && !isAfternoon;
-
-  useEffect(() => {
-    if (isConflict) {
-      onConflict(isConflict,
-        spotPresences[spotId].find(({ tri: t }) => tri !== t).tri,
-        spotId);
-      deletePresence({ id: dayPresences.find(({ tri: t }) => t === tri).id });
-    }
-  }, [isConflict]);
 
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
-  const tooltip = <SpotDescription md={Description} spot={Spot} />;
+  useEffect(() => {
+    console.log('conflict changed', isConflict);
+    if (isConflict) {
+      // onConflict(isConflict,
+      //   fullDays.find(({ tri: t }) => tri !== t).tri,
+      //   spotId);
+      // deletePresence({ id: fullDays.find(({ tri: t }) => t === tri).id });
+    }
+  }, [isConflict]);
+
+  const removePresence = period => {
+    if (period === FULLDAY_PERIOD) deletePresence(presenceFullDay);
+    if (period === MORNING_PERIOD) deletePresence(presenceMorning);
+    if (period === AFTERNOON_PERIOD) deletePresence(presenceAfternon);
+  };
+
+  const [contextualMenu, setContextualMenu] = useState(false);
+  const [anchor, setAnchor] = useState(null);
+
+  const unsubscribe = () => {
+    removePresence(currentTriPeriod());
+  };
 
   const handleClick = p => {
     if (edit) { return null; }
 
-    if (!isOccupied && !isLocked) {
+    if ((!isOccupied && !isLocked) || (currentTriPeriod())) {
       const [firstId, ...extraneous] = dayPresences
         ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
         ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
         ?.filter(() => !isCumulative)
         ?.map(({ id }) => id);
-
       setPresence({ id: firstId, day, tri, spot: spotId, plan: place, period: p });
       extraneous.forEach(i => deletePresence({ id: i }));
     }
 
-    if (isOwnSpot) {
-      return deletePresence(presence);
+    const [previousPeriod] = dayPresences
+      .filter(({ tri: t }) => sameLowC(t, tri))
+      .map(({ period }) => period);
+    if (isOwnSpot && previousPeriod === p) {
+      return unsubscribe();
     }
 
     return null;
   };
-
-  const [contextualMenu, setContextualMenu] = useState(false);
-  const [anchor, setAnchor] = useState(null);
 
   const fullDay = () => {
     handleClick(FULLDAY_PERIOD);
@@ -281,10 +278,20 @@ const SpotButton = ({
   };
 
   const contextualMenuItems = [
-    { item: 'Journée entière', action: fullDay },
-    { item: 'Matinée uniquement', action: morningOnly },
-    { item: 'Après-midi uniquement', action: afternoonOnly },
+    { item: 'Journée entière',
+      action: fullDay,
+      disabled: mornings.filter(({ tri: t }) => !sameLowC(t, tri)).length > 0
+        || afternoons.filter(({ tri: t }) => !sameLowC(t, tri)).length > 0
+        || fullDays.filter(({ tri: t }) => sameLowC(t, tri)).length === 1 },
+    { item: 'Matinée uniquement', action: morningOnly, disabled: mornings.length > 0 },
+    { item: 'Après-midi uniquement', action: afternoonOnly, disabled: afternoons.length > 0 },
+    { item: 'separator', separator: true },
+    { item: 'Se désinscrire', action: unsubscribe, disabled: Boolean(!currentTriPeriod()) },
   ];
+
+  const title = 'Réserver pour :';
+
+  const tooltip = <SpotDescription md={Description} spot={Spot} />;
 
   return (
     <>
@@ -297,11 +304,17 @@ const SpotButton = ({
         <Fab
           className={clsx({
             [classes.spot]: true,
-            [classes.conflict]: isConflict,
+            [classes.fullDayAvailable]: mornings.length === 0 && afternoons.length === 0,
             [classes.occupied]: isOccupied && !isOwnSpot,
-            [classes.ownSpot]: isOwnSpot,
+            [classes.fullDay]: currentTriPeriod() === FULLDAY_PERIOD,
+            [classes.morning]: currentTriPeriod() === MORNING_PERIOD,
+            [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD,
             [classes.locked]: isLocked,
-            [`hl-${presence?.tri}`]: presence?.tri,
+            [`hl-${presenceFullDay?.tri}`]: presenceFullDay?.tri,
+            [classes.morningAvailable]: mornings.length === 0
+              && currentTriPeriod() !== AFTERNOON_PERIOD,
+            [classes.afternoonAvailable]: afternoons.length === 0
+              && currentTriPeriod() !== MORNING_PERIOD,
           })}
           disabled={isPast}
           component={canClick ? 'div' : 'button'}
@@ -309,43 +322,68 @@ const SpotButton = ({
             left: `${x}px`,
             top: `${y}px`,
             borderColor: Type?.color?.replace('-', ''),
+            // borderImage: `linear-gradient(to bottom, ${Type?.color} 50%, red 50%) 1`,
           }}
           size="small"
           draggable={Boolean(edit)}
           onMouseDown={edit && handleMouseDown(Spot)}
           onDragEnd={edit && handleDragEnd}
-          onClick={fullDay}
+          onClick={event => {
+            if (mornings.length === 1 && mornings[0].tri !== tri) {
+              afternoonOnly();
+            } else if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
+              morningOnly();
+            } else if (sameLowC(afternoons[0]?.tri, tri) || sameLowC(mornings[0]?.tri, tri)) {
+              handleClick(currentTriPeriod());
+            } else {
+              fullDay();
+            }
+          }}
           onContextMenu={event => {
             event.preventDefault();
+
+            if (event.ctrlKey) return afternoonOnly();
+
             setContextualMenu(true);
-            console.log(event.target);
             setAnchor(event.target);
+            return null;
           }}
         >
-          {/* <Grid container>
-            <Grid
-              item
-              className={clsx({
-                [classes.top]: isMorning,
-                [classes.fullSpot]: isFullDay,
-              })}
-            >
-              {(isMorning || isFullDay) && ((!edit && presence?.tri) || spotId)}
-            </Grid>
-            {!isFullDay && (<Divider className={classes.divider} />)}
-            <Grid
-              item
-              className={clsx({
-                [classes.bottom]: isAfternoon,
-              })}
-            >
-              {isAfternoon && ((!edit && presence?.tri) || spotId)}
-            </Grid>
-          </Grid> */}
-          {((!edit && presence?.tri) || spotId)}
+          {afternoons.length === 0 && mornings.length === 0
+            ? ((!edit && presenceFullDay?.tri) || spotId)
+            : (
+              <Grid container>
+                <SpotButtonMorning
+                  presences={mornings}
+                  onConflict={onConflict}
+                  spot={Spot}
+                  disabled={isPast}
+                />
+                <Divider
+                  className={classes.divider}
+                  sx={{
+                    borderColor: Type?.color?.replace('-', ''),
+                  }}
+                />
+                <SpotButtonAfternoon
+                  presences={afternoons}
+                  onConflict={onConflict}
+                  spot={Spot}
+                  disabled={isPast}
+                />
+              </Grid>
+            )}
+
         </Fab>
       </CustomTooltip>
-      {contextualMenu && (<ContextualMenu anchor={anchor} title="Réserver pour :" items={contextualMenuItems} />)}
+      {contextualMenu && (
+        <ContextualMenu
+          anchor={anchor}
+          title={title}
+          items={contextualMenuItems}
+          onClose={setContextualMenu}
+        />
+      )}
     </>
   );
 };

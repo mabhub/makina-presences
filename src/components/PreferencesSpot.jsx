@@ -42,7 +42,10 @@ const PreferencesSpot = () => {
 
   const handleDialogClose = (value, spotPlace) => {
     setDialogOpen(false);
-    if (!value || favorites.includes(value)) return;
+    if (!value || favorites
+      .filter(({ place: p }) => p === spotPlace)
+      .map(({ name }) => name)
+      .includes(value)) return;
     setFavorites([
       ...favorites,
       {
