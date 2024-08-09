@@ -204,9 +204,6 @@ const SpotButton = ({
 
   const [fullDays, mornings, afternoons] = getPresence();
 
-  console.log(spotId);
-  console.log(getPresence());
-
   const [presenceFullDay, ...restFullDay] = fullDays;
   const [presenceMorning] = mornings;
   const [presenceAfternon] = afternoons;
@@ -222,7 +219,6 @@ const SpotButton = ({
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
   useEffect(() => {
-    console.log('conflict changed', isConflict);
     if (isConflict) {
       onConflict(isConflict,
         fullDays.find(({ tri: t }) => tri !== t).tri,
@@ -259,6 +255,7 @@ const SpotButton = ({
     }
 
     const [previousPeriod] = dayPresences
+      .filter(({ spot: s }) => !isCumulativeSpot(s))
       .filter(({ tri: t }) => sameLowC(t, tri))
       .map(({ period }) => period);
     if (isOwnSpot && previousPeriod === p) {
@@ -330,9 +327,10 @@ const SpotButton = ({
           onMouseDown={edit && handleMouseDown(Spot)}
           onDragEnd={edit && handleDragEnd}
           onClick={event => {
-            console.log(isCumulative);
             if (isCumulative && currentTriPeriod()) return unsubscribe();
-            if (mornings.length === 1 && mornings[0].tri !== tri) return afternoonOnly();
+            if (mornings.length === 1 && mornings[0].tri !== tri) {
+              return afternoonOnly();
+            }
             if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
               return morningOnly();
             }
