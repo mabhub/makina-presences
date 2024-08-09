@@ -98,8 +98,7 @@ const SpotDialog = ({
       ({ Identifiant: a }, { Identifiant: b }) => favoriteName.indexOf(a) - favoriteName.indexOf(b),
     );
 
-  const defaultFavoriteSpot = favoriteSpots[favoriteSpots
-    .findIndex(({ Identifiant: spot }) => !spotPresences[spot])];
+  const defaultFavoriteSpot = favoriteSpots.find(({ Identifiant: spot }) => !spotPresences[spot]);
 
   const [selectedValue, setSelectedValue] = React.useState((
     defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
@@ -144,7 +143,6 @@ const SpotDialog = ({
   };
 
   const handleChange = event => {
-    console.log(event.target.value);
     setSelectedValue(event.target.value);
   };
 
