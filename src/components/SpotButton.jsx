@@ -257,6 +257,7 @@ const SpotButton = ({
     }
 
     const [previousPeriod] = dayPresences
+      .filter(({ spot: s }) => !isCumulativeSpot(s))
       .filter(({ tri: t }) => sameLowC(t, tri))
       .map(({ period }) => period);
     if (isOwnSpot && previousPeriod === p) {
@@ -328,7 +329,9 @@ const SpotButton = ({
           onDragEnd={edit && handleDragEnd}
           onClick={event => {
             if (isCumulative && currentTriPeriod()) return unsubscribe();
-            if (mornings.length === 1 && mornings[0].tri !== tri) return afternoonOnly();
+            if (mornings.length === 1 && mornings[0].tri !== tri) {
+              return afternoonOnly();
+            }
             if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
               return morningOnly();
             }

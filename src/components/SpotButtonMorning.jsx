@@ -80,7 +80,7 @@ const SpotButtonMorning = ({ presences, onConflict, spot, disabled }) => {
         [classes.occupied]: isOccupied,
         [classes.conflict]: isConflict,
         [classes.disabled]: disabled,
-        [`hl-${presence?.tri}`]: presence?.tri,
+        [`hl-${presence?.tri}`]: presence?.tri && !disabled,
       })}
     >
       {presence?.tri}
