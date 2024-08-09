@@ -19,7 +19,7 @@ import SpotDescription from './SpotDescription';
 
 const useTriState = createPersistedState('tri');
 
-const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
+const { VITE_TABLE_ID_SPOTS: spotsTableId, VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
 
 export const FULLDAY_PERIOD = 'fullday';
 export const MORNING_PERIOD = 'morning';
@@ -340,6 +340,7 @@ const SpotButton = ({
             return fullDay();
           }}
           onContextMenu={event => {
+            if (enableHalfDay === 'false') return null;
             event.preventDefault();
 
             if (event.ctrlKey) return afternoonOnly();
@@ -354,7 +355,7 @@ const SpotButton = ({
             : (
               <Grid container>
                 {['top', 'bottom'].map((position, i) => (
-                  <>
+                  <React.Fragment key={position}>
                     <SpotButtonHalfDay
                       presences={position === 'top' ? mornings : afternoons}
                       onConflict={onConflict}
@@ -370,7 +371,7 @@ const SpotButton = ({
                         }}
                       />
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </Grid>
             )}
