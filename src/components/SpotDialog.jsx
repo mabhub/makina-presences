@@ -33,6 +33,8 @@ import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
 
+const { VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
+
 const useStyles = makeStyles(theme => ({
   buttonGroup: {
     marginBottom: theme.spacing(2),
@@ -188,7 +190,7 @@ const SpotDialog = ({
       )}
 
       <DialogContent dividers>
-        {fullScreen ? displayFavorite && (
+        {fullScreen ? displayFavorite && enableHalfDay === 'true' && (
           <ToggleButtonGroup
             value={periodPref}
             exclusive
@@ -209,7 +211,7 @@ const SpotDialog = ({
               <span className={classes.toggleLabel}>Après-midi</span>
             </ToggleButton>
           </ToggleButtonGroup>
-        ) : displayFavorite && (
+        ) : displayFavorite && enableHalfDay === 'true' && (
           <List dense disablePadding>
             <ListItemButton onClick={() => { setOptionsOpen(!optionsOpen); }} disableGutters>
               <ListItemIcon><Settings /></ListItemIcon>
@@ -235,7 +237,7 @@ const SpotDialog = ({
           </List>
         )}
 
-        {displayFavorite && (
+        {displayFavorite && enableHalfDay === 'true' && (
         <Divider sx={{
           mb: t => t.spacing(2.5),
           mt: t => t.spacing(1),
