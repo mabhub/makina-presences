@@ -1,0 +1,18 @@
+{
+    "short_name" : "Présence",
+    "name" : "Makina Présence",
+    "icons": [
+        {
+            "src": "presences.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "presences.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "display": "fullscreen",
+    "start_url": "/"
+}
