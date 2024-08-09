@@ -13,10 +13,9 @@ import withStyles from '@mui/styles/withStyles';
 import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
-import SpotDescription from './SpotDescription';
 import ContextualMenu from './ContextualMenu';
-import SpotButtonMorning from './SpotButtonMorning';
-import SpotButtonAfternoon from './SpotButtonAfternoon';
+import SpotButtonHalfDay from './SpotButtonHalfDay';
+import SpotDescription from './SpotDescription';
 
 const useTriState = createPersistedState('tri');
 
@@ -354,24 +353,25 @@ const SpotButton = ({
             ? ((!edit && presenceFullDay?.tri) || spotId)
             : (
               <Grid container>
-                <SpotButtonMorning
-                  presences={mornings}
-                  onConflict={onConflict}
-                  spot={Spot}
-                  disabled={isPast}
-                />
-                <Divider
-                  className={classes.divider}
-                  sx={{
-                    borderColor: Type?.color?.replace('-', ''),
-                  }}
-                />
-                <SpotButtonAfternoon
-                  presences={afternoons}
-                  onConflict={onConflict}
-                  spot={Spot}
-                  disabled={isPast}
-                />
+                {['top', 'bottom'].map((position, i) => (
+                  <>
+                    <SpotButtonHalfDay
+                      presences={position === 'top' ? mornings : afternoons}
+                      onConflict={onConflict}
+                      spot={Spot}
+                      disabled={isPast}
+                      position={position}
+                    />
+                    {i === 0 && (
+                      <Divider
+                        className={classes.divider}
+                        sx={{
+                          borderColor: Type?.color?.replace('-', ''),
+                        }}
+                      />
+                    )}
+                  </>
+                ))}
               </Grid>
             )}
 

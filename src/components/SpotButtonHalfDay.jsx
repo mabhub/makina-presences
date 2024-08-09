@@ -10,9 +10,15 @@ import usePresences from '../hooks/usePresences';
 const useTriState = createPersistedState('tri');
 
 const useStyles = makeStyles(theme => ({
+  top: {
+    top: 0,
+  },
   bottom: {
+    bottom: 0,
+  },
+
+  common: {
     position: 'absolute',
-    bottom: '0',
     width: '100%',
     height: '50%',
     color: theme.palette.primary.fg,
@@ -46,7 +52,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const SpotButtonAfternoon = ({ presences, onConflict, spot, disabled }) => {
+function SpotButtonHaldDay ({ presences, onConflict, spot, disabled, position }) {
   const classes = useStyles();
   const [tri] = useTriState('');
   const { place } = useParams();
@@ -74,7 +80,9 @@ const SpotButtonAfternoon = ({ presences, onConflict, spot, disabled }) => {
   return (
     <Box
       className={clsx({
-        [classes.bottom]: true,
+        [classes.top]: position === 'top',
+        [classes.bottom]: position === 'bottom',
+        [classes.common]: true,
         [classes.ownSpot]: isOwnSpot,
         [classes.occupied]: isOccupied,
         [classes.conflict]: isConflict,
@@ -85,6 +93,6 @@ const SpotButtonAfternoon = ({ presences, onConflict, spot, disabled }) => {
       {presence?.tri}
     </Box>
   );
-};
+}
 
-export default React.memo(SpotButtonAfternoon);
+export default React.memo(SpotButtonHaldDay);
