@@ -21,8 +21,6 @@ const useTriState = createPersistedState('tri');
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId, VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
 
-console.log(Boolean(enableHalfDay));
-
 export const FULLDAY_PERIOD = 'fullday';
 export const MORNING_PERIOD = 'morning';
 export const AFTERNOON_PERIOD = 'afternoon';
