@@ -15,8 +15,8 @@ const useStyles = makeStyles(theme => {
       width: '100%',
       height: '100%',
       position: 'relatve',
-      // backgroundSize: '20px 20px',
-      // backgroundImage: 'linear-gradient(to right, #f5f5f5 1px, transparent 1px), linear-gradient(to bottom, #f5f5f5 1px, transparent 1px)',
+      backgroundSize: '20px 20px',
+      backgroundImage: 'linear-gradient(to right, #f5f5f5 1px, transparent 1px), linear-gradient(to bottom, #f5f5f5 1px, transparent 1px)',
     },
     planWrapper: {
       // border: '1px solid red',
@@ -42,30 +42,58 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-const useUpdatedSpot = createPersistedState('updatedSpot');
+const useUpdatedStack = createPersistedState('updateStack');
 
-function EditPlan ({ handleClick }) {
+function EditPlan ({ handleClick, updatedSpot }) {
   const classes = useStyles();
   const { place } = useParams();
   const plans = usePlans();
 
-  const [updatedSpot] = useUpdatedSpot({});
-  const [updateStack, setUpdatedStack] = useState([]);
+  const defaultStack = plans
+    .filter(({ Brouillon }) => !Brouillon)
+    .reduce((acc, curr) => {
+      const { Name } = curr;
+      if (!Object.hasOwn(acc, Name)) {
+        return {
+          ...acc,
+          [Name]: [],
+        };
+      }
+      return acc;
+    }, {});
+
+  const [updateStack, setUpdatedStack] = useUpdatedStack({});
 
   useEffect(() => {
-    setUpdatedStack([
-      ...updateStack
-        .filter(({ Identifiant: spotId }, index) =>
-          index !== updateStack.length - 1 || spotId !== updatedSpot.Identifiant),
-      updatedSpot,
-    ]);
+    if (!Object.keys(updateStack).length) {
+      setUpdatedStack({
+        ...defaultStack,
+      });
+    }
+  }, [plans]);
+
+  useEffect(() => {
+    // Prevent adding an empty update on start
+    if (Object.keys(updatedSpot).length) {
+      setUpdatedStack({
+        ...updateStack,
+        [place]: [
+          ...updateStack[place].filter(
+            ({ Identifiant: spotId }, index) =>
+              index !== updateStack[place].length - 1 || spotId !== updatedSpot.Identifiant,
+          ),
+          updatedSpot,
+        ],
+      });
+    }
   }, [updatedSpot]);
 
   const spots = useSpots(place)
     .map(spot => {
-      const idUpdateStack = updateStack.map(({ Identifiant: spotId }) => spotId);
+      const idUpdateStack = updateStack[place]
+        .map(({ Identifiant: spotId }) => spotId);
       if (idUpdateStack.includes(spot.Identifiant)) {
-        return updateStack[idUpdateStack.lastIndexOf(spot.Identifiant)];
+        return updateStack[place][idUpdateStack.lastIndexOf(spot.Identifiant)];
       }
       return spot;
     });
