@@ -46,11 +46,16 @@ function AdminPage () {
 
   const [showPanel, setShowPanel] = React.useState(false);
   const [spot, setSelectedSpot] = React.useState({});
+  const [updatedSpot, setUpdatedSpot] = React.useState({});
 
   const handleClick = Spot => {
-    // console.log(Spot);
     setShowPanel(!showPanel);
     setSelectedSpot(Spot);
+  };
+
+  const handleUpdate = Spot => {
+    console.log('admin page');
+    setUpdatedSpot(Spot);
   };
 
   return (
@@ -63,12 +68,12 @@ function AdminPage () {
           </Box>
           <Box className={classes.editSpot}>
             {showPanel && (
-              <SpotPanel spot={spot} onClose={setShowPanel} />
+              <SpotPanel spot={spot} onClose={setShowPanel} handleUpdate={handleUpdate} />
             )}
           </Box>
           <Box className={classes.plan}>
             {Boolean(place) && (
-              <EditPlan handleClick={handleClick} />
+              <EditPlan handleClick={handleClick} updatedSpot={updatedSpot} />
             )}
           </Box>
         </Box>

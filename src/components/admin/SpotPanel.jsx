@@ -23,12 +23,12 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-const useUpdatedSpot = createPersistedState('updatedSpot');
+// const useUpdatedSpot = createPersistedState('updatedSpot');
 
-function SpotPanel ({ spot, onClose }) {
+function SpotPanel ({ spot, onClose, handleUpdate }) {
   const classes = useStyles();
   const fields = useFields(spotsTableId);
-  const [updatedSpot, setUpdatedSpot] = useUpdatedSpot({});
+  // const [updatedSpot, setUpdatedSpot] = useUpdatedSpot({});
 
   const { Identifiant } = spot;
 
@@ -37,10 +37,8 @@ function SpotPanel ({ spot, onClose }) {
     ?.select_options || [];
 
   const [spotInfo, setSpotInfo] = useState(spot);
-  let previousSpotInfo = spot;
 
   const handleChange = (key, value) => {
-    previousSpotInfo = spotInfo;
     setSpotInfo({
       ...spotInfo,
       [key]: value,
@@ -49,10 +47,8 @@ function SpotPanel ({ spot, onClose }) {
 
   useEffect(() => {
     // const diff = Object.keys(previousSpotInfo).filter(k => previousSpotInfo[k] !== spotInfo[k]);
-    // setTimeout(() => {
-    setUpdatedSpot(spotInfo);
-    // }, 3000);
-    // console.log(diff);
+    console.log('spot panel');
+    handleUpdate(spotInfo);
   }, [spotInfo]);
 
   return (
