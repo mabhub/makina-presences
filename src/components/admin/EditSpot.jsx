@@ -22,26 +22,14 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-// const useUpdatedSpot = createPersistedState('updatedSpot');
-
 function EditSpot ({ Spot, onClick = () => {} }) {
   const classes = useStyles();
-  // const [updatedSpot] = useUpdatedSpot({});
 
-  const { Identifiant: spotId, x, y, Type, Description, Cumul } = Spot;
+  const { Identifiant: spotId, x, y, Type } = spot;
 
   const handleClick = () => {
     onClick(Spot);
   };
-
-  // if (updatedSpot.Identifiant === spotId && JSON.stringify(updatedSpot) !== JSON.stringify(Spot)) {
-  //   console.log(spotId, ' changed');
-  //   // console.log(Spot);
-  //   // console.log(JSON.stringify(updatedSpot) !== JSON.stringify(Spot));
-  //   // updatedSpot.map((key, value) => console.log(key, value));
-  //   // Object.keys(updatedSpot).map(key => Spot[key] = updatedSpot[key]);
-  //   // x = 85;
-  // }
 
   return (
     <Fab
