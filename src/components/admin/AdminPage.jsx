@@ -1,11 +1,13 @@
-import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import { Box, Container } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
-import PlanList from './PlanList';
-import EditPlan from './EditPlan';
+import createPersistedState from 'use-persisted-state';
 import LoadIndicator from '../LoadIndicator';
+import EditPlan from './EditPlan';
+import PlanList from './PlanList';
 import SpotPanel from './SpotPanel';
+import usePlans from '../../hooks/usePlans';
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
@@ -40,9 +42,44 @@ const useStyles = makeStyles(theme => {
   };
 });
 
+const useUpdatedStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
+
 function AdminPage () {
   const classes = useStyles();
   const { place } = useParams();
+
+  const plans = usePlans();
+
+  const defaultStack = plans
+    .filter(({ Brouillon }) => !Brouillon)
+    .reduce((acc, curr) => {
+      const { Name } = curr;
+      if (!Object.hasOwn(acc, Name)) {
+        return {
+          ...acc,
+          [Name]: [],
+        };
+      }
+      return acc;
+    }, {});
+
+  const [updateStack, setUpdatedStack] = useUpdatedStack({});
+  const [undidStack, setUndidStack] = useUndidStack({});
+
+  useEffect(() => {
+    // Init the stack of update/undid modification, ordered by location
+    if (!Object.keys(updateStack).length) {
+      setUpdatedStack({
+        ...defaultStack,
+      });
+    }
+    if (!Object.keys(undidStack).length) {
+      setUndidStack({
+        ...defaultStack,
+      });
+    }
+  }, [plans]);
 
   const [showPanel, setShowPanel] = React.useState(false);
   const [spot, setSelectedSpot] = React.useState({});
@@ -54,7 +91,6 @@ function AdminPage () {
   };
 
   const handleUpdate = Spot => {
-    console.log('admin page');
     setUpdatedSpot(Spot);
   };
 
