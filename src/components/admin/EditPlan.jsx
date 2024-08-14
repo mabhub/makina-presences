@@ -7,13 +7,21 @@ import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import EditSpot from './EditSpot';
+import ActionBar from './ActionBar';
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
   return {
-    wrapper: {
+    root: {
       width: '100%',
       height: '100%',
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    wrapper: {
+      width: '100%',
+      flexGrow: '1',
       position: 'relatve',
       backgroundSize: '20px 20px',
       backgroundImage: 'linear-gradient(to right, #f5f5f5 1px, transparent 1px), linear-gradient(to bottom, #f5f5f5 1px, transparent 1px)',
@@ -49,28 +57,7 @@ function EditPlan ({ handleClick, updatedSpot }) {
   const { place } = useParams();
   const plans = usePlans();
 
-  const defaultStack = plans
-    .filter(({ Brouillon }) => !Brouillon)
-    .reduce((acc, curr) => {
-      const { Name } = curr;
-      if (!Object.hasOwn(acc, Name)) {
-        return {
-          ...acc,
-          [Name]: [],
-        };
-      }
-      return acc;
-    }, {});
-
   const [updateStack, setUpdateStack] = useUpdateStack({});
-
-  useEffect(() => {
-    if (!Object.keys(updateStack).length) {
-      setUpdatedStack({
-        ...defaultStack,
-      });
-    }
-  }, [plans]);
 
   useEffect(() => {
     // Prevent adding an empty update on start
@@ -102,38 +89,40 @@ function EditPlan ({ handleClick, updatedSpot }) {
   const planRef = useRef(null);
 
   return (
-    <TransformWrapper
-      ref={planRef}
-      disabled
-    >
-      <TransformComponent
-        wrapperClass={classes.wrapper}
+    <Box className={classes.root}>
+      <ActionBar />
+      <TransformWrapper
+        ref={planRef}
+        disabled
       >
-        <Box className={classes.planWrapper}>
-          {plan?.url && (
-          <img
-            src={plan.url}
-            alt=""
-            className={classes.plan}
-            id={place}
-            onLoad={() => {
-              planRef.current.zoomToElement(place, undefined, 300);
-            }}
-          />
-          )}
-
-          {spots.map(Spot => (
-            <EditSpot
-              key={Spot.Identifiant}
-              Spot={Spot}
-              onClick={handleClick}
+        <TransformComponent
+          wrapperClass={classes.wrapper}
+        >
+          <Box className={classes.planWrapper}>
+            {plan?.url && (
+            <img
+              src={plan.url}
+              alt=""
+              className={classes.plan}
+              id={place}
+              onLoad={() => {
+                planRef.current.zoomToElement(place, undefined, 300);
+              }}
             />
-          ))}
+            )}
+            {spots.map(Spot => (
+              <EditSpot
+                key={Spot.Identifiant}
+                spot={Spot}
+                onClick={handleClick}
+              />
+            ))}
 
-        </Box>
+          </Box>
 
-      </TransformComponent>
-    </TransformWrapper>
+        </TransformComponent>
+      </TransformWrapper>
+    </Box>
   );
 }
 
