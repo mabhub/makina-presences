@@ -23,12 +23,9 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-// const useUpdatedSpot = createPersistedState('updatedSpot');
-
 function SpotPanel ({ spot, onClose, handleUpdate }) {
   const classes = useStyles();
   const fields = useFields(spotsTableId);
-  // const [updatedSpot, setUpdatedSpot] = useUpdatedSpot({});
 
   const { Identifiant } = spot;
 
@@ -37,8 +34,12 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
     ?.select_options || [];
 
   const [spotInfo, setSpotInfo] = useState(spot);
+  const [previousSpotInfo, setPreviousSpotInfo] = useState(spotInfo);
 
   const handleChange = (key, value) => {
+    setPreviousSpotInfo({
+      ...spotInfo,
+    });
     setSpotInfo({
       ...spotInfo,
       [key]: value,
@@ -46,8 +47,15 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
   };
 
   useEffect(() => {
-    // const diff = Object.keys(previousSpotInfo).filter(k => previousSpotInfo[k] !== spotInfo[k]);
-    handleUpdate(spotInfo);
+    setSpotInfo(spot);
+  }, [spot]);
+
+  useEffect(() => {
+    const diff = Object.keys(previousSpotInfo).filter(k =>
+      previousSpotInfo[k] !== spotInfo[k]
+      && previousSpotInfo.Identifiant === spotInfo.Identifiant);
+
+    handleUpdate(spotInfo, diff[0]);
   }, [spotInfo]);
 
   return (

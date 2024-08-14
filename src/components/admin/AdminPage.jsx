@@ -86,12 +86,21 @@ function AdminPage () {
   const [updatedSpot, setUpdatedSpot] = React.useState({});
 
   const handleClick = Spot => {
-    setShowPanel(!showPanel);
+    setShowPanel(true);
     setSelectedSpot(Spot);
   };
 
-  const handleUpdate = Spot => {
-    setUpdatedSpot(Spot);
+  const onPanelClose = () => {
+    setShowPanel(false);
+  };
+
+  const handleUpdate = (Spot, key) => {
+    if (!key) return null;
+    // Remove undid change when a new update is done
+    setUndidStack({
+      ...defaultStack,
+    });
+    return setUpdatedSpot(Spot);
   };
 
   return (
@@ -104,12 +113,21 @@ function AdminPage () {
           </Box>
           <Box className={classes.editSpot}>
             {showPanel && (
-              <SpotPanel spot={spot} onClose={setShowPanel} handleUpdate={handleUpdate} />
+              <SpotPanel
+                spot={spot}
+                onClose={onPanelClose}
+                handleUpdate={handleUpdate}
+              />
             )}
           </Box>
           <Box className={classes.plan}>
             {Boolean(place) && (
-              <EditPlan handleClick={handleClick} updatedSpot={updatedSpot} />
+              <EditPlan
+                handleClick={handleClick}
+                updatedSpot={updatedSpot}
+                selectedSpot={spot}
+                panelOpen={showPanel}
+              />
             )}
           </Box>
         </Box>
