@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => {
         "c b b"
         "C b b"`,
       gridTemplateColumns: '2fr 8fr ',
-      gridTemplateRows: ' 5fr 4fr',
+      gridTemplateRows: '1fr auto',
     },
     list: {
       gridArea: 'a',
@@ -85,6 +85,11 @@ function AdminPage () {
   const [spot, setSelectedSpot] = React.useState({});
   const [updatedSpot, setUpdatedSpot] = React.useState({});
 
+  useEffect(() => {
+    // TODO : set panel info with new change
+    setShowPanel(false);
+  }, [place]);
+
   const handleClick = Spot => {
     setShowPanel(true);
     setSelectedSpot(Spot);
@@ -111,15 +116,6 @@ function AdminPage () {
           <Box className={classes.list}>
             <PlanList />
           </Box>
-          <Box className={classes.editSpot}>
-            {showPanel && (
-              <SpotPanel
-                spot={spot}
-                onClose={onPanelClose}
-                handleUpdate={handleUpdate}
-              />
-            )}
-          </Box>
           <Box className={classes.plan}>
             {Boolean(place) && (
               <EditPlan
@@ -127,6 +123,15 @@ function AdminPage () {
                 updatedSpot={updatedSpot}
                 selectedSpot={spot}
                 panelOpen={showPanel}
+              />
+            )}
+          </Box>
+          <Box className={classes.editSpot}>
+            {showPanel && (
+              <SpotPanel
+                spot={spot}
+                onClose={onPanelClose}
+                handleUpdate={handleUpdate}
               />
             )}
           </Box>
