@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material';
-import { Avatar, Card, CardContent, CardHeader, Chip, FormControl, IconButton, List, ListItem, ListItemText, MenuItem, Select, Switch, TextField, Typography } from '@mui/material';
+import { alpha, Avatar, Button, Card, CardActionArea, CardActions, CardContent, CardHeader, Chip, FormControl, IconButton, List, ListItem, ListItemText, MenuItem, Select, Switch, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect, useState } from 'react';
 import createPersistedState from 'use-persisted-state';
@@ -20,18 +20,24 @@ const useStyles = makeStyles(theme => {
       width: '75px',
       marginLeft: theme.spacing(0.5),
     },
+    delete: {
+      width: '100%',
+      margin: theme.spacing(1, 0, 0, 0),
+      padding: theme.spacing(1.5, 0),
+      border: `1.5px solid ${alpha(theme.palette.error.light, 0.5)}`,
+      borderRadius: '8px',
+    },
   };
 });
 
 const useUpdatedStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 
+export const DELETED_KEY = 'deleted';
+
 function SpotPanel ({ spot, onClose, handleUpdate }) {
   const classes = useStyles();
   const fields = useFields(spotsTableId);
-
-  const [updateStack] = useUpdatedStack({});
-  const [undidStack] = useUndidStack({});
 
   const { Identifiant } = spot;
 
@@ -41,6 +47,10 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
 
   const [spotInfo, setSpotInfo] = useState(spot);
   const [previousSpotInfo, setPreviousSpotInfo] = useState(spotInfo);
+
+  useEffect(() => {
+    setSpotInfo(spot);
+  }, [spot]);
 
   const handleChange = (key, value) => {
     setPreviousSpotInfo({
@@ -53,15 +63,16 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
   };
 
   useEffect(() => {
-    setSpotInfo(spot);
-  }, [spot]);
-
-  useEffect(() => {
-    const diff = Object.keys(previousSpotInfo).filter(k =>
+    const [diff] = [
+      ...new Set([
+        ...Object.keys(previousSpotInfo),
+        ...Object.keys(spotInfo),
+      ]),
+    ].filter(k =>
       previousSpotInfo[k] !== spotInfo[k]
       && previousSpotInfo.Identifiant === spotInfo.Identifiant);
 
-    handleUpdate(spotInfo, diff[0]);
+    handleUpdate(spotInfo, diff);
   }, [spotInfo]);
 
   return (
@@ -171,6 +182,14 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
             />
           </ListItem>
         </List>
+        <Button
+          size="small"
+          color="error"
+          className={classes.delete}
+          onClick={() => handleChange(DELETED_KEY, true)}
+        >
+          Supprimer Poste
+        </Button>
       </CardContent>
     </Card>
   );
