@@ -67,10 +67,9 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
     // Is the last, ID is different from the new update
     if (spotId !== updatedSpot.Identifiant) return true;
 
-    // Is the last, IDs are the same and last update isn't position related
+    // Is the last, IDs are the same and last update isn't position/description related
     const [diff] = Object.keys(spot).filter(k => spot[k] !== updatedSpot[k]);
-    console.log(diff, diff !== 'x', diff !== 'y');
-    if (diff !== 'x' && diff !== 'y') return true;
+    if (diff !== 'x' && diff !== 'y' && diff !== 'Description') return true;
 
     return false;
   };

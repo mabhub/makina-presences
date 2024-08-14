@@ -23,9 +23,15 @@ const useStyles = makeStyles(theme => {
   };
 });
 
+const useUpdatedStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
+
 function SpotPanel ({ spot, onClose, handleUpdate }) {
   const classes = useStyles();
   const fields = useFields(spotsTableId);
+
+  const [updateStack] = useUpdatedStack({});
+  const [undidStack] = useUndidStack({});
 
   const { Identifiant } = spot;
 
@@ -152,6 +158,17 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
                 ))}
               </Select>
             </FormControl>
+          </ListItem>
+          <ListItem disableGutters>
+            <TextField
+              fullWidth
+              label="Description"
+              variant="outlined"
+              value={spotInfo.Description || ''}
+              multiline
+              rows={4}
+              onChange={event => handleChange('Description', event.target.value)}
+            />
           </ListItem>
         </List>
       </CardContent>

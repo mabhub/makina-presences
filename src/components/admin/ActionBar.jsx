@@ -1,9 +1,10 @@
 import { KeyboardArrowLeft, KeyboardArrowRight, Place } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
+import useSpots from '../../hooks/useSpots';
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
