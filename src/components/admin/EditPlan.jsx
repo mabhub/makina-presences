@@ -8,6 +8,7 @@ import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import EditSpot from './EditSpot';
 import ActionBar from './ActionBar';
+import { DELETED_KEY } from './SpotPanel';
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
@@ -87,9 +88,20 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
     }
   }, [updatedSpot]);
 
+  const idUpdateStack = updateStack[place].map(({ Identifiant: spotId }) => spotId);
   const spots = useSpots(place)
+    // remove deleted spot
+    .filter(spot => {
+      if (idUpdateStack.includes(spot.Identifiant)
+        && Object.hasOwn(
+          updateStack[place][idUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
+        )) {
+        return false;
+      }
+      return true;
+    })
+    // update updated spot
     .map(spot => {
-      const idUpdateStack = updateStack[place].map(({ Identifiant: spotId }) => spotId);
       if (idUpdateStack.includes(spot.Identifiant)) {
         return updateStack[place][idUpdateStack.lastIndexOf(spot.Identifiant)];
       }
