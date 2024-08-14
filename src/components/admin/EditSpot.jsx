@@ -1,7 +1,8 @@
-import { Fab } from '@mui/material';
-import createPersistedState from 'use-persisted-state';
+import { alpha, Fab } from '@mui/material';
+import { dark } from '@mui/material/styles/createPalette';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect } from 'react';
+import clsx from 'clsx';
+import React from 'react';
 
 const useStyles = makeStyles(theme => ({
   spot: {
@@ -20,9 +21,15 @@ const useStyles = makeStyles(theme => ({
     overflow: 'hidden',
     fontSize: '0.75em',
   },
+  selected: {
+    backgroundImage: 'linear-gradient(45deg, #ffffff 20%, #e6e6e6 20%, #e6e6e6 50%, #ffffff 50%, #ffffff 70%, #e6e6e6 70%, #e6e6e6 100%)',
+    backgroundSize: '7.07px 7.07px',
+    color: 'black',
+    fontWeight: 'bold',
+  },
 }));
 
-function EditSpot ({ Spot, onClick = () => {} }) {
+function EditSpot ({ Spot, onClick = () => {}, isSelected }) {
   const classes = useStyles();
 
   const { Identifiant: spotId, x, y, Type } = Spot;
@@ -33,7 +40,10 @@ function EditSpot ({ Spot, onClick = () => {} }) {
 
   return (
     <Fab
-      className={classes.spot}
+      className={clsx({
+        [classes.spot]: true,
+        [classes.selected]: isSelected,
+      })}
       style={{
         left: `${x}px`,
         top: `${y}px`,

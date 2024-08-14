@@ -52,12 +52,28 @@ const useStyles = makeStyles(theme => {
 
 const useUpdatedStack = createPersistedState('updateStack');
 
-function EditPlan ({ handleClick, updatedSpot }) {
+function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
   const plans = usePlans();
 
   const [updateStack, setUpdatedStack] = useUpdatedStack({});
+
+  const keepSpotUpdate = (spot, index) => {
+    const { Identifiant: spotId } = spot;
+    // Is not the last one
+    if (index !== updateStack[place].length - 1) return true;
+
+    // Is the last, ID is different from the new update
+    if (spotId !== updatedSpot.Identifiant) return true;
+
+    // Is the last, IDs are the same and last update isn't position related
+    const [diff] = Object.keys(spot).filter(k => spot[k] !== updatedSpot[k]);
+    console.log(diff, diff !== 'x', diff !== 'y');
+    if (diff !== 'x' && diff !== 'y') return true;
+
+    return false;
+  };
 
   useEffect(() => {
     // Prevent adding an empty update on start
@@ -65,10 +81,7 @@ function EditPlan ({ handleClick, updatedSpot }) {
       setUpdatedStack({
         ...updateStack,
         [place]: [
-          ...updateStack[place].filter(
-            ({ Identifiant: spotId }, index) =>
-              index !== updateStack[place].length - 1 || spotId !== updatedSpot.Identifiant,
-          ),
+          ...updateStack[place].filter((spot, index) => keepSpotUpdate(spot, index)),
           updatedSpot,
         ],
       });
@@ -77,8 +90,7 @@ function EditPlan ({ handleClick, updatedSpot }) {
 
   const spots = useSpots(place)
     .map(spot => {
-      const idUpdateStack = updateStack[place]
-        .map(({ Identifiant: spotId }) => spotId);
+      const idUpdateStack = updateStack[place].map(({ Identifiant: spotId }) => spotId);
       if (idUpdateStack.includes(spot.Identifiant)) {
         return updateStack[place][idUpdateStack.lastIndexOf(spot.Identifiant)];
       }
@@ -116,6 +128,7 @@ function EditPlan ({ handleClick, updatedSpot }) {
                 key={Spot.Identifiant}
                 Spot={Spot}
                 onClick={handleClick}
+                isSelected={selectedSpot.Identifiant === Spot.Identifiant && panelOpen}
               />
             ))}
 
