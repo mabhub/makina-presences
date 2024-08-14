@@ -6,7 +6,7 @@ import createPersistedState from 'use-persisted-state';
 import LoadIndicator from '../LoadIndicator';
 import EditPlan from './EditPlan';
 import PlanList from './PlanList';
-import SpotPanel from './SpotPanel';
+import SpotPanel, { DELETED_KEY } from './SpotPanel';
 import usePlans from '../../hooks/usePlans';
 
 const useStyles = makeStyles(theme => {
@@ -86,7 +86,7 @@ function AdminPage () {
   const [updatedSpot, setUpdatedSpot] = React.useState({});
 
   useEffect(() => {
-    // TODO : set panel info with new change
+    // TODO : set panel info with undo/redo changes
     setShowPanel(false);
   }, [place]);
 
@@ -101,7 +101,8 @@ function AdminPage () {
 
   const handleUpdate = (Spot, key) => {
     if (!key) return null;
-    // Remove undid change when a new update is done
+    if (key === DELETED_KEY) setShowPanel(false);
+    // Remove undid changes when a new update is done
     setUndidStack({
       ...defaultStack,
     });
