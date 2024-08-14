@@ -47,7 +47,6 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
 
   useEffect(() => {
     // const diff = Object.keys(previousSpotInfo).filter(k => previousSpotInfo[k] !== spotInfo[k]);
-    console.log('spot panel');
     handleUpdate(spotInfo);
   }, [spotInfo]);
 
