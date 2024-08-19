@@ -9,40 +9,35 @@ import PlanList from './PlanList';
 import SpotPanel, { DELETED_KEY } from './SpotPanel';
 import usePlans from '../../hooks/usePlans';
 
-const useStyles = makeStyles(theme => {
-  const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
-
-  return {
-    container: {
-      height: '100dvh',
-      padding: theme.spacing(0),
-    },
-    wrapper: {
-      height: '100%',
-      display: 'grid',
-      gridTemplateAreas: `
+const useStyles = makeStyles(theme => ({
+  container: {
+    height: '100dvh',
+    padding: theme.spacing(0),
+  },
+  wrapper: {
+    height: '100%',
+    display: 'grid',
+    gridTemplateAreas: `
         "a b b"
         "c b b"
         "C b b"`,
-      gridTemplateColumns: '2fr 8fr ',
-      gridTemplateRows: '1fr auto',
-    },
-    list: {
-      gridArea: 'a',
-      borderRight: '2px solid #00000015',
-    },
-    plan: {
-      gridArea: 'b',
-    },
-    editSpot: {
-      gridArea: 'c',
-      // background: 'orange',
-      border: '2px solid #00000015',
-    },
-  };
-});
+    gridTemplateColumns: '2fr 8fr ',
+    gridTemplateRows: '1fr auto',
+  },
+  list: {
+    gridArea: 'a',
+    borderRight: '2px solid #00000015',
+  },
+  plan: {
+    gridArea: 'b',
+  },
+  editSpot: {
+    gridArea: 'c',
+    // background: 'orange',
+    border: '2px solid #00000015',
+  },
+}));
 
-const useUpdatedStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 
 function AdminPage () {
@@ -64,22 +59,16 @@ function AdminPage () {
       return acc;
     }, {});
 
-  const [updateStack, setUpdatedStack] = useUpdatedStack({});
-  const [undidStack, setUndidStack] = useUndidStack({});
+  const [, setUndidStack] = useUndidStack({});
 
-  useEffect(() => {
-    // Init the stack of update/undid modification, ordered by location
-    if (!Object.keys(updateStack).length) {
-      setUpdatedStack({
-        ...defaultStack,
-      });
+  const initStacks = () => {
+    if (Object.keys(defaultStack).length > 0) {
+      localStorage.setItem('updateStack', JSON.stringify({ ...defaultStack }));
+      localStorage.setItem('undidStack', JSON.stringify({ ...defaultStack }));
     }
-    if (!Object.keys(undidStack).length) {
-      setUndidStack({
-        ...defaultStack,
-      });
-    }
-  }, [plans]);
+  };
+
+  const areStacksValid = typeof localStorage.updateStack !== 'undefined' && typeof localStorage.undidStack !== 'undefined';
 
   const [showPanel, setShowPanel] = React.useState(false);
   const [spot, setSelectedSpot] = React.useState({});
@@ -102,7 +91,7 @@ function AdminPage () {
   const handleUpdate = (Spot, key) => {
     if (!key) return null;
     if (key === DELETED_KEY) setShowPanel(false);
-    // Remove undid changes when a new update is done
+    // Remove undid changes when a new update/deletion is done
     setUndidStack({
       ...defaultStack,
     });
@@ -112,32 +101,39 @@ function AdminPage () {
   return (
     <div className="adminPage">
       <LoadIndicator />
-      <Container className={classes.container} maxWidth="unset">
-        <Box className={classes.wrapper}>
-          <Box className={classes.list}>
-            <PlanList />
+
+      {!areStacksValid && (
+        initStacks()
+      )}
+
+      {areStacksValid && (
+        <Container className={classes.container} maxWidth="unset">
+          <Box className={classes.wrapper}>
+            <Box className={classes.list}>
+              <PlanList />
+            </Box>
+            <Box className={classes.plan}>
+              {Boolean(place) && (
+                <EditPlan
+                  handleClick={handleClick}
+                  updatedSpot={updatedSpot}
+                  selectedSpot={spot}
+                  panelOpen={showPanel}
+                />
+              )}
+            </Box>
+            <Box className={classes.editSpot}>
+              {showPanel && (
+                <SpotPanel
+                  spot={spot}
+                  onClose={onPanelClose}
+                  handleUpdate={handleUpdate}
+                />
+              )}
+            </Box>
           </Box>
-          <Box className={classes.plan}>
-            {Boolean(place) && (
-              <EditPlan
-                handleClick={handleClick}
-                updatedSpot={updatedSpot}
-                selectedSpot={spot}
-                panelOpen={showPanel}
-              />
-            )}
-          </Box>
-          <Box className={classes.editSpot}>
-            {showPanel && (
-              <SpotPanel
-                spot={spot}
-                onClose={onPanelClose}
-                handleUpdate={handleUpdate}
-              />
-            )}
-          </Box>
-        </Box>
-      </Container>
+        </Container>
+      )}
     </div>
   );
 }
