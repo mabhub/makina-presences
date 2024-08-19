@@ -5,30 +5,26 @@ import React from 'react';
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../../hooks/usePlans';
 
-const useStyles = makeStyles(theme => {
-  const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
-
-  return {
-    root: {
-      width: '100%',
-      padding: theme.spacing(2, 1),
-    },
-    card: {
-      border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
-      borderRadius: '10px',
-      margin: theme.spacing(1, 0),
-    },
-    cardContent: {
-      position: 'relative',
-      padding: theme.spacing(2),
-      display: 'flex',
-      justifyContent: 'space-between',
-    },
-    selected: {
-      border: `3px solid ${theme.palette.primary.main}`,
-    },
-  };
-});
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: '100%',
+    padding: theme.spacing(2, 1),
+  },
+  card: {
+    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    borderRadius: '10px',
+    margin: theme.spacing(1, 0),
+  },
+  cardContent: {
+    position: 'relative',
+    padding: theme.spacing(2),
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  selected: {
+    border: `3px solid ${theme.palette.primary.main}`,
+  },
+}));
 
 function PlanList () {
   const classes = useStyles();
