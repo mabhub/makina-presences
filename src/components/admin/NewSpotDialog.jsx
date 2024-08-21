@@ -47,18 +47,7 @@ function NewSpotDialog ({ open, onClose }) {
   };
 
   return (
-    <Dialog
-      open={open}
-      PaperProps={{
-        component: 'form',
-        onSubmit: () => {
-          onClose({
-            ...spotInfo,
-            [CREATED_KEY]: true,
-          });
-        },
-      }}
-    >
+    <Dialog open={open}>
       <DialogTitle><strong>Nouveau Poste</strong></DialogTitle>
       <DialogContent sx={{ overflow: 'visible' }} dividers>
         <SpotForm
