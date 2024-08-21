@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(0),
   },
   wrapper: {
-    height: '100%',
+    height: '100dvh',
     display: 'grid',
     gridTemplateAreas: `
         "a b b"
@@ -27,6 +27,8 @@ const useStyles = makeStyles(theme => ({
   list: {
     gridArea: 'a',
     borderRight: '2px solid #00000015',
+    overflow: 'auto',
+    scrollbarWidth: 'thin',
   },
   plan: {
     gridArea: 'b',
@@ -39,10 +41,13 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUndidStack = createPersistedState('undidStack');
+const usePlanUpdate = createPersistedState('planUpdate');
 
 function AdminPage () {
   const classes = useStyles();
   const { place } = useParams();
+
+  const [planUpdate] = usePlanUpdate([]);
 
   const plans = usePlans();
 
