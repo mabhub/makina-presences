@@ -112,10 +112,10 @@ const Plan = ({ edit }) => {
             <img src={plan.url} alt="" className={classes.plan} />
             )}
 
-            {spots.map(Spot => (
+            {spots.map(spot => (
               <SpotButton
-                key={Spot.Identifiant}
-                Spot={Spot}
+                key={spot.Identifiant}
+                spot={spot}
                 onConflict={handleConflict}
               />
             ))}

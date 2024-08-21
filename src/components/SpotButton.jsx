@@ -84,7 +84,7 @@ const CustomTooltip = withStyles(theme => ({
 
 const SpotButton = ({
   edit,
-  Spot,
+  spot,
   onConflict = () => {},
 }) => {
   const classes = useStyles();
@@ -101,9 +101,9 @@ const SpotButton = ({
   const { presences, setPresence, deletePresence } = usePresences(place);
   const dayPresences = presences.filter(presence => presence.day === day);
   const spotPresences = dayPresences
-    .reduce((acc, { spot, ...presence }) => ({
+    .reduce((acc, { spot: s, ...presence }) => ({
       ...acc,
-      [spot]: [...(acc[spot] || []), presence],
+      [s]: [...(acc[s] || []), presence],
     }), {});
 
   const queryClient = useQueryClient();
@@ -116,7 +116,7 @@ const SpotButton = ({
   const handleDragEnd = async ({ screenX: x2, screenY: y2 }) => {
     if (!movingSpot || !edit) { return; }
 
-    const { spot, from: [x1, y1] = [] } = movingSpot;
+    const { s, from: [x1, y1] = [] } = movingSpot;
     const deltas = { x: x2 - x1, y: y2 - y1 };
 
     setMovingSpot();
@@ -129,8 +129,8 @@ const SpotButton = ({
         method: 'PATCH',
         headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          x: snap(deltas.x + Number(spot.x)),
-          y: snap(deltas.y + Number(spot.y)),
+          x: snap(deltas.x + Number(s.x)),
+          y: snap(deltas.y + Number(s.y)),
         }),
       },
     );
@@ -140,11 +140,11 @@ const SpotButton = ({
 
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
-  const { Bloqué, Identifiant: spotId, x, y, Type, Description, Cumul } = Spot;
+  const { Bloqué: blocked, Identifiant: spotId, x, y, Type, Description, Cumul } = spot;
 
   const [presence, ...rest] = spotPresences[spotId] || [];
 
-  const isLocked = Boolean(Bloqué);
+  const isLocked = Boolean(blocked);
   const isConflict = Boolean(rest.length);
   const isOccupied = Boolean(presence);
   const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
@@ -161,7 +161,7 @@ const SpotButton = ({
 
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
-  const tooltip = <SpotDescription md={Description} spot={Spot} />;
+  const tooltip = <SpotDescription md={Description} spot={spot} />;
 
   return (
     <>
@@ -189,7 +189,7 @@ const SpotButton = ({
           }}
           size="small"
           draggable={Boolean(edit)}
-          onMouseDown={edit && handleMouseDown(Spot)}
+          onMouseDown={edit && handleMouseDown(spot)}
           onDragEnd={edit && handleDragEnd}
           onClick={() => {
             if (edit) { return null; }
