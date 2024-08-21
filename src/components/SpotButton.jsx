@@ -290,7 +290,7 @@ const SpotButton = ({
 
   const title = 'Réserver pour :';
 
-  const tooltip = <SpotDescription md={Description} spot={Spot} />;
+  const tooltip = <SpotDescription md={Description} spot={spot} />;
 
   return (
     <>
@@ -360,7 +360,7 @@ const SpotButton = ({
                     <SpotButtonHalfDay
                       presences={position === 'top' ? mornings : afternoons}
                       onConflict={onConflict}
-                      spot={Spot}
+                      spot={spot}
                       disabled={isPast}
                       position={position}
                     />
