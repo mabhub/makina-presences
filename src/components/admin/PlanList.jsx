@@ -1,7 +1,7 @@
 import { Box, Card, CardActionArea, colors, IconButton, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { Add } from '@mui/icons-material';
 import createPersistedState from 'use-persisted-state';
@@ -60,6 +60,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const usePlanUpdate = createPersistedState('planUpdate');
+const useUpdateStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
 
 function PlanList () {
   const classes = useStyles();
@@ -70,8 +72,6 @@ function PlanList () {
   const plans = usePlans()
     .concat(planUpdate)
     .filter(({ Brouillon }) => !Brouillon);
-
-  console.log(plans);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -90,6 +90,35 @@ function PlanList () {
       ]);
     }
   };
+
+  const [updateStack, setUpdatedStack] = useUpdateStack();
+  const [undidStack, setUndidStack] = useUndidStack();
+
+  const getPlacesToAdd = action => planUpdate.reduce((acc, curr) => {
+    const { Name } = curr;
+    if (!Object.hasOwn(acc, Name)) {
+      return {
+        ...acc,
+        [Name]: action[Name] ? action[Name] : [],
+      };
+    }
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    setTimeout(() => {
+      setUpdatedStack({
+        ...updateStack,
+        ...getPlacesToAdd(updateStack),
+      });
+    }, 0);
+    setTimeout(() => {
+      setUndidStack({
+        ...undidStack,
+        ...getPlacesToAdd(undidStack),
+      });
+    }, 0);
+  }, [planUpdate]);
 
   return (
     <>

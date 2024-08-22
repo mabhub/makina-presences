@@ -42,6 +42,7 @@ const useStyles = makeStyles(theme => ({
 
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
+const usePlanUpdate = createPersistedState('planUpdate');
 
 function ActionBar () {
   const classes = useStyles();
@@ -49,6 +50,7 @@ function ActionBar () {
 
   const [updateStack, setUpdateStack] = useUpdateStack({});
   const [undidStack, setUndidStack] = useUndidStack({});
+  const [planUpdate] = usePlanUpdate([]);
 
   const handleUndo = () => {
     setUndidStack({
