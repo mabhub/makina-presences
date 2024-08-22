@@ -52,6 +52,7 @@ function AdminPage () {
   const plans = usePlans();
 
   const defaultStack = plans
+    // .concat(planUpdate)
     .filter(({ Brouillon }) => !Brouillon)
     .reduce((acc, curr) => {
       const { Name } = curr;
@@ -64,7 +65,10 @@ function AdminPage () {
       return acc;
     }, {});
 
-  const [, setUndidStack] = useUndidStack({});
+  // console.log(plans);
+  // console.log(defaultStack);
+
+  const [undidStack, setUndidStack] = useUndidStack({});
 
   const initStacks = () => {
     if (Object.keys(defaultStack).length > 0) {
@@ -73,7 +77,8 @@ function AdminPage () {
     }
   };
 
-  const areStacksValid = typeof localStorage.updateStack !== 'undefined' && typeof localStorage.undidStack !== 'undefined';
+  const areStacksValid = typeof localStorage.updateStack !== 'undefined'
+  && typeof localStorage.undidStack !== 'undefined';
 
   const [showPanel, setShowPanel] = React.useState(false);
   const [spot, setSelectedSpot] = React.useState({});
@@ -93,13 +98,18 @@ function AdminPage () {
     setShowPanel(false);
   };
 
+  const resestUndidStack = () => {
+    setUndidStack(Object.keys(undidStack)
+      .reduce((acc, curr) => ({
+        ...acc,
+        [curr]: [],
+      }), {}));
+  };
+
   const handleUpdate = (Spot, key) => {
     if (!key) return null;
     if (key === DELETED_KEY) setShowPanel(false);
-    // Remove undid changes when a new update/deletion is done
-    setUndidStack({
-      ...defaultStack,
-    });
+    resestUndidStack();
     return setUpdatedSpot(Spot);
   };
 

@@ -43,8 +43,7 @@ function NewSpotDialog ({ open, onClose }) {
       return;
     }
 
-    const objectUrl = URL.createObjectURL(selectedFile);
-    setPreview(objectUrl);
+    setPreview(URL.createObjectURL(selectedFile));
   }, [selectedFile]);
 
   const onSelectFile = event => {
@@ -56,7 +55,11 @@ function NewSpotDialog ({ open, onClose }) {
   };
 
   const handleSubmit = () => {
-    onClose(name, selectedFile);
+    const reader = new FileReader();
+    reader.onload = e => {
+      onClose(name, e.target.result);
+    };
+    reader.readAsDataURL(selectedFile);
   };
 
   return (

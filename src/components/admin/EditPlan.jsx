@@ -50,11 +50,17 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUpdatedStack = createPersistedState('updateStack');
+const usePlanUpdate = createPersistedState('planUpdate');
 
 function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
-  const plans = usePlans();
+
+  const [planUpdate] = usePlanUpdate();
+
+  const plans = usePlans().concat(planUpdate);
+
+  // console.log(plans);
 
   const [updateStack, setUpdatedStack] = useUpdatedStack({});
 
@@ -123,6 +129,8 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
     });
 
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
+
+  // console.log(plan);
   const planRef = useRef(null);
 
   return (
