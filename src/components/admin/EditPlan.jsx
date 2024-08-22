@@ -45,11 +45,15 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUpdateStack = createPersistedState('updateStack');
+const usePlanUpdate = createPersistedState('planUpdate');
 
 function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
-  const plans = usePlans();
+
+  const [planUpdate] = usePlanUpdate();
+
+  const plans = usePlans().concat(planUpdate);
 
   const [updateStack, setUpdateStack] = useUpdateStack({});
 
