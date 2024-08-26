@@ -1,12 +1,54 @@
 import { Add, Delete, Edit } from '@mui/icons-material';
-import { Box, Card, CardActionArea, Tooltip, Typography } from '@mui/material';
+import { Box, Card, CardActionArea, Switch, Tooltip, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import usePlans from '../../hooks/usePlans';
 import NewPlanDialog from './NewPlanDialog';
+import PlanNameDialog from './PlanNameDialog';
+
+const AntSwitch = styled(Switch)(({ theme }) => ({
+  width: 28,
+  height: 16,
+  padding: 0,
+  display: 'flex',
+  '&:active': {
+    '& .MuiSwitch-thumb': {
+      width: 15,
+    },
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      transform: 'translateX(9px)',
+    },
+  },
+  '& .MuiSwitch-switchBase': {
+    padding: 2,
+    '&.Mui-checked': {
+      transform: 'translateX(12px)',
+      color: '#fff',
+      '& + .MuiSwitch-track': {
+        opacity: 1,
+      },
+    },
+  },
+  '& .MuiSwitch-thumb': {
+    boxShadow: '0 2px 4px 0 rgb(0 35 11 / 20%)',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    transition: theme.transitions.create(['width'], {
+      duration: 200,
+    }),
+  },
+  '& .MuiSwitch-track': {
+    borderRadius: 16 / 2,
+    opacity: 1,
+    backgroundColor:
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.25)',
+    boxSizing: 'border-box',
+  },
+}));
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -21,12 +63,16 @@ const useStyles = makeStyles(theme => ({
   },
   cardContent: {
     position: 'relative',
-    padding: theme.spacing(2),
+    padding: theme.spacing(2, 1, 2, 2),
     display: 'flex',
     justifyContent: 'space-between',
   },
+  brouillon: {
+    border: '3px dashed #00000030',
+  },
   selected: {
-    border: `3px solid ${theme.palette.primary.main}`,
+    borderWidth: '3px',
+    borderColor: ` ${theme.palette.primary.main}`,
   },
   wrapper: {
     background: 'linear-gradient( rgba(255,255,255,1) 88%, rgba(9,9,121,0) 100%)',
@@ -61,6 +107,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
   },
   actionButton: {
+    alignContent: 'center',
     padding: theme.spacing(0.8),
     border: 'unset',
     background: 'unset',
@@ -91,20 +138,16 @@ function PlanList () {
   const history = useHistory();
   const { place } = useParams();
 
-  const [planUpdate, setPlanUpdate] = usePlanUpdate([]);
-  // const plans = usePlans()
-  // .concat(planUpdate)
-  // .filter(({ Brouillon }) => !Brouillon);
+  const [plans, setPlanUpdate] = usePlanUpdate([]);
+  const [dialogNewOpen, setDialogNewOpen] = useState(false);
+  const [dialogUpdateOpen, setDialogUpdateOpen] = useState(false);
+  const [planName, setPlanName] = useState('');
 
-  // console.log(plans);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleClose = (name, plan) => {
-    setDialogOpen(!dialogOpen);
+  const handleNewClose = (name, plan) => {
+    setDialogNewOpen(!dialogNewOpen);
     if (name && plan) {
       setPlanUpdate([
-        ...planUpdate,
+        ...plans,
         {
           Name: name,
           Postes: [],
@@ -115,10 +158,26 @@ function PlanList () {
     }
   };
 
+  const handleUpdateClose = (oldName, newName) => {
+    setDialogUpdateOpen(!dialogUpdateOpen);
+    setPlanUpdate([
+      ...plans.map(plan => {
+        if (plan.Name === oldName) {
+          return {
+            ...plan,
+            Name: newName,
+          };
+        }
+        return plan;
+      }),
+    ]);
+    history.push('/admin');
+  };
+
   const [updateStack, setUpdatedStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
 
-  const uptdateTheStack = stack => planUpdate.reduce((acc, curr) => {
+  const uptdateTheStack = stack => plans.reduce((acc, curr) => {
     const { Name } = curr;
     if (!Object.hasOwn(acc, Name)) {
       return {
@@ -138,14 +197,28 @@ function PlanList () {
         ...uptdateTheStack(undidStack),
       });
     }, 0);
-  }, [planUpdate]);
+  }, [plans]);
 
   const handleDelete = (event, name) => {
     setPlanUpdate([
-      ...planUpdate.filter(({ Name }) => Name !== name),
+      ...plans.filter(({ Name }) => Name !== name),
     ]);
     history.push('/admin');
     event.stopPropagation();
+  };
+
+  const handleBrouillon = name => {
+    setPlanUpdate([
+      ...plans.map(plan => {
+        if (plan.Name === name) {
+          return {
+            ...plan,
+            Brouillon: !plan.Brouillon,
+          };
+        }
+        return plan;
+      }),
+    ]);
   };
 
   return (
@@ -155,13 +228,13 @@ function PlanList () {
           <Box
             className={classes.addPlan}
             component="button"
-            onClick={() => setDialogOpen(!dialogOpen)}
+            onClick={() => setDialogNewOpen(!dialogNewOpen)}
           >
             <Add />
           </Box>
         </Box>
 
-        {planUpdate.map(({ Name }) => {
+        {plans.map(({ Name, Brouillon }) => {
           const isSelected = Name === place;
           return (
             <Card
@@ -170,6 +243,7 @@ function PlanList () {
               className={clsx({
                 [classes.card]: true,
                 [classes.selected]: isSelected,
+                [classes.brouillon]: Brouillon,
               })}
             >
               <CardActionArea
@@ -186,6 +260,27 @@ function PlanList () {
 
                 {isSelected && (
                   <Box className={classes.actions}>
+                    <Tooltip title="Actif">
+                      <Box
+                        className={classes.actionButton}
+                        onClick={() => handleBrouillon(Name)}
+                      >
+                        <AntSwitch
+                          checked={!Brouillon}
+                        />
+                      </Box>
+                    </Tooltip>
+                    <Tooltip title="Modifier">
+                      <Box
+                        className={classes.actionButton}
+                        onClick={() => {
+                          setDialogUpdateOpen(!dialogUpdateOpen);
+                          setPlanName(Name);
+                        }}
+                      >
+                        <Edit />
+                      </Box>
+                    </Tooltip>
                     <Tooltip title="Supprimer">
                       <Box
                         className={classes.actionButton}
@@ -201,10 +296,17 @@ function PlanList () {
           );
         })}
       </Box>
-      {dialogOpen && (
+      {dialogNewOpen && (
         <NewPlanDialog
-          open={dialogOpen}
-          onClose={handleClose}
+          open={dialogNewOpen}
+          onClose={handleNewClose}
+        />
+      )}
+      {dialogUpdateOpen && (
+        <PlanNameDialog
+          open={dialogUpdateOpen}
+          onClose={handleUpdateClose}
+          planName={planName}
         />
       )}
     </>
