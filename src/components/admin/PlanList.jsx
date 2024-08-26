@@ -1,13 +1,13 @@
 import { Add, Delete, Edit } from '@mui/icons-material';
-import { Box, Card, CardActionArea, Switch, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Card, CardActionArea, Switch, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import usePlans from '../../hooks/usePlans';
 import NewPlanDialog from './NewPlanDialog';
+import PlanNameDialog from './PlanNameDialog';
 
 const AntSwitch = styled(Switch)(({ theme }) => ({
   width: 28,
@@ -140,10 +140,12 @@ function PlanList () {
   const { place } = useParams();
 
   const [plans, setPlanUpdate] = usePlanUpdate([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogNewOpen, setDialogNewOpen] = useState(false);
+  const [dialogUpdateOpen, setDialogUpdateOpen] = useState(false);
+  const [planName, setPlanName] = useState('');
 
-  const handleClose = (name, plan) => {
-    setDialogOpen(!dialogOpen);
+  const handleNewClose = (name, plan) => {
+    setDialogNewOpen(!dialogNewOpen);
     if (name && plan) {
       setPlanUpdate([
         ...plans,
@@ -155,6 +157,22 @@ function PlanList () {
         },
       ]);
     }
+  };
+
+  const handleUpdateClose = (oldName, newName) => {
+    setDialogUpdateOpen(!dialogUpdateOpen);
+    setPlanUpdate([
+      ...plans.map(plan => {
+        if (plan.Name === oldName) {
+          return {
+            ...plan,
+            Name: newName,
+          };
+        }
+        return plan;
+      }),
+    ]);
+    history.push('/admin');
   };
 
   const [updateStack, setUpdatedStack] = useUpdateStack();
@@ -211,7 +229,7 @@ function PlanList () {
           <Box
             className={classes.addPlan}
             component="button"
-            onClick={() => setDialogOpen(!dialogOpen)}
+            onClick={() => setDialogNewOpen(!dialogNewOpen)}
           >
             <Add />
           </Box>
@@ -243,14 +261,25 @@ function PlanList () {
 
                 {isSelected && (
                   <Box className={classes.actions}>
-                    <Tooltip title="Brouillon">
+                    <Tooltip title="Actif">
                       <Box
                         className={classes.actionButton}
                         onClick={() => handleBrouillon(Name)}
                       >
                         <AntSwitch
-                          checked={Brouillon}
+                          checked={!Brouillon}
                         />
+                      </Box>
+                    </Tooltip>
+                    <Tooltip title="Modifier">
+                      <Box
+                        className={classes.actionButton}
+                        onClick={() => {
+                          setDialogUpdateOpen(!dialogUpdateOpen);
+                          setPlanName(Name);
+                        }}
+                      >
+                        <Edit />
                       </Box>
                     </Tooltip>
                     <Tooltip title="Supprimer">
@@ -268,10 +297,17 @@ function PlanList () {
           );
         })}
       </Box>
-      {dialogOpen && (
+      {dialogNewOpen && (
         <NewPlanDialog
-          open={dialogOpen}
-          onClose={handleClose}
+          open={dialogNewOpen}
+          onClose={handleNewClose}
+        />
+      )}
+      {dialogUpdateOpen && (
+        <PlanNameDialog
+          open={dialogUpdateOpen}
+          onClose={handleUpdateClose}
+          planName={planName}
         />
       )}
     </>
