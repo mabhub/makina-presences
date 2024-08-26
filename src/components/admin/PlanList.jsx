@@ -1,9 +1,9 @@
-import { Box, Card, CardActionArea, colors, IconButton, Tooltip, Typography } from '@mui/material';
+import { Add, Delete, Edit } from '@mui/icons-material';
+import { Box, Card, CardActionArea, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
-import { Add } from '@mui/icons-material';
 import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
 import NewPlanDialog from './NewPlanDialog';
@@ -49,13 +49,36 @@ const useStyles = makeStyles(theme => ({
     borderRadius: '10px',
     border: 'unset',
     padding: theme.spacing(1.5, 0),
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(1),
     opacity: 0.5,
     transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
       cursor: 'pointer',
       opacity: 1,
     },
+  },
+  actions: {
+    display: 'flex',
+  },
+  actionButton: {
+    padding: theme.spacing(0.8),
+    border: 'unset',
+    background: 'unset',
+    borderRadius: '10px',
+    transition: 'all 100ms cubic-bezier(0.4, 0, 0.2, 1)',
+    opacity: '0.5',
+    '&:hover': {
+      opacity: '1',
+      transition: 'all 100ms cubic-bezier(0.4, 0, 0.2, 1)',
+      background: 'rgba(0, 0, 0, 0.05);',
+      cursor: 'pointer',
+    },
+  },
+  cardTitle: {
+    maxWidth: '100%',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
   },
 }));
 
@@ -69,16 +92,17 @@ function PlanList () {
   const { place } = useParams();
 
   const [planUpdate, setPlanUpdate] = usePlanUpdate([]);
-  const plans = usePlans()
-    .concat(planUpdate)
-    .filter(({ Brouillon }) => !Brouillon);
+  // const plans = usePlans()
+  // .concat(planUpdate)
+  // .filter(({ Brouillon }) => !Brouillon);
+
+  // console.log(plans);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleClose = (name, plan) => {
     setDialogOpen(!dialogOpen);
     if (name && plan) {
-      // console.log(name, plan);
       setPlanUpdate([
         ...planUpdate,
         {
@@ -94,12 +118,12 @@ function PlanList () {
   const [updateStack, setUpdatedStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
 
-  const getPlacesToAdd = action => planUpdate.reduce((acc, curr) => {
+  const uptdateTheStack = stack => planUpdate.reduce((acc, curr) => {
     const { Name } = curr;
     if (!Object.hasOwn(acc, Name)) {
       return {
         ...acc,
-        [Name]: action[Name] ? action[Name] : [],
+        [Name]: stack[Name] ? stack[Name] : [],
       };
     }
     return acc;
@@ -108,17 +132,21 @@ function PlanList () {
   useEffect(() => {
     setTimeout(() => {
       setUpdatedStack({
-        ...updateStack,
-        ...getPlacesToAdd(updateStack),
+        ...uptdateTheStack(updateStack),
       });
-    }, 0);
-    setTimeout(() => {
       setUndidStack({
-        ...undidStack,
-        ...getPlacesToAdd(undidStack),
+        ...uptdateTheStack(undidStack),
       });
     }, 0);
   }, [planUpdate]);
+
+  const handleDelete = (event, name) => {
+    setPlanUpdate([
+      ...planUpdate.filter(({ Name }) => Name !== name),
+    ]);
+    history.push('/admin');
+    event.stopPropagation();
+  };
 
   return (
     <>
@@ -133,7 +161,7 @@ function PlanList () {
           </Box>
         </Box>
 
-        {plans.map(({ Name }) => {
+        {planUpdate.map(({ Name }) => {
           const isSelected = Name === place;
           return (
             <Card
@@ -144,12 +172,30 @@ function PlanList () {
                 [classes.selected]: isSelected,
               })}
             >
-              <CardActionArea className={classes.cardContent} onClick={() => history.push(`/admin/${Name}`)}>
+              <CardActionArea
+                className={classes.cardContent}
+                onClick={() => history.push(`/admin/${Name}`)}
+                disableRipple
+              >
                 <Typography
                   variant="h4"
                   fontWeight={isSelected ? 'bold' : 'unset'}
+                  className={classes.cardTitle}
                 >{Name}
                 </Typography>
+
+                {isSelected && (
+                  <Box className={classes.actions}>
+                    <Tooltip title="Supprimer">
+                      <Box
+                        className={classes.actionButton}
+                        onClick={event => handleDelete(event, Name)}
+                      >
+                        <Delete />
+                      </Box>
+                    </Tooltip>
+                  </Box>
+                )}
               </CardActionArea>
             </Card>
           );

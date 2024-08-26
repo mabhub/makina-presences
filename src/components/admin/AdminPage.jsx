@@ -72,11 +72,13 @@ function AdminPage () {
     if (Object.keys(defaultStack).length > 0) {
       localStorage.setItem('updateStack', JSON.stringify({ ...defaultStack }));
       localStorage.setItem('undidStack', JSON.stringify({ ...defaultStack }));
+      localStorage.setItem('planUpdate', JSON.stringify([...plans]));
     }
   };
 
   const areStacksValid = typeof localStorage.updateStack !== 'undefined'
-  && typeof localStorage.undidStack !== 'undefined';
+  && typeof localStorage.undidStack !== 'undefined'
+  && typeof localStorage.planUpdate !== 'undefined';
 
   const [showPanel, setShowPanel] = React.useState(false);
   const [spot, setSelectedSpot] = React.useState({});
