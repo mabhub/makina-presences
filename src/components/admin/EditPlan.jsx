@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
@@ -56,11 +56,7 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
 
-  const [planUpdate] = usePlanUpdate();
-
-  const plans = usePlans().concat(planUpdate);
-
-  // console.log(plans);
+  const [plans] = usePlanUpdate();
 
   const [updateStack, setUpdatedStack] = useUpdatedStack({});
 
@@ -88,7 +84,6 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   };
 
   useEffect(() => {
-    // Prevent adding an empty update on start
     if (Object.keys(updatedSpot).length) {
       setUpdatedStack({
         ...updateStack,
@@ -130,7 +125,6 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
 
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
-  // console.log(plan);
   const planRef = useRef(null);
 
   return (
