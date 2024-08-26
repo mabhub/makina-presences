@@ -1,7 +1,8 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { AddPhotoAlternateOutlined } from '@mui/icons-material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { AddPhotoAlternate, AddPhotoAlternateOutlined } from '@mui/icons-material';
+import React, { useEffect, useState } from 'react';
+import createPersistedState from 'use-persisted-state';
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -9,6 +10,9 @@ const useStyles = makeStyles(theme => ({
     aspectRatio: '16/9',
     marginTop: theme.spacing(1),
     border: '2px dashed #00000030',
+    '&:hover, &:focus-within': {
+      borderColor: '#000000',
+    },
     borderRadius: '10px',
     position: 'relative',
   },
@@ -29,8 +33,12 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const usePlanUpdate = createPersistedState('planUpdate');
+
 function NewSpotDialog ({ open, onClose }) {
   const classes = useStyles();
+
+  const [planUpdate] = usePlanUpdate();
 
   const [name, setName] = useState('');
 
@@ -39,16 +47,13 @@ function NewSpotDialog ({ open, onClose }) {
 
   useEffect(() => {
     if (!selectedFile) {
-      setPreview(undefined);
       return;
     }
-
     setPreview(URL.createObjectURL(selectedFile));
   }, [selectedFile]);
 
   const onSelectFile = event => {
     if (!event.target.files || event.target.files.length === 0) {
-      setSelectedFile(undefined);
       return;
     }
     setSelectedFile(event.target.files[0]);
@@ -72,6 +77,8 @@ function NewSpotDialog ({ open, onClose }) {
           fullWidth
           value={name}
           onChange={event => setName(event.target.value)}
+          error={planUpdate.map(({ Name }) => Name).includes(name)}
+          helperText={!planUpdate.map(({ Name }) => Name).includes(name) ? '' : 'Ce nom est déjà prit'}
         />
         <br />
 
@@ -97,7 +104,11 @@ function NewSpotDialog ({ open, onClose }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={() => onClose()}>Annuler</Button>
-        <Button onClick={handleSubmit} disabled={name === '' || !selectedFile}>Créer</Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={name === '' || !selectedFile || planUpdate.map(({ Name }) => Name).includes(name)}
+        >Créer
+        </Button>
       </DialogActions>
     </Dialog>
   );
