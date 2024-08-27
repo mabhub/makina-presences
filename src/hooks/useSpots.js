@@ -2,11 +2,11 @@ import useTable from './useTable';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
-const useSpots = place => {
+const useSpots = placeID => {
   const allSpots = useTable(Number(spotsTableId));
 
   return allSpots
-    .filter(({ Plan: [{ value } = {}] = [] }) => value === place);
+    .filter(({ Plan: [{ id } = {}] = [] }) => id === placeID && placeID !== undefined);
 };
 
 export default useSpots;

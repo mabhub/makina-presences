@@ -41,29 +41,33 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUndidStack = createPersistedState('undidStack');
-const usePlanUpdate = createPersistedState('planUpdate');
+const useMapping = createPersistedState('mapping');
 
 function AdminPage () {
   const classes = useStyles();
   const { place } = useParams();
 
-  const [planUpdate] = usePlanUpdate([]);
-
   const plans = usePlans();
+
+  const [mapping] = useMapping();
 
   const defaultStack = plans
     // .concat(planUpdate)
-    .filter(({ Brouillon }) => !Brouillon)
     .reduce((acc, curr) => {
-      const { Name } = curr;
-      if (!Object.hasOwn(acc, Name)) {
+      const { id } = curr;
+      if (!Object.hasOwn(acc, id)) {
         return {
           ...acc,
-          [Name]: [],
+          [id]: [],
         };
       }
       return acc;
     }, {});
+  // const defaultStack = Object.values(mapping)
+  //   .reduce((acc, curr) => ({
+  //     ...acc,
+  //     [curr]: [],
+  //   }), {});
 
   // console.log(plans);
   // console.log(defaultStack);
