@@ -35,12 +35,16 @@ const useStyles = makeStyles(theme => ({
 
 const usePlanUpdate = createPersistedState('planUpdate');
 
-function NewSpotDialog ({ open, onClose }) {
+function PlanDialog ({ open, onClose, edit, planName }) {
   const classes = useStyles();
 
   const [planUpdate] = usePlanUpdate();
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState(planName);
+  const nameValid = !planUpdate
+    .filter(({ Name }) => Name !== planName)
+    .map(({ Name }) => Name)
+    .includes(name);
 
   const [selectedFile, setSelectedFile] = useState();
   const [preview, setPreview] = useState();
@@ -60,16 +64,20 @@ function NewSpotDialog ({ open, onClose }) {
   };
 
   const handleSubmit = () => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      onClose(name, e.target.result);
-    };
-    reader.readAsDataURL(selectedFile);
+    if (edit) {
+      onClose(planName, name);
+    } else {
+      const reader = new FileReader();
+      reader.onload = e => {
+        onClose(name, e.target.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    }
   };
 
   return (
     <Dialog open={open}>
-      <DialogTitle><strong>Nouvel Espace</strong></DialogTitle>
+      <DialogTitle><strong>{edit ? `Modification de ${planName}` : 'Nouvel Espace'}</strong></DialogTitle>
       <DialogContent dividers>
         <TextField
           size="small"
@@ -77,11 +85,12 @@ function NewSpotDialog ({ open, onClose }) {
           fullWidth
           value={name}
           onChange={event => setName(event.target.value)}
-          error={planUpdate.map(({ Name }) => Name).includes(name)}
-          helperText={!planUpdate.map(({ Name }) => Name).includes(name) ? '' : 'Ce nom est déjà prit'}
+          error={!nameValid}
+          helperText={nameValid ? '' : 'Ce nom est déjà prit'}
         />
         <br />
 
+        {!edit && (
         <Box
           htmlFor="plan-picker"
           className={classes.wrapper}
@@ -101,12 +110,17 @@ function NewSpotDialog ({ open, onClose }) {
             onChange={onSelectFile}
           />
         </Box>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={() => onClose()}>Annuler</Button>
         <Button
           onClick={handleSubmit}
-          disabled={name === '' || !selectedFile || planUpdate.map(({ Name }) => Name).includes(name)}
+          disabled={name === ''
+            || (!edit && !selectedFile)
+            || planUpdate
+              .filter(({ Name }) => Name !== planName)
+              .map(({ Name }) => Name).includes(name)}
         >Créer
         </Button>
       </DialogActions>
@@ -114,4 +128,4 @@ function NewSpotDialog ({ open, onClose }) {
   );
 }
 
-export default React.memo(NewSpotDialog);
+export default React.memo(PlanDialog);

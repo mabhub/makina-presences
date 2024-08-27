@@ -6,9 +6,8 @@ import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import NewPlanDialog from './NewPlanDialog';
-import PlanNameDialog from './PlanNameDialog';
 import usePlans from '../../hooks/usePlans';
+import PlanDialog from './PlanDialog';
 
 const AntSwitch = styled(Switch)(({ theme }) => ({
   width: 28,
@@ -367,15 +366,17 @@ function PlanList () {
         })}
       </Box>
       {dialogNewOpen && (
-        <NewPlanDialog
+        <PlanDialog
           open={dialogNewOpen}
           onClose={handleNew}
+          planName=""
         />
       )}
       {dialogUpdateOpen && (
-        <PlanNameDialog
+        <PlanDialog
           open={dialogUpdateOpen}
           onClose={handleUpdate}
+          edit
           planName={planName}
         />
       )}
