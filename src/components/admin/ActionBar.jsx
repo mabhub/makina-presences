@@ -42,28 +42,29 @@ const useStyles = makeStyles(theme => ({
 
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
-const usePlanUpdate = createPersistedState('planUpdate');
+const useMapping = createPersistedState('mapping');
 
 function ActionBar () {
   const classes = useStyles();
   const { place } = useParams();
+  const [mapping] = useMapping();
+  const placeID = mapping[place];
 
   const [updateStack, setUpdateStack] = useUpdateStack({});
   const [undidStack, setUndidStack] = useUndidStack({});
-  const [planUpdate] = usePlanUpdate([]);
 
   const handleUndo = () => {
     setUndidStack({
       ...undidStack,
-      [place]: [
-        ...undidStack[place],
-        updateStack[place][updateStack[place].length - 1],
+      [placeID]: [
+        ...undidStack[placeID],
+        updateStack[placeID][updateStack[placeID].length - 1],
       ],
     });
     setUpdateStack({
       ...updateStack,
-      [place]: [
-        ...updateStack[place].slice(0, -1),
+      [placeID]: [
+        ...updateStack[placeID].slice(0, -1),
       ],
     });
   };
@@ -71,15 +72,15 @@ function ActionBar () {
   const handleRedo = () => {
     setUpdateStack({
       ...updateStack,
-      [place]: [
-        ...updateStack[place],
-        undidStack[place][undidStack[place].length - 1],
+      [placeID]: [
+        ...updateStack[placeID],
+        undidStack[placeID][undidStack[placeID].length - 1],
       ],
     });
     setUndidStack({
       ...undidStack,
-      [place]: [
-        ...undidStack[place].slice(0, -1),
+      [placeID]: [
+        ...undidStack[placeID].slice(0, -1),
       ],
     });
   };
@@ -97,8 +98,8 @@ function ActionBar () {
         }), {}));
       setUpdateStack({
         ...updateStack,
-        [place]: [
-          ...updateStack[place],
+        [placeID]: [
+          ...updateStack[placeID],
           spotInfo,
         ],
       });
@@ -116,7 +117,7 @@ function ActionBar () {
               <Box
                 className={classes.button}
                 component="button"
-                disabled={updateStack[place].length === 0}
+                disabled={updateStack[placeID].length === 0}
                 onClick={handleUndo}
               >
                 <KeyboardArrowLeft />
@@ -131,7 +132,7 @@ function ActionBar () {
               <Box
                 className={classes.button}
                 component="button"
-                disabled={undidStack[place].length === 0}
+                disabled={undidStack[placeID].length === 0}
                 onClick={handleRedo}
               >
                 <KeyboardArrowRight />
