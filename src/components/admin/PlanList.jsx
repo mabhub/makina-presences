@@ -8,6 +8,7 @@ import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min
 import createPersistedState from 'use-persisted-state';
 import NewPlanDialog from './NewPlanDialog';
 import PlanNameDialog from './PlanNameDialog';
+import usePlans from '../../hooks/usePlans';
 
 const AntSwitch = styled(Switch)(({ theme }) => ({
   width: 28,
@@ -132,6 +133,7 @@ const useStyles = makeStyles(theme => ({
 const usePlanUpdate = createPersistedState('planUpdate');
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
+const useMapping = createPersistedState('mapping');
 
 function PlanList () {
   const classes = useStyles();
@@ -142,67 +144,109 @@ function PlanList () {
   const [dialogNewOpen, setDialogNewOpen] = useState(false);
   const [dialogUpdateOpen, setDialogUpdateOpen] = useState(false);
   const [planName, setPlanName] = useState('');
+  const plansDB = usePlans();
 
-  const handleNewClose = (name, plan) => {
-    setDialogNewOpen(!dialogNewOpen);
-    if (name && plan) {
-      setPlanUpdate([
-        ...plans,
-        {
-          Name: name,
-          Postes: [],
-          plan: [{ url: plan }],
-          Brouillon: false,
-        },
+  const [usedIDs, setUsedIDs] = useState([
+    ...new Set([
+      0,
+      ...plans.map(({ id }) => id),
+    ]),
+  ]);
+
+  useEffect(() => {
+    if (plansDB.length > 0) {
+      setUsedIDs([
+        ...new Set([
+          ...usedIDs,
+          ...plansDB.map(({ id }) => id),
+        ]),
       ]);
     }
-  };
+  }, [plansDB]);
 
-  const handleUpdateClose = (oldName, newName) => {
-    setDialogUpdateOpen(!dialogUpdateOpen);
-    setPlanUpdate([
-      ...plans.map(plan => {
-        if (plan.Name === oldName) {
-          return {
-            ...plan,
-            Name: newName,
-          };
-        }
-        return plan;
-      }),
-    ]);
-    history.push('/admin');
-  };
-
-  const [updateStack, setUpdatedStack] = useUpdateStack();
-  const [undidStack, setUndidStack] = useUndidStack();
-
-  const uptdateTheStack = stack => plans.reduce((acc, curr) => {
-    const { Name } = curr;
-    if (!Object.hasOwn(acc, Name)) {
+  const defaultMapping = plans.reduce((acc, curr) => {
+    const { Name: key, id } = curr;
+    if (!Object.hasOwn(acc, key)) {
       return {
         ...acc,
-        [Name]: stack[Name] ? stack[Name] : [],
+        [key]: id,
       };
     }
     return acc;
   }, {});
 
+  const [mapping, setMapping] = useMapping();
   useEffect(() => {
-    setTimeout(() => {
-      setUpdatedStack({
-        ...uptdateTheStack(updateStack),
+    if (!mapping
+      || (mapping && Object.keys(mapping).length !== Object.keys(defaultMapping).length)
+    ) {
+      setMapping({ ...defaultMapping });
+    }
+  }, [defaultMapping]);
+
+  const handleNew = (name, plan) => {
+    setDialogNewOpen(!dialogNewOpen);
+    if (name && plan) {
+      const newId = Math.max(...Object.values(usedIDs)) + 1;
+      const newPlan = {
+        id: newId,
+        Name: name,
+        Postes: [],
+        plan: [{ url: plan }],
+        Brouillon: false,
+      };
+      setUsedIDs([
+        ...usedIDs,
+        newId,
+      ]);
+      setPlanUpdate([
+        ...plans,
+        newPlan,
+      ]);
+      setMapping({
+        ...mapping,
+        [name]: newPlan.id,
       });
-      setUndidStack({
-        ...uptdateTheStack(undidStack),
-      });
-    }, 0);
-  }, [plans]);
+    }
+  };
+
+  const handleUpdate = (oldName, newName) => {
+    setDialogUpdateOpen(!dialogUpdateOpen);
+    setMapping({
+      ...Object.keys(mapping).reduce((acc, curr) => {
+        if (curr === oldName) {
+          return {
+            ...acc,
+            [newName]: mapping[oldName],
+          };
+        }
+        return {
+          ...acc,
+          [curr]: mapping[curr],
+        };
+      }, {}),
+    });
+    setPlanUpdate([
+      ...plans.map(plan => ({
+        ...plan,
+        Name: plan.Name === oldName ? newName : plan.Name,
+      })),
+    ]);
+    if (oldName && newName) history.push('/admin');
+  };
 
   const handleDelete = (event, name) => {
     setPlanUpdate([
       ...plans.filter(({ Name }) => Name !== name),
     ]);
+    setMapping({
+      ...Object.keys(mapping)
+        .filter(key => key !== name)
+        .reduce((acc, curr) => ({
+          ...acc,
+          [curr]: mapping[curr],
+        }), {}),
+    });
     history.push('/admin');
     event.stopPropagation();
   };
@@ -220,6 +264,31 @@ function PlanList () {
       }),
     ]);
   };
+
+  const [updateStack, setUpdatedStack] = useUpdateStack();
+  const [undidStack, setUndidStack] = useUndidStack();
+
+  const uptdateTheStack = stack => plans.reduce((acc, curr) => {
+    const { id } = curr;
+    if (!Object.hasOwn(acc, id)) {
+      return {
+        ...acc,
+        [id]: stack[id] ? stack[id] : [],
+      };
+    }
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    setTimeout(() => {
+      setUpdatedStack({
+        ...uptdateTheStack(updateStack),
+      });
+      setUndidStack({
+        ...uptdateTheStack(undidStack),
+      });
+    }, 0);
+  }, [plans]);
 
   return (
     <>
@@ -299,13 +368,13 @@ function PlanList () {
       {dialogNewOpen && (
         <NewPlanDialog
           open={dialogNewOpen}
-          onClose={handleNewClose}
+          onClose={handleNew}
         />
       )}
       {dialogUpdateOpen && (
         <PlanNameDialog
           open={dialogUpdateOpen}
-          onClose={handleUpdateClose}
+          onClose={handleUpdate}
           planName={planName}
         />
       )}

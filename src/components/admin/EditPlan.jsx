@@ -1,15 +1,14 @@
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect, useRef } from 'react';
-import { useHistory, useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import createPersistedState from 'use-persisted-state';
-import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import ActionBar from './ActionBar';
 import EditSpot from './EditSpot';
-import { DELETED_KEY } from './SpotPanel';
 import { CREATED_KEY } from './NewSpotDialog';
+import { DELETED_KEY } from './SpotPanel';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -46,26 +45,30 @@ const useStyles = makeStyles(theme => ({
 
 const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
+const useMapping = createPersistedState('mapping');
 
 function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
 
-  const [plans] = usePlanUpdate();
+  const [planUpdate] = usePlanUpdate();
+
+  const [mapping] = useMapping();
+  const placeID = mapping[place];
 
   const [updateStack, setUpdateStack] = useUpdateStack({});
 
   const keepSpotUpdate = (spot, index) => {
     const { Identifiant: spotId } = spot;
     // Is not the last one
-    if (index !== updateStack[place].length - 1) return true;
+    if (index !== updateStack[placeID].length - 1) return true;
 
     // Is the last, ID is different from the new update
     if (spotId !== updatedSpot.Identifiant) return true;
 
     // Is the last, IDs are the same, and the spot was created last action
     const isCreated = Object.hasOwn(spot, CREATED_KEY)
-      && updateStack[place].findIndex(
+      && updateStack[placeID].findIndex(
         ({ Identifiant }) => Identifiant === spot.Identifiant,
       ) === index;
     if (isCreated) return true;
@@ -82,29 +85,29 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
     if (Object.keys(updatedSpot).length) {
       setUpdateStack({
         ...updateStack,
-        [place]: [
-          ...updateStack[place].filter((spot, index) => keepSpotUpdate(spot, index)),
+        [placeID]: [
+          ...updateStack[placeID].filter((spot, index) => keepSpotUpdate(spot, index)),
           updatedSpot,
         ],
       });
     }
   }, [updatedSpot]);
 
-  const idUpdateStack = updateStack[place].map(({ Identifiant: spotId }) => spotId);
-  const spots = useSpots(place)
+  const idUpdateStack = updateStack[placeID].map(({ Identifiant: spotId }) => spotId);
+  const spots = useSpots(placeID)
     // add created spot
     .concat([...new Set(
-      updateStack[place]
+      updateStack[placeID]
         .filter(spot => Object.hasOwn(spot, CREATED_KEY))
         .map(({ Identifiant }) => Identifiant),
-    )].map(Identifiant => updateStack[place][
-      updateStack[place].findLastIndex(({ Identifiant: spotId }) => spotId === Identifiant)
+    )].map(Identifiant => updateStack[placeID][
+      updateStack[placeID].findLastIndex(({ Identifiant: spotId }) => spotId === Identifiant)
     ]))
     // remove deleted spot
     .filter(spot => {
       if (idUpdateStack.includes(spot.Identifiant)
         && Object.hasOwn(
-          updateStack[place][idUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
+          updateStack[placeID][idUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
         )) {
         return false;
       }
@@ -113,12 +116,13 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
     // update updated spot
     .map(spot => {
       if (idUpdateStack.includes(spot.Identifiant)) {
-        return updateStack[place][idUpdateStack.lastIndexOf(spot.Identifiant)];
+        return updateStack[placeID][idUpdateStack.lastIndexOf(spot.Identifiant)];
       }
       return spot;
     });
 
-  const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
+  const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};
+
   const planRef = useRef(null);
 
   return (
