@@ -1,4 +1,4 @@
-import { AddCircleOutline, KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import { Box, Tooltip } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
@@ -9,7 +9,6 @@ import NewSpotDialog from './NewSpotDialog';
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    // background: 'red',
     borderBottom: '2px solid #00000015',
     borderLeft: '1px solid #00000015',
     display: 'flex',

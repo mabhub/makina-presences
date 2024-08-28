@@ -6,11 +6,10 @@ import { Chip, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, 
 
 import { makeStyles } from '@mui/styles';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import useMapping from '../hooks/useMapping';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
 import SpotDialog from './SpotDialog';
-import useSpots from '../hooks/useSpots';
-import useMapping from '../hooks/useMapping';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -34,8 +33,6 @@ const PreferencesSpot = () => {
   const spots = useTable(Number(spotsTableId));
   const plans = usePlans();
   const classes = useStyles();
-
-  // favorites.filter(({ place: favPlace }) => console.log(favPlace));
 
   const sortedFavorite = plans
     .map(plan => ({

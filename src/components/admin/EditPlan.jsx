@@ -9,7 +9,6 @@ import ActionBar from './ActionBar';
 import EditSpot from './EditSpot';
 import { CREATED_KEY } from './NewSpotDialog';
 import { DELETED_KEY } from './SpotPanel';
-import usePlans from '../../hooks/usePlans';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -27,7 +26,6 @@ const useStyles = makeStyles(theme => ({
     backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
   },
   planWrapper: {
-    // border: '1px solid red',
   },
   plan: {
   },

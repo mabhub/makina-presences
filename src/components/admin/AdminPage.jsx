@@ -35,13 +35,11 @@ const useStyles = makeStyles(theme => ({
   },
   editSpot: {
     gridArea: 'c',
-    // background: 'orange',
     border: '2px solid #00000015',
   },
 }));
 
 const useUndidStack = createPersistedState('undidStack');
-// const useMapping = createPersistedState('mapping');
 
 function AdminPage () {
   const classes = useStyles();
@@ -49,10 +47,7 @@ function AdminPage () {
 
   const plans = usePlans();
 
-  // const [mapping] = useMapping();
-
   const defaultStack = plans
-    // .concat(planUpdate)
     .reduce((acc, curr) => {
       const { id } = curr;
       if (!Object.hasOwn(acc, id)) {
@@ -63,14 +58,6 @@ function AdminPage () {
       }
       return acc;
     }, {});
-  // const defaultStack = Object.values(mapping)
-  //   .reduce((acc, curr) => ({
-  //     ...acc,
-  //     [curr]: [],
-  //   }), {});
-
-  // console.log(plans);
-  // console.log(defaultStack);
 
   const [undidStack, setUndidStack] = useUndidStack({});
 
