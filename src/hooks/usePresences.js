@@ -16,7 +16,7 @@ const headers = {
 
 const useWeekPrefs = createPersistedState('weekPref');
 
-const usePresences = place => {
+const usePresences = placeID => {
   const [weekPref] = useWeekPrefs('2');
 
   let timespan = 14;
@@ -29,14 +29,14 @@ const usePresences = place => {
   const queryClient = useQueryClient();
   const basePath = `https://api.baserow.io/api/database/rows/table/${presencesTableId}/`;
 
-  const queryKey = ['presences', place, dayFrom, dayTo];
+  const queryKey = ['presences', placeID, dayFrom, dayTo];
 
   const qs = [
     '?',
     'user_field_names=true',
     `filter__day__date_after=${dayFrom}`,
     `filter__day__date_before=${dayTo}`,
-    `filter__plan__equal=${place}`,
+    `filter__planID__equal=${placeID}`,
     'size=200',
   ].join('&');
 
@@ -139,7 +139,8 @@ const usePresences = place => {
 
   const setPresence = React.useCallback(
     presence => {
-      const { id, day, tri, plan, spot, period } = presence;
+      const { id, day, tri, plan, planID, spot, period } = presence;
+      console.log(presence);
       if (id && !spot) {
         return deleteRow.mutate(presence);
       }
@@ -149,7 +150,7 @@ const usePresences = place => {
       }
 
       if (!id && (day && tri && plan && spot)) {
-        createPresence(day, tri, { spot, plan, period });
+        createPresence(day, tri, { spot, plan, planID, period });
       }
 
       return null;

@@ -9,6 +9,7 @@ import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
+import useMapping from '../hooks/useMapping';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -71,7 +72,8 @@ const Plan = ({ edit }) => {
   const plans = usePlans();
   const { place } = useParams();
 
-  const spots = useSpots(place);
+  const mapping = useMapping();
+  const spots = useSpots(mapping[place]);
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
   const DragWrapper = edit ? Children : TransformWrapper;

@@ -11,6 +11,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import usePresences from '../hooks/usePresences';
 import { Days, Months } from '../settings';
 import SpotDialog from './SpotDialog';
+import useMapping from '../hooks/useMapping';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
@@ -50,8 +51,9 @@ const DayHeader = ({
   const classes = useStyles();
   const isPresent = Boolean(presence?.spot);
   const [dialogOpen, setDialogOpen] = React.useState();
+  const mapping = useMapping();
 
-  const { setPresence } = usePresences(place);
+  const { setPresence } = usePresences(mapping[place]);
 
   const handleAction = event => {
     if (isPresent) {

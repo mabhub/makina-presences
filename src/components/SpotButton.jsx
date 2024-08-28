@@ -16,6 +16,7 @@ import useSpots from '../hooks/useSpots';
 import ContextualMenu from './ContextualMenu';
 import SpotButtonHalfDay from './SpotButtonHalfDay';
 import SpotDescription from './SpotDescription';
+import useMapping from '../hooks/useMapping';
 
 const useTriState = createPersistedState('tri');
 
@@ -132,14 +133,15 @@ const SpotButton = ({
   const [tri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
-  const spots = useSpots(place);
+  const mapping = useMapping();
+  const spots = useSpots(mapping[place]);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
   const isCumulativeSpot = React.useCallback(
     identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),
     [cumulativeSpots],
   );
 
-  const { presences, setPresence, deletePresence } = usePresences(place);
+  const { presences, setPresence, deletePresence } = usePresences(mapping[place]);
   const dayPresences = presences.filter(presence => presence.day === day);
   const spotPresences = dayPresences
     .reduce((acc, { spot, ...presence }) => ({
@@ -249,7 +251,15 @@ const SpotButton = ({
         ?.filter(() => !isCumulative)
         ?.map(({ id }) => id);
 
-      setPresence({ id: firstId, day, tri, spot: spotId, plan: place, period: p });
+      setPresence({
+        id: firstId,
+        day,
+        tri,
+        spot: spotId,
+        plan: place,
+        planID: mapping[place],
+        period: p,
+      });
       extraneous.forEach(i => deletePresence({ id: i }));
     }
 

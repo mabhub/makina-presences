@@ -4,8 +4,11 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import SpotForm from './SpotForm';
+import createPersistedState from 'use-persisted-state';
 
 export const CREATED_KEY = 'created';
+
+const useMapping = createPersistedState('mapping');
 
 function NewSpotDialog ({ open, onClose }) {
   const { place } = useParams();
@@ -23,7 +26,8 @@ function NewSpotDialog ({ open, onClose }) {
 
   const [idValid, setIdValid] = useState(true);
 
-  const spotIds = useSpots(place).map(({ Identifiant }) => Identifiant);
+  const [mapping] = useMapping();
+  const spotIds = useSpots(mapping[place]).map(({ Identifiant }) => Identifiant);
   const handleChange = (key, value) => {
     if (key === 'Identifiant') {
       setIdValid(!spotIds.includes(value));

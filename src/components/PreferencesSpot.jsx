@@ -9,6 +9,8 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
 import SpotDialog from './SpotDialog';
+import useSpots from '../hooks/useSpots';
+import useMapping from '../hooks/useMapping';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -28,14 +30,17 @@ const useStyles = makeStyles({
 const PreferencesSpot = () => {
   const [favorites, setFavorites] = useFavoritesState([]);
   const { place } = useParams();
+  const mapping = useMapping();
   const spots = useTable(Number(spotsTableId));
   const plans = usePlans();
   const classes = useStyles();
 
+  // favorites.filter(({ place: favPlace }) => console.log(favPlace));
+
   const sortedFavorite = plans
     .map(plan => ({
-      agency: plan.Name,
-      favs: favorites.filter(({ place: favPlace }) => favPlace === plan.Name),
+      agency: mapping[plan.Name],
+      favs: favorites.filter(({ place: favPlace }) => favPlace === mapping[plan.Name]),
     }));
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -50,7 +55,7 @@ const PreferencesSpot = () => {
       ...favorites,
       {
         name: value,
-        place: spotPlace,
+        place: mapping[spotPlace],
       },
     ]);
   };
@@ -84,7 +89,7 @@ const PreferencesSpot = () => {
         .filter(({
           Identifiant: id,
           Plan: [{ value: plan } = {}] = [],
-        }) => id === name && plan === spotPlace)
+        }) => id === name && mapping[plan] === spotPlace)
         .map(({ Type: { value: type } }) => (icons[type]));
 
       return (
@@ -148,7 +153,7 @@ const PreferencesSpot = () => {
             {favs.length > 0
             && (
               <ListItem sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
-                <ListItemText primary={agency} />
+                <ListItemText primary={Object.keys(mapping).find(key => mapping[key] === agency)} />
               </ListItem>
             )}
             {createListItem(favs)}

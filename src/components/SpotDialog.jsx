@@ -32,6 +32,7 @@ import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
+import useMapping from '../hooks/useMapping';
 
 const { VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
 
@@ -70,6 +71,7 @@ const SpotDialog = ({
   const [favorites] = useFavoritesState([]);
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
+  const mapping = useMapping();
 
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -89,10 +91,10 @@ const SpotDialog = ({
       [spot]: tri,
     }), {});
 
-  const spots = useSpots(selectedPlace)
+  const spots = useSpots(mapping[selectedPlace])
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
   const favoriteName = favorites
-    .filter(({ place: spotPLace }) => spotPLace === selectedPlace)
+    .filter(({ place: spotPlace }) => spotPlace === mapping[selectedPlace])
     .reduce((acc, curr) => [...acc, curr.name], []);
   const favoriteSpots = spots
     .filter(({ Identifiant: id }) => favoriteName.includes(id))
