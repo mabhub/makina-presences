@@ -12,6 +12,7 @@ import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
+import useMapping from '../hooks/useMapping';
 
 const { FF_COMPLEMENTARY } = baseFlags;
 
@@ -82,7 +83,8 @@ const Plan = ({ edit }) => {
   const plans = usePlans();
   const { place } = useParams();
 
-  const spots = useSpots(place);
+  const mapping = useMapping();
+  const spots = useSpots(mapping[place]);
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
   const DragWrapper = edit ? Children : TransformWrapper;

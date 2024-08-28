@@ -40,15 +40,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUndidStack = createPersistedState('undidStack');
-const useMapping = createPersistedState('mapping');
 
 function AdminPage () {
   const classes = useStyles();
   const { place } = useParams();
 
   const plans = usePlans();
-
-  const [mapping] = useMapping();
 
   const defaultStack = plans
     .reduce((acc, curr) => {

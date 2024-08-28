@@ -26,6 +26,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
+import useMapping from '../hooks/useMapping';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
 import { baseFlags, isEnable } from '../feature_flag_service';
 
@@ -74,6 +75,7 @@ const SpotDialog = ({
   const [favorites] = useFavoritesState([]);
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
+  const mapping = useMapping();
 
   const enableFavorite = isEnable(FF_FAVORITE);
   const enableHalfDay = isEnable(FF_HALFDAY);
@@ -95,10 +97,10 @@ const SpotDialog = ({
       [spot]: tri,
     }), {});
 
-  const spots = useSpots(selectedPlace)
+  const spots = useSpots(mapping[selectedPlace])
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
   const favoriteName = favorites
-    .filter(({ place: spotPLace }) => spotPLace === selectedPlace)
+    .filter(({ place: spotPlace }) => spotPlace === mapping[selectedPlace])
     .reduce((acc, curr) => [...acc, curr.name], []);
   const favoriteSpots = spots
     .filter(({ Identifiant: id }) => favoriteName.includes(id))

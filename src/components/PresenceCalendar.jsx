@@ -25,6 +25,7 @@ import { sameLowC } from '../helpers';
 
 import DayHeader from './DayHeader';
 import Moment from './Moment';
+import useMapping from '../hooks/useMapping';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -108,7 +109,9 @@ const PresenceCalendar = () => {
 
   const today = dayjs(dayjs().format('YYYY-MM-DD')); // Wacky trick to strip time
 
-  const { presences } = usePresences(place);
+  const mapping = useMapping();
+
+  const { presences } = usePresences(mapping[place]);
   const holidays = useHolidays();
 
   const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {

@@ -8,6 +8,7 @@ import { makeStyles } from '@mui/styles';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
+import useMapping from '../hooks/useMapping';
 import SpotDialog from './SpotDialog';
 import { baseFlags, isEnable } from '../feature_flag_service';
 
@@ -47,6 +48,7 @@ export const NO_AGENCYPREF_LABEL = 'Aucune';
 const PreferencesFavorites = () => {
   const [favorites, setFavorites] = useFavoritesState([]);
   const { place } = useParams();
+  const mapping = useMapping();
   const spots = useTable(Number(spotsTableId));
   const plans = usePlans();
   const classes = useStyles();
@@ -60,8 +62,8 @@ const PreferencesFavorites = () => {
 
   const sortedFavorite = plans
     .map(plan => ({
-      agency: plan.Name,
-      favs: favorites.filter(({ place: favPlace }) => favPlace === plan.Name),
+      agency: mapping[plan.Name],
+      favs: favorites.filter(({ place: favPlace }) => favPlace === mapping[plan.Name]),
     }));
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -76,7 +78,7 @@ const PreferencesFavorites = () => {
       ...favorites,
       {
         name: value,
-        place: spotPlace,
+        place: mapping[spotPlace],
       },
     ]);
   };
@@ -107,7 +109,7 @@ const PreferencesFavorites = () => {
         .filter(({
           Identifiant: id,
           Plan: [{ value: plan } = {}] = [],
-        }) => id === name && plan === spotPlace)
+        }) => id === name && mapping[plan] === spotPlace)
         .map(({ Type: { value: type } }) => (icons[type]));
 
       return (
@@ -192,7 +194,9 @@ const PreferencesFavorites = () => {
                       {favs.length > 0
                 && (
                   <ListItem sx={{ mb: '-8px', mt: '-2px', ml: '-7px', position: 'relative' }}>
-                    <Typography variant="caption" sx={{ opacity: 0.5 }}>{agency}</Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.5 }}>
+                      {Object.keys(mapping).find(key => mapping[key] === agency)}
+                    </Typography>
                   </ListItem>
                 )}
                       {createListItem(favs)}
