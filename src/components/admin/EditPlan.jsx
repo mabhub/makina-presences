@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import createPersistedState from 'use-persisted-state';
@@ -26,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
   },
   planWrapper: {
+    border: '1px solid red',
   },
   plan: {
   },
@@ -129,15 +130,52 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
 
   const planRef = useRef(null);
 
+  const [movingSpot, setMovingSpot] = useState();
+  const [deltas, setDeltas] = useState({
+    x: 0,
+    y: 0,
+  });
+
+  const handleMoveStart = (clicPosition, spot) => {
+    setMovingSpot({
+      ...spot,
+    });
+    setDeltas({
+      x: clicPosition.x - (spot.x * planRef.current.state.scale),
+      y: clicPosition.y - (spot.y * planRef.current.state.scale),
+    });
+  };
+
+  const handleMoveEnd = event => {
+    if (!movingSpot) return;
+    setUpdatedStack({
+      ...updateStack,
+      [placeID]: [
+        ...updateStack[placeID],
+        {
+          ...movingSpot,
+          x: (event.clientX - deltas.x) / planRef.current.state.scale,
+          y: (event.clientY - deltas.y) / planRef.current.state.scale,
+        },
+      ],
+    });
+    setMovingSpot();
+  };
+
   return (
-    <Box className={classes.root}>
+    <Box
+      className={classes.root}
+      onClick={handleMoveEnd}
+    >
       <ActionBar />
       <TransformWrapper
         ref={planRef}
         disabled
+        id="planContainer"
       >
         <TransformComponent
           wrapperClass={classes.wrapper}
+          id="plan"
         >
           <Box className={classes.planWrapper}>
             {plan?.url && (
@@ -157,6 +195,7 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
                 key={Spot.Identifiant}
                 Spot={Spot}
                 onClick={handleClick}
+                onMoveStart={handleMoveStart}
                 isSelected={selectedSpot.Identifiant === Spot.Identifiant && panelOpen}
               />
             ))}
