@@ -2,7 +2,9 @@ import { ContentCopy, Delete, OpenWith } from '@mui/icons-material';
 import { Box, Fab } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import createPersistedState from 'use-persisted-state';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -88,11 +90,34 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function EditSpot ({ Spot, onClick = () => {}, isSelected, isGhost, onMoveStart, onMoveUndo }) {
+const useUpdateStack = createPersistedState('updateStack');
+const useMapping = createPersistedState('mapping');
+
+const EditSpot = forwardRef((
+  {
+    Spot,
+    onClick = () => {},
+    isSelected,
+    planRef,
+  },
+  ref,
+) => {
   const classes = useStyles();
 
   const { Identifiant: spotId, x, y, Type } = Spot;
   const [isMoving, setIsMoving] = useState(false);
+  const [deltas, setDeltas] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [coords, setCoords] = useState({ x, y });
+  useEffect(() => {
+    setCoords({ x, y });
+  }, [x, y]);
+  const [updateStack, setUpdateStack] = useUpdateStack();
+  const { place } = useParams();
+  const [mapping] = useMapping();
+  const placeID = mapping[place];
 
   const getPositionAtCenter = element => {
     const { top, left, width, height } = element.getBoundingClientRect();
@@ -102,27 +127,68 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, isGhost, onMoveStart,
     };
   };
 
-  const handleClick = () => {
-    onClick(Spot);
-    if (isMoving) setIsMoving(!isMoving);
+  const snap = (v, a = 5) => Math.round(v / a) * a;
+  const getNewPosition = event => {
+    const { current: { state: { scale } = {} } = {} } = planRef;
+    return {
+      x: snap((event.clientX - deltas.x) / scale),
+      y: snap((event.clientY - deltas.y) / scale),
+    };
   };
 
   const handleMoveStart = event => {
     event.stopPropagation();
-    onMoveStart(
-      getPositionAtCenter(document.getElementById(`btn-${spotId}`)),
-      Spot,
-    );
     setIsMoving(!isMoving);
+
+    const { current: { state: { scale } = {} } = {} } = planRef;
+    const clicPosition = getPositionAtCenter(document.getElementById(`btn-${spotId}`));
+    setDeltas({
+      x: clicPosition.x - (coords.x * scale),
+      y: clicPosition.y - (coords.y * scale),
+    });
   };
 
-  const handleKeyboardClick = event => {
-    if (event.keyCode === 27) {
-      setIsMoving(false);
-      onMoveUndo();
-      console.log(isGhost);
+  useImperativeHandle(ref, () => {
+    if (isMoving) {
+      return {
+        handleMove (event) {
+          setCoords({
+            ...getNewPosition(event),
+          });
+        },
+      };
+    }
+    return undefined;
+  });
+
+  const handleMoveEnd = event => {
+    setUpdateStack({
+      ...updateStack,
+      [placeID]: [
+        ...updateStack[placeID],
+        {
+          ...Spot,
+          ...getNewPosition(event),
+        },
+      ],
+    });
+  };
+
+  const handleClick = event => {
+    onClick(Spot);
+    if (isMoving) {
+      setIsMoving(!isMoving);
+      handleMoveEnd(event);
     }
   };
+
+  // const handleKeyboardClick = event => {
+  //   if (event.keyCode === 27) {
+  //     setIsMoving(false);
+  //     onMoveUndo();
+  //     console.log(isGhost);
+  //   }
+  // };
 
   return (
     <Box
@@ -131,17 +197,20 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, isGhost, onMoveStart,
         [classes.onTop]: isSelected,
       })}
       style={{
-        left: `${x}px`,
-        top: `${y}px`,
+        left: `${coords.x}px`,
+        top: `${coords.y}px`,
       }}
     >
-      <div id={`btn-${spotId}`}>
+      <div
+        id={`btn-${spotId}`}
+        ref={isMoving ? ref : null}
+      >
         <Fab
           className={clsx({
             [classes.spot]: true,
             [classes.selected]: isSelected,
             [classes.spotMoving]: isMoving,
-            [classes.ghost]: isGhost,
+            // [classes.ghost]: isGhost,
           })}
           style={{
             borderColor: Type?.color?.replace('-', ''),
@@ -149,8 +218,8 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, isGhost, onMoveStart,
           component="button"
           size="small"
           onClick={handleClick}
-          onKeyDown={handleKeyboardClick}
-          autoFocus
+          // onKeyDown={handleKeyboardClick}
+          // autoFocus
         >
           {spotId}
 
@@ -182,11 +251,11 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, isGhost, onMoveStart,
       )}
       {isMoving && (
         <Box className={classes.coords}>
-          <strong>({x}, {y})</strong>
+          <strong>({coords.x}, {coords.y})</strong>
         </Box>
       )}
     </Box>
   );
-}
+});
 
 export default React.memo(EditSpot);
