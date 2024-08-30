@@ -91,6 +91,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUpdateStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
 const EditSpot = forwardRef((
@@ -115,6 +116,7 @@ const EditSpot = forwardRef((
     setCoords({ x, y });
   }, [x, y]);
   const [updateStack, setUpdateStack] = useUpdateStack();
+  const [undidStack, setUndidStack] = useUndidStack();
   const { place } = useParams();
   const [mapping] = useMapping();
   const placeID = mapping[place];
@@ -125,6 +127,14 @@ const EditSpot = forwardRef((
       x: left + width / 2,
       y: top + height / 2,
     };
+  };
+
+  const resestUndidStack = () => {
+    setUndidStack(Object.keys(undidStack)
+      .reduce((acc, curr) => ({
+        ...acc,
+        [curr]: [],
+      }), {}));
   };
 
   const snap = (v, a = 5) => Math.round(v / a) * a;
@@ -162,6 +172,7 @@ const EditSpot = forwardRef((
   });
 
   const handleMoveEnd = event => {
+    resestUndidStack();
     setUpdateStack({
       ...updateStack,
       [placeID]: [
@@ -175,7 +186,10 @@ const EditSpot = forwardRef((
   };
 
   const handleClick = event => {
-    onClick(Spot);
+    onClick({
+      ...spot,
+      ...coords,
+    });
     if (isMoving) {
       setIsMoving(!isMoving);
       handleMoveEnd(event);

@@ -35,7 +35,10 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
   const [previousSpotInfo, setPreviousSpotInfo] = useState(spotInfo);
 
   useEffect(() => {
-    setSpotInfo(spot);
+    setSpotInfo({
+      ...spot,
+    });
+    setPreviousSpotInfo({});
   }, [spot]);
 
   const handleChange = (key, value) => {
@@ -58,7 +61,9 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
       previousSpotInfo[k] !== spotInfo[k]
       && previousSpotInfo.Identifiant === spotInfo.Identifiant);
 
-    handleUpdate(spotInfo, diffs);
+    if (diffs.length === 1) {
+      handleUpdate(spotInfo, diffs);
+    }
   }, [spotInfo]);
 
   return (
@@ -87,7 +92,6 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
           </IconButton>
         )}
       />
-      {/* <Divider sx={{ mx: '-16px' }} /> */}
       <CardContent>
         <SpotForm
           edit
