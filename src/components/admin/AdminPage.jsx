@@ -99,11 +99,14 @@ function AdminPage () {
       }), {}));
   };
 
-  const handleUpdate = (Spot, key) => {
-    if (!key) return null;
+  const handleUpdate = (Spot, diffs) => {
+    if (diffs.length !== 1) {
+      resestUndidStack();
+      return;
+    }
+    const [key] = diffs;
     if (key === DELETED_KEY) setShowPanel(false);
-    resestUndidStack();
-    return setUpdatedSpot(Spot);
+    setUpdatedSpot(Spot);
   };
 
   return (
@@ -125,7 +128,7 @@ function AdminPage () {
                 <EditPlan
                   handleClick={handleClick}
                   updatedSpot={updatedSpot}
-                  selectedSpot={spot}
+                  setUpdatedSpot={setUpdatedSpot}
                   panelOpen={showPanel}
                 />
               )}

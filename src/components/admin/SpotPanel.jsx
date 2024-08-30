@@ -49,7 +49,7 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
   };
 
   useEffect(() => {
-    const [diff] = [
+    const diffs = [
       ...new Set([
         ...Object.keys(previousSpotInfo),
         ...Object.keys(spotInfo),
@@ -58,7 +58,7 @@ function SpotPanel ({ spot, onClose, handleUpdate }) {
       previousSpotInfo[k] !== spotInfo[k]
       && previousSpotInfo.Identifiant === spotInfo.Identifiant);
 
-    handleUpdate(spotInfo, diff);
+    handleUpdate(spotInfo, diffs);
   }, [spotInfo]);
 
   return (

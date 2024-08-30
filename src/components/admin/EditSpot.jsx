@@ -2,7 +2,7 @@ import { ContentCopy, Delete, OpenWith } from '@mui/icons-material';
 import { Box, Fab } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -12,6 +12,10 @@ const useStyles = makeStyles(theme => ({
     minHeight: 35,
     position: 'absolute',
     transform: 'translate(-50%, -50%)',
+
+  },
+  onTop: {
+    zIndex: 99999,
   },
   spot: {
     width: '100%',
@@ -24,6 +28,22 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'clip',
     overflow: 'hidden',
     fontSize: '0.75em',
+  },
+  spotMoving: {
+    '&:hover': {
+      cursor: 'move',
+    },
+  },
+  ghost: {
+    opacity: '0.5',
+  },
+  coords: {
+    fontSize: '0.5em',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '200%',
+    textAlign: 'center',
   },
   selected: {
     backgroundImage: 'linear-gradient(45deg, #ffffff 20%, #e6e6e6 20%, #e6e6e6 50%, #ffffff 50%, #ffffff 70%, #e6e6e6 70%, #e6e6e6 100%)',
@@ -52,7 +72,6 @@ const useStyles = makeStyles(theme => ({
   duplicate: {
     top: '25%',
     right: '-60%',
-    // transform: 'translateY(10px)',
   },
   delete: {
     top: '80%',
@@ -69,10 +88,11 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function EditSpot ({ Spot, onClick = () => {}, isSelected, onMoveStart }) {
+function EditSpot ({ Spot, onClick = () => {}, isSelected, isGhost, onMoveStart, onMoveUndo }) {
   const classes = useStyles();
 
   const { Identifiant: spotId, x, y, Type } = spot;
+  const [isMoving, setIsMoving] = useState(false);
 
   const getPositionAtCenter = element => {
     const { top, left, width, height } = element.getBoundingClientRect();
@@ -82,9 +102,9 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, onMoveStart }) {
     };
   };
 
-  const handleClick = event => {
-    event.stopPropagation();
+  const handleClick = () => {
     onClick(Spot);
+    if (isMoving) setIsMoving(!isMoving);
   };
 
   const handleMoveStart = event => {
@@ -93,11 +113,23 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, onMoveStart }) {
       getPositionAtCenter(document.getElementById(`btn-${spotId}`)),
       Spot,
     );
+    setIsMoving(!isMoving);
+  };
+
+  const handleKeyboardClick = event => {
+    if (event.keyCode === 27) {
+      setIsMoving(false);
+      onMoveUndo();
+      console.log(isGhost);
+    }
   };
 
   return (
     <Box
-      className={classes.root}
+      className={clsx({
+        [classes.root]: true,
+        [classes.onTop]: isSelected,
+      })}
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -108,6 +140,8 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, onMoveStart }) {
           className={clsx({
             [classes.spot]: true,
             [classes.selected]: isSelected,
+            [classes.spotMoving]: isMoving,
+            [classes.ghost]: isGhost,
           })}
           style={{
             borderColor: Type?.color?.replace('-', ''),
@@ -115,12 +149,14 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, onMoveStart }) {
           component="button"
           size="small"
           onClick={handleClick}
+          onKeyDown={handleKeyboardClick}
+          autoFocus
         >
           {spotId}
 
         </Fab>
       </div>
-      {isSelected && (
+      {isSelected && !isMoving && (
         <>
           <Box
             component="button"
@@ -143,6 +179,11 @@ function EditSpot ({ Spot, onClick = () => {}, isSelected, onMoveStart }) {
           </Box>
 
         </>
+      )}
+      {isMoving && (
+        <Box className={classes.coords}>
+          <strong>({x}, {y})</strong>
+        </Box>
       )}
     </Box>
   );
