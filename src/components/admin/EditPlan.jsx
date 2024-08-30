@@ -150,7 +150,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
       className={classes.root}
       onPointerMove={handleMove}
     >
-      <ActionBar />
+      <ActionBar onUndoRedu={onSpotSelect} />
       <TransformWrapper
         ref={planRef}
         disabled
