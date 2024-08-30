@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
 import NewSpotDialog from './NewSpotDialog';
+import useSpots from '../../hooks/useSpots';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -44,7 +45,7 @@ const useUpdatedStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function ActionBar () {
+function ActionBar ({ onUndoRedu }) {
   const classes = useStyles();
   const { place } = useParams();
   const [mapping] = useMapping();
@@ -53,7 +54,20 @@ function ActionBar () {
   const [updateStack, setUpdatedStack] = useUpdatedStack({});
   const [undidStack, setUndidStack] = useUndidStack({});
 
+  const defaultSpot = useSpots(placeID);
+
+  const getPreviousSpotInfo = () => {
+    const spot = updateStack[placeID][updateStack[placeID].length - 1];
+    const spotHistory = updateStack[placeID]
+      .filter(({ Identifiant }) => Identifiant === spot.Identifiant);
+    if (spotHistory.length === 1) {
+      return defaultSpot.find(({ Identifiant }) => Identifiant === spot.Identifiant);
+    }
+    return spotHistory[spotHistory.length - 2];
+  };
+
   const handleUndo = () => {
+    onUndoRedu(getPreviousSpotInfo());
     setUndidStack({
       ...undidStack,
       [placeID]: [
@@ -70,6 +84,7 @@ function ActionBar () {
   };
 
   const handleRedo = () => {
+    onUndoRedu(undidStack[placeID][undidStack[placeID].length - 1]);
     setUpdatedStack({
       ...updateStack,
       [placeID]: [

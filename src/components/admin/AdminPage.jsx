@@ -78,13 +78,17 @@ function AdminPage () {
   const [updatedSpot, setUpdatedSpot] = React.useState({});
 
   useEffect(() => {
-    // TODO : set panel info with undo/redo changes
     setShowPanel(false);
   }, [place]);
 
   const handleClick = Spot => {
+    if (!Spot) {
+      setShowPanel(false);
+      setSelectedSpot();
+      return;
+    }
     setShowPanel(true);
-    setSelectedSpot(Spot);
+    setSelectedSpot({ ...Spot });
   };
 
   const onPanelClose = () => {
@@ -100,10 +104,7 @@ function AdminPage () {
   };
 
   const handleUpdate = (Spot, diffs) => {
-    if (diffs.length !== 1) {
-      resestUndidStack();
-      return;
-    }
+    resestUndidStack();
     const [key] = diffs;
     if (key === DELETED_KEY) setShowPanel(false);
     setUpdatedSpot(Spot);
