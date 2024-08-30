@@ -52,7 +52,7 @@ const useUpdatedStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
 
-function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
+function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
 
@@ -62,6 +62,81 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   const placeID = mapping[place];
 
   const [updateStack, setUpdatedStack] = useUpdatedStack({});
+
+  const [movingSpot, setMovingSpot] = useState({});
+  const [ghostSpot, setGhostSpot] = useState();
+  const [deltas, setDeltas] = useState({
+    x: 0,
+    y: 0,
+  });
+
+  const [selectedSpot, setSelectedSpot] = useState({});
+
+  const onSpotSelect = spot => {
+    // console.log('select');
+    setSelectedSpot({
+      ...spot,
+    });
+    handleClick(spot);
+  };
+
+  // console.log(selectedSpot);
+
+  const snap = (v, a = 5) => Math.round(v / a) * a;
+  const planRef = useRef(null);
+
+  const updatePointPosition = (point, event) => {
+    const { current: { state: { scale } = {} } = {} } = planRef;
+    return {
+      ...point,
+      x: snap((event.clientX - deltas.x) / scale),
+      y: snap((event.clientY - deltas.y) / scale),
+    };
+  };
+
+  const handleMoveStart = (clicPosition, spot) => {
+    const { current: { state: { scale } = {} } = {} } = planRef;
+    setMovingSpot({
+      ...spot,
+    });
+    setGhostSpot({
+      ...spot,
+    });
+    setDeltas({
+      x: clicPosition.x - (spot.x * scale),
+      y: clicPosition.y - (spot.y * scale),
+    });
+  };
+
+  const handleMove = event => {
+    if (Object.keys(movingSpot).length === 0) return;
+    setMovingSpot({
+      ...updatePointPosition(movingSpot, event),
+    });
+  };
+
+  const handleMoveEnd = event => {
+    if (Object.keys(movingSpot).length === 0) return;
+    setUpdatedStack({
+      ...updateStack,
+      [placeID]: [
+        ...updateStack[placeID],
+        {
+          ...updatePointPosition(movingSpot, event),
+        },
+      ],
+    });
+    setMovingSpot({});
+    setGhostSpot();
+  };
+
+  const handleMoveUndo = () => {
+    setMovingSpot({});
+    setGhostSpot();
+    // setSelectedSpot({});
+    // onSpotSelect(spot);
+    onSpotSelect(movingSpot);
+  };
 
   const keepSpotUpdate = (spot, index) => {
     const { Identifiant: spotId } = spot;
@@ -87,6 +162,7 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
   };
 
   useEffect(() => {
+    // console.log(updatedSpot);
     if (Object.keys(updatedSpot).length) {
       setUpdatedStack({
         ...updateStack,
@@ -95,6 +171,7 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
           updatedSpot,
         ],
       });
+      setUpdatedSpot({});
     }
   }, [updatedSpot]);
 
@@ -124,48 +201,24 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
         return updateStack[placeID][idUpdateStack.lastIndexOf(spot.Identifiant)];
       }
       return spot;
+    })
+    // update moving spot
+    .map(spot => {
+      if (spot.Identifiant === movingSpot.Identifiant) {
+        return {
+          ...movingSpot,
+        };
+      }
+      return spot;
     });
 
   const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};
-
-  const planRef = useRef(null);
-
-  const [movingSpot, setMovingSpot] = useState();
-  const [deltas, setDeltas] = useState({
-    x: 0,
-    y: 0,
-  });
-
-  const handleMoveStart = (clicPosition, spot) => {
-    setMovingSpot({
-      ...spot,
-    });
-    setDeltas({
-      x: clicPosition.x - (spot.x * planRef.current.state.scale),
-      y: clicPosition.y - (spot.y * planRef.current.state.scale),
-    });
-  };
-
-  const handleMoveEnd = event => {
-    if (!movingSpot) return;
-    setUpdatedStack({
-      ...updateStack,
-      [placeID]: [
-        ...updateStack[placeID],
-        {
-          ...movingSpot,
-          x: (event.clientX - deltas.x) / planRef.current.state.scale,
-          y: (event.clientY - deltas.y) / planRef.current.state.scale,
-        },
-      ],
-    });
-    setMovingSpot();
-  };
 
   return (
     <Box
       className={classes.root}
       onClick={handleMoveEnd}
+      onPointerMove={handleMove}
     >
       <ActionBar />
       <TransformWrapper
@@ -194,12 +247,22 @@ function EditPlan ({ handleClick, updatedSpot, selectedSpot, panelOpen }) {
               <EditSpot
                 key={Spot.Identifiant}
                 Spot={Spot}
-                onClick={handleClick}
-                onMoveStart={handleMoveStart}
                 isSelected={selectedSpot.Identifiant === Spot.Identifiant && panelOpen}
+                onClick={onSpotSelect}
+                onMoveStart={handleMoveStart}
+                onMoveEnd={handleMoveEnd}
+                onMoveUndo={handleMoveUndo}
               />
             ))}
-
+            {/* {ghostSpot && (
+              <EditSpot
+                key={ghostSpot.Identifiant}
+                Spot={ghostSpot}
+                isSelected={false}
+                isGhost
+                onMoveUndo={handleMoveUndo}
+              />
+            )} */}
           </Box>
 
         </TransformComponent>

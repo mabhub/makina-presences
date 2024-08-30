@@ -140,7 +140,6 @@ const usePresences = placeID => {
   const setPresence = React.useCallback(
     presence => {
       const { id, day, tri, plan, planID, spot, period } = presence;
-      console.log(presence);
       if (id && !spot) {
         return deleteRow.mutate(presence);
       }
