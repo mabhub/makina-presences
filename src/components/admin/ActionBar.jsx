@@ -4,7 +4,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import NewSpotDialog from './NewSpotDialog';
+import SpotDialog from './SpotDialog';
 import useSpots from '../../hooks/useSpots';
 
 const useStyles = makeStyles(theme => ({
@@ -173,7 +173,7 @@ function ActionBar ({ onUndoRedu }) {
         </Box>
       </Box>
       {dialogOpen && (
-        <NewSpotDialog
+        <SpotDialog
           open={dialogOpen}
           onClose={handleCloseDialog}
         />

@@ -10,10 +10,10 @@ export const CREATED_KEY = 'created';
 
 const useMapping = createPersistedState('mapping');
 
-function NewSpotDialog ({ open, onClose }) {
+function SpotDialog ({ open, onClose, initialSpot }) {
   const { place } = useParams();
   const plans = usePlans(place).map(({ id, Name }) => ({ id, Name }));
-  const [spotInfo, setSpotInfo] = useState({
+  const [spotInfo, setSpotInfo] = useState(initialSpot || {
     Bloqué: false,
     Cumul: false,
     Description: null,
@@ -52,10 +52,11 @@ function NewSpotDialog ({ open, onClose }) {
 
   return (
     <Dialog open={open}>
-      <DialogTitle><strong>Nouveau Poste</strong></DialogTitle>
+      <DialogTitle><strong>{!initialSpot ? 'Nouveau Poste' : `Duplication depuis ${initialSpot.Identifiant}`}</strong></DialogTitle>
       <DialogContent sx={{ overflow: 'visible' }} dividers>
         <SpotForm
           edit={false}
+          isDuplicating={initialSpot}
           isIDValid={idValid}
           spotInfo={spotInfo}
           handleChange={handleChange}
@@ -69,4 +70,4 @@ function NewSpotDialog ({ open, onClose }) {
   );
 }
 
-export default React.memo(NewSpotDialog);
+export default React.memo(SpotDialog);

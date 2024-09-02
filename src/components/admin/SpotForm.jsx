@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function SpotForm ({ edit, isIDValid, spotInfo, handleChange }) {
+function SpotForm ({ edit, isDuplicating, isIDValid, spotInfo, handleChange }) {
   const classes = useStyles();
   const fields = useFields(spotsTableId);
   const spotTypes = fields
@@ -40,7 +40,7 @@ function SpotForm ({ edit, isIDValid, spotInfo, handleChange }) {
 
   return (
     <List disablePadding sx={{}}>
-      {!edit && (
+      {(!edit || isDuplicating) && (
         <ListItem disablePadding>
           <ListItemText
             className={clsx({ [classes.idLabel]: !isIDValid })}
@@ -55,84 +55,88 @@ function SpotForm ({ edit, isIDValid, spotInfo, handleChange }) {
           />
         </ListItem>
       )}
-      <ListItem disableGutters>
-        <ListItemText>Position</ListItemText>
-        <TextField
-          label="X"
-          variant="outlined"
-          size="small"
-          className={classes.textField}
-          value={spotInfo?.x}
-          type="number"
-          onChange={event => handleChange('x', event.target.value)}
-        />
-        <TextField
-          label="Y"
-          variant="outlined"
-          size="small"
-          className={classes.textField}
-          value={spotInfo.y}
-          type="number"
-          onChange={event => handleChange('y', event.target.value)}
-        />
+      {!isDuplicating && (
+      <>
+        <ListItem disableGutters>
+          <ListItemText>Position</ListItemText>
+          <TextField
+            label="X"
+            variant="outlined"
+            size="small"
+            className={classes.textField}
+            value={spotInfo?.x}
+            type="number"
+            onChange={event => handleChange('x', event.target.value)}
+          />
+          <TextField
+            label="Y"
+            variant="outlined"
+            size="small"
+            className={classes.textField}
+            value={spotInfo.y}
+            type="number"
+            onChange={event => handleChange('y', event.target.value)}
+          />
 
-      </ListItem>
-      <ListItem disablePadding>
-        <ListItemText>Bloqué</ListItemText>
-        <Switch
-          onChange={() => handleChange('Bloqué', !spotInfo.Bloqué)}
-          checked={spotInfo.Bloqué}
-        />
-      </ListItem>
-      <ListItem disablePadding>
-        <ListItemText>Cumulable</ListItemText>
-        <Switch
-          onChange={() => handleChange('Cumul', !spotInfo.Cumul)}
-          checked={spotInfo.Cumul}
-        />
-      </ListItem>
-      <ListItem disablePadding>
-        <ListItemText>Type {!edit && (<strong>*</strong>)}</ListItemText>
-        <FormControl size="small">
-          <Select
-            value={spotInfo.Type ? spotInfo.Type.value : ''}
-            onChange={event => handleChange('Type', spotTypes.find(({ value }) => value === event.target.value))}
-            required
-          >
-            {spotTypes.map(({ value, color }) => (
-              <MenuItem value={value} key={value}>
-                <Chip
-                  label={value}
-                  sx={{
-                    background: color.replace('-', ''),
-                    opacity: 0.5,
-                    color: 'transparent',
-                  }}
-                />
-                <Chip
-                  label={value}
-                  sx={{
-                    background: 'transparent',
-                    position: 'absolute',
-                    left: 14,
-                  }}
-                />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </ListItem>
-      <ListItem disableGutters>
-        <TextField
-          fullWidth
-          label="Description"
-          variant="outlined"
-          value={spotInfo.Description || ''}
-          multiline
-          rows={4}
-          onChange={event => handleChange('Description', event.target.value)}
-        />
-      </ListItem>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemText>Bloqué</ListItemText>
+          <Switch
+            onChange={() => handleChange('Bloqué', !spotInfo.Bloqué)}
+            checked={spotInfo.Bloqué}
+          />
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemText>Cumulable</ListItemText>
+          <Switch
+            onChange={() => handleChange('Cumul', !spotInfo.Cumul)}
+            checked={spotInfo.Cumul}
+          />
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemText>Type {!edit && (<strong>*</strong>)}</ListItemText>
+          <FormControl size="small">
+            <Select
+              value={spotInfo.Type ? spotInfo.Type.value : ''}
+              onChange={event => handleChange('Type', spotTypes.find(({ value }) => value === event.target.value))}
+              required
+            >
+              {spotTypes.map(({ value, color }) => (
+                <MenuItem value={value} key={value}>
+                  <Chip
+                    label={value}
+                    sx={{
+                      background: color.replace('-', ''),
+                      opacity: 0.5,
+                      color: 'transparent',
+                    }}
+                  />
+                  <Chip
+                    label={value}
+                    sx={{
+                      background: 'transparent',
+                      position: 'absolute',
+                      left: 14,
+                    }}
+                  />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </ListItem>
+        <ListItem disableGutters>
+          <TextField
+            fullWidth
+            label="Description"
+            variant="outlined"
+            value={spotInfo.Description || ''}
+            multiline
+            rows={4}
+            onChange={event => handleChange('Description', event.target.value)}
+          />
+        </ListItem>
+      </>
+      )}
     </List>
   );
 }

@@ -7,7 +7,7 @@ import createPersistedState from 'use-persisted-state';
 import useSpots from '../../hooks/useSpots';
 import ActionBar from './ActionBar';
 import EditSpot from './EditSpot';
-import { CREATED_KEY } from './NewSpotDialog';
+import { CREATED_KEY } from './SpotDialog';
 import { DELETED_KEY } from './SpotPanel';
 
 const useStyles = makeStyles(theme => ({
@@ -74,6 +74,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   };
 
   const handleMove = event => {
+    // console.log(movingSpotRef.current);
     if (movingSpotRef.current) {
       movingSpotRef.current.handleMove(event);
     }
