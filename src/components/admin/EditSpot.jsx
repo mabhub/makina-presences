@@ -2,9 +2,11 @@ import { ContentCopy, Delete, OpenWith } from '@mui/icons-material';
 import { Box, Fab } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
+import { DELETED_KEY } from './SpotPanel';
+import SpotDialog, { CREATED_KEY } from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -65,6 +67,7 @@ const useStyles = makeStyles(theme => ({
     transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
       cursor: 'pointer',
+      borderColor: theme.palette.primary.main,
     },
   },
   move: {
@@ -158,10 +161,13 @@ const EditSpot = forwardRef((
     });
   };
 
+  const btnRef = useRef();
+
   useImperativeHandle(ref, () => {
     if (isMoving) {
       return {
         handleMove (event) {
+          btnRef.current.focus();
           setCoords({
             ...getNewPosition(event),
           });
@@ -185,6 +191,13 @@ const EditSpot = forwardRef((
     });
   };
 
+  const handleMoveUndo = event => {
+    if (event.keyCode === 27) {
+      setCoords({ x, y });
+      setIsMoving(!isMoving);
+    }
+  };
+
   const handleClick = event => {
     onClick({
       ...Spot,
@@ -196,50 +209,80 @@ const EditSpot = forwardRef((
     }
   };
 
-  // const handleKeyboardClick = event => {
-  //   if (event.keyCode === 27) {
-  //     setIsMoving(false);
-  //     onMoveUndo();
-  //     console.log(isGhost);
-  //   }
-  // };
+  const handleDelete = () => {
+    resestUndidStack();
+    setUpdateStack({
+      ...updateStack,
+      [placeID]: [
+        ...updateStack[placeID],
+        {
+          ...Spot,
+          [DELETED_KEY]: true,
+        },
+      ],
+    });
+  };
+
+  const [showDialog, setShowDialog] = useState(false);
+  const [initialSpot, setInitialSpot] = useState();
+
+  const handleDuplicate = () => {
+    setShowDialog(true);
+    setInitialSpot({
+      ...Spot,
+      x: parseInt(Spot.x, 10) + 15,
+      y: parseInt(Spot.y, 10) + 15,
+      [CREATED_KEY]: true,
+    });
+  };
+
+  const handleDuplicateValidation = spot => {
+    if (spot) {
+      resestUndidStack();
+      setUpdateStack({
+        ...updateStack,
+        [placeID]: [
+          ...updateStack[placeID],
+          spot,
+        ],
+      });
+      onClick(spot);
+    }
+    setShowDialog(false);
+  };
 
   return (
-    <Box
-      className={clsx({
-        [classes.root]: true,
-        [classes.onTop]: isSelected,
-      })}
-      style={{
-        left: `${coords.x}px`,
-        top: `${coords.y}px`,
-      }}
-    >
-      <div
-        id={`btn-${spotId}`}
-        ref={isMoving ? ref : null}
+    <>
+      <Box
+        className={clsx({
+          [classes.root]: true,
+          [classes.onTop]: isSelected,
+        })}
+        style={{
+          left: `${coords.x}px`,
+          top: `${coords.y}px`,
+        }}
       >
-        <Fab
-          className={clsx({
-            [classes.spot]: true,
-            [classes.selected]: isSelected,
-            [classes.spotMoving]: isMoving,
-            // [classes.ghost]: isGhost,
-          })}
-          style={{
-            borderColor: Type?.color?.replace('-', ''),
-          }}
-          component="button"
-          size="small"
-          onClick={handleClick}
-          // onKeyDown={handleKeyboardClick}
-          // autoFocus
-        >
-          {spotId}
-
-        </Fab>
-      </div>
-      {isSelected && !isMoving && (
+        <div id={`btn-${spotId}`}>
+          <Fab
+            className={clsx({
+              [classes.spot]: true,
+              [classes.selected]: isSelected,
+              [classes.spotMoving]: isMoving,
+            })}
+            style={{
+              borderColor: Type?.color?.replace('-', ''),
+            }}
+            component="button"
+            size="small"
+            onClick={handleClick}
+            onKeyDown={handleMoveUndo}
+            ref={btnRef}
+          >
+            {spotId}
+          </Fab>
+        </div>
+        {isSelected && !isMoving && (
         <>
           <Box
             component="button"
@@ -251,24 +294,48 @@ const EditSpot = forwardRef((
           <Box
             component="button"
             className={clsx([classes.quickActionButton], [classes.duplicate])}
+            onClick={handleDuplicate}
           >
             <ContentCopy className={classes.quickActionIcon} />
           </Box>
           <Box
             component="button"
             className={clsx([classes.quickActionButton], [classes.delete])}
+            onClick={handleDelete}
           >
             <Delete className={classes.quickActionIcon} />
           </Box>
 
         </>
-      )}
-      {isMoving && (
+        )}
+        {isMoving && (
         <Box className={classes.coords}>
           <strong>({coords.x}, {coords.y})</strong>
         </Box>
+        )}
+      </Box>
+      {isMoving && (
+        <Fab
+          className={clsx([classes.spot], [classes.root], [classes.selected], [classes.ghost])}
+          style={{
+            borderColor: Type?.color?.replace('-', ''),
+            width: 'inherit',
+            height: 'inherit',
+            left: `${x}px`,
+            top: `${y}px`,
+          }}
+        >
+          {spotId}
+        </Fab>
       )}
-    </Box>
+      {showDialog && (
+        <SpotDialog
+          open={showDialog}
+          onClose={handleDuplicateValidation}
+          initialSpot={initialSpot}
+        />
+      )}
+    </>
   );
 });
 
