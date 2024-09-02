@@ -21,7 +21,6 @@ const useTriState = createPersistedState('tri');
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId, VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
 
-console.log(Boolean(enableHalfDay));
 
 export const FULLDAY_PERIOD = 'fullday';
 export const MORNING_PERIOD = 'morning';
@@ -321,7 +320,6 @@ const SpotButton = ({
             left: `${x}px`,
             top: `${y}px`,
             borderColor: Type?.color?.replace('-', ''),
-            // borderImage: `linear-gradient(to bottom, ${Type?.color} 50%, red 50%) 1`,
           }}
           size="small"
           draggable={Boolean(edit)}
