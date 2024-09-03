@@ -5,6 +5,8 @@ import { alpha } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import useSpots from '../hooks/useSpots';
 import TriPresence from './TriPresence';
 
 const useStyles = makeStyles(theme => ({
@@ -40,24 +42,35 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const deduplicate = (collection, key) =>
-  collection.reduce((acc, curr) => {
-    const { values = new Set(), store = [] } = acc;
-
-    if (values.has(curr[key])) {
-      return acc;
-    }
-
-    return {
-      values: new Set([...values, curr[key]]),
-      store: [...store, curr],
-    };
-  }, {}).store || [];
-
 const Moment = ({
   momentPresences: presences = [],
 }) => {
   const classes = useStyles();
+  const { place } = useParams();
+
+  const spots = useSpots(place);
+  const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
+  const isCumulativeSpot = React.useCallback(
+    identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),
+    [cumulativeSpots],
+  );
+
+  const deduplicate = (collection, key) =>
+    collection
+      .sort(({ spot: a }, { spot: b }) => !isCumulativeSpot(b) - !isCumulativeSpot(a))
+      .reduce((acc, curr) => {
+        const { values = new Set(), store = [] } = acc;
+
+        if (values.has(curr[key])) {
+          return acc;
+        }
+
+        return {
+          values: new Set([...values, curr[key]]),
+          store: [...store, curr],
+        };
+      }, {}).store || [];
+
   return (
     <Grid
       item
@@ -66,12 +79,13 @@ const Moment = ({
     >
       {deduplicate(presences, 'tri')
         .sort(({ tri: a }, { tri: b }) => (a.localeCompare(b)))
-        .map(({ id, tri: t, fake }) => (
+        .map(({ id, tri: t, fake, period }) => (
           <TriPresence
             key={id}
             tri={t}
             alt={fake}
             className={classes.tri}
+            period={period}
           />
         ))}
     </Grid>

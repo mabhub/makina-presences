@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
@@ -95,18 +95,32 @@ const Plan = ({ edit }) => {
     });
   };
 
+  const planRef = useRef(null);
+
   return (
     <>
-      <DragWrapper {...transformWrapperProps}>
+      <DragWrapper
+        {...transformWrapperProps}
+        ref={planRef}
+      >
         <DragComponent
           wrapperClass={classes.wrapper}
           contentClass={classes.content}
         >
           <Box
             className={classes.planWrapper}
+            id="box"
           >
             {plan?.url && (
-            <img src={plan.url} alt="" className={classes.plan} />
+            <img
+              src={plan.url}
+              alt=""
+              className={classes.plan}
+              id={place}
+              onLoad={() => {
+                planRef.current.zoomToElement(place);
+              }}
+            />
             )}
 
             {spots.map(spot => (
@@ -136,7 +150,7 @@ const Plan = ({ edit }) => {
             alt
             className={classes.tri}
           />
-          vient de réserver le poste <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
+          vient de réserver <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
         </Alert>
       </Snackbar>
     </>

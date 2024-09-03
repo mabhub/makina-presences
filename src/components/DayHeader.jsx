@@ -65,11 +65,11 @@ const DayHeader = ({
     event.stopPropagation();
   };
 
-  const handleDialogClose = React.useCallback(value => {
+  const handleDialogClose = React.useCallback((...args) => {
+    const { 0: spotId, [args.length - 1]: periodPref } = args;
     setDialogOpen(false);
-    if (value) {
-      // Create présence
-      setPresence({ day: date, tri, plan: place, spot: value });
+    if (spotId) {
+      setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
     }
   }, [date, place, setPresence, tri]);
 

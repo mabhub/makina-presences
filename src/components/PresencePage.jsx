@@ -1,25 +1,25 @@
 import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import createPersistedState from 'use-persisted-state';
-import dayjs from 'dayjs';
-import weekOfYear from 'dayjs/plugin/weekOfYear';
-import isoWeek from 'dayjs/plugin/isoWeek';
-import dayOfYear from 'dayjs/plugin/dayOfYear';
-import { Box, Container, Grid, Tabs, Tab, Link } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
 import { GitHub } from '@mui/icons-material';
+import { Box, Container, Grid, Link, Tab, Tabs } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import dayjs from 'dayjs';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import createPersistedState from 'use-persisted-state';
 
 import PresenceForm from './PresenceForm';
 
-import Plan from './Plan';
-import LoadIndicator from './LoadIndicator';
-import PresenceCalendar from './PresenceCalendar';
 import usePlans from '../hooks/usePlans';
-import UserMenu from './UserMenu';
 import Legend from './Legend';
+import LoadIndicator from './LoadIndicator';
+import Plan from './Plan';
+import PresenceCalendar from './PresenceCalendar';
+import UserMenu from './UserMenu';
 
-import { name, version, repository } from '../../package.json';
+import { name, repository, version } from '../../package.json';
 
 const { VITE_PROJECT_VERSION = version } = import.meta.env;
 
@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => {
     container: {},
 
     wrapper: {
-      height: '100vh',
+      height: '100dvh',
       display: 'grid',
       gridTemplateAreas: `
         "a a a"
@@ -50,8 +50,8 @@ const useStyles = makeStyles(theme => {
       [maxWidth('sm')]: {
         gridTemplateAreas: `
           "a"
-          "b"
-          "c"`,
+          "c"
+          "b"`,
         gridTemplateColumns: 'auto',
         gridTemplateRows: 'auto 1fr 1fr',
       },
@@ -85,6 +85,27 @@ const useStyles = makeStyles(theme => {
       gridArea: 'b',
       overflow: 'auto',
       padding: theme.spacing(0, 0.25),
+      position: 'relative',
+      [maxWidth('sm')]: {
+        boxShadow: '0px -30px 30px #0000000d',
+        borderTopRightRadius: '30px',
+        borderTopLeftRadius: '30px',
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(2),
+        background: theme.palette.primary.elevated,
+        marginTop: '-30px',
+        zIndex: '2',
+        '&::before': {
+          position: 'sticky',
+          top: 0,
+          left: 0,
+          zIndex: '2',
+          content: '""',
+          width: '100%',
+          height: '30px',
+          background: theme.palette.primary.elevated,
+        },
+      },
     },
     plan: {
       gridArea: 'c',
