@@ -26,7 +26,6 @@ const useStyles = makeStyles(theme => ({
     backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
   },
   planWrapper: {
-    border: '1px solid red',
   },
   plan: {
   },
@@ -76,7 +75,6 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   };
 
   const handleMove = event => {
-    // console.log(movingSpotRef.current);
     if (movingSpotRef.current) {
       movingSpotRef.current.handleMove(event);
     }
