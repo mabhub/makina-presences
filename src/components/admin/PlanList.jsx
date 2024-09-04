@@ -138,74 +138,91 @@ function PlanList () {
   const classes = useStyles();
   const history = useHistory();
   const { place } = useParams();
+  const [mapping, setMapping] = useMapping();
+
+  const { createPlan } = usePlans();
 
   const [plans, setPlanUpdate] = usePlanUpdate([]);
   const [dialogNewOpen, setDialogNewOpen] = useState(false);
   const [dialogUpdateOpen, setDialogUpdateOpen] = useState(false);
   const [planName, setPlanName] = useState('');
-  const plansDB = usePlans();
+  const { plans: plansDB } = usePlans();
 
-  const [usedIDs, setUsedIDs] = useState([
-    ...new Set([
-      0,
-      ...plans.map(({ id }) => id),
-    ]),
-  ]);
+  // console.log(plansDB);
+
+  // const [usedIDs, setUsedIDs] = useState([
+  //   ...new Set([
+  //     0,
+  //     ...plans.map(({ id }) => id),
+  //   ]),
+  // ]);
 
   useEffect(() => {
-    if (plansDB.length > 0) {
-      setUsedIDs([
-        ...new Set([
-          ...usedIDs,
-          ...plansDB.map(({ id }) => id),
-        ]),
+    // if (plansDB.length > 0) {
+    //   setUsedIDs([
+    //     ...new Set([
+    //       ...usedIDs,
+    //       ...plansDB.map(({ id }) => id),
+    //     ]),
+    //   ]);
+    // }
+    if (plansDB.length > plans.length) {
+      setPlanUpdate([
+        ...plansDB.reduce((acc, curr) => [
+          ...acc,
+          plans.find(({ id }) => id === curr.id) || curr,
+        ], []),
       ]);
     }
   }, [plansDB]);
 
-  const defaultMapping = plans.reduce((acc, curr) => {
-    const { Name: key, id } = curr;
-    if (!Object.hasOwn(acc, key)) {
-      return {
-        ...acc,
-        [key]: id,
-      };
-    }
-    return acc;
-  }, {});
+  const defaultMapping = plans
+    .filter(plan => !Object.hasOwn(plan, 'deleted'))
+    .reduce((acc, curr) => {
+      const { Name: key, id } = curr;
+      if (!Object.hasOwn(acc, key)) {
+        return {
+          ...acc,
+          [key]: id,
+        };
+      }
+      return acc;
+    }, {});
 
-  const [mapping, setMapping] = useMapping();
   useEffect(() => {
+    console.log('defaultmapping changed', defaultMapping, mapping);
     if (!mapping
-      || (mapping && Object.keys(mapping).length !== Object.keys(defaultMapping).length)
+    || (mapping && Object.keys(mapping).length !== Object.keys(defaultMapping).length)
     ) {
       setMapping({ ...defaultMapping });
     }
   }, [defaultMapping]);
 
-  const handleNew = (name, plan) => {
+  const handleNew = (name, planImage) => {
     setDialogNewOpen(!dialogNewOpen);
-    if (name && plan) {
-      const newId = Math.max(...Object.values(usedIDs)) + 1;
+    if (name && planImage) {
+      // const newId = Math.max(...Object.values(usedIDs)) + 1;
       const newPlan = {
-        id: newId,
+        // id: newId,
         Name: name,
         Postes: [],
-        plan: [{ url: plan }],
-        Brouillon: false,
+        // plan: [{ name: plan.name.replace(/\s+/g, '') }],
+        Brouillon: true,
       };
-      setUsedIDs([
-        ...usedIDs,
-        newId,
-      ]);
-      setPlanUpdate([
-        ...plans,
-        newPlan,
-      ]);
-      setMapping({
-        ...mapping,
-        [name]: newPlan.id,
-      });
+      // console.log(plan);
+      // setUsedIDs([
+      //   ...usedIDs,
+      //   newId,
+      // ]);
+      // setPlanUpdate([
+      //   ...plans,
+      //   newPlan,
+      // ]);
+      // setMapping({
+      //   ...mapping,
+      //   [name]: newPlan.id,
+      // });
+      createPlan(newPlan, planImage);
     }
   };
 
@@ -236,7 +253,16 @@ function PlanList () {
 
   const handleDelete = (event, name) => {
     setPlanUpdate([
-      ...plans.filter(({ Name }) => Name !== name),
+      // ...plans.filter(({ Name }) => Name !== name),
+      ...plans.map(plan => {
+        if (plan.Name === name) {
+          return {
+            ...plan,
+            deleted: true,
+          };
+        }
+        return plan;
+      }),
     ]);
     setMapping({
       ...Object.keys(mapping)
@@ -267,16 +293,18 @@ function PlanList () {
   const [updateStack, setUpdatedStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
 
-  const uptdateTheStack = stack => plans.reduce((acc, curr) => {
-    const { id } = curr;
-    if (!Object.hasOwn(acc, id)) {
-      return {
-        ...acc,
-        [id]: stack[id] ? stack[id] : [],
-      };
-    }
-    return acc;
-  }, {});
+  const uptdateTheStack = stack => plans
+    .filter(plan => !Object.hasOwn(plan, 'deleted'))
+    .reduce((acc, curr) => {
+      const { id } = curr;
+      if (!Object.hasOwn(acc, id)) {
+        return {
+          ...acc,
+          [id]: stack[id] ? stack[id] : [],
+        };
+      }
+      return acc;
+    }, {});
 
   useEffect(() => {
     setTimeout(() => {
@@ -302,31 +330,33 @@ function PlanList () {
           </Box>
         </Box>
 
-        {plans.map(({ Name, Brouillon }) => {
-          const isSelected = Name === place;
-          return (
-            <Card
-              key={Name}
-              elevation={0}
-              className={clsx({
-                [classes.card]: true,
-                [classes.selected]: isSelected,
-                [classes.brouillon]: Brouillon,
-              })}
-            >
-              <CardActionArea
-                className={classes.cardContent}
-                onClick={() => history.push(`/admin/${Name}`)}
-                disableRipple
+        {plans
+          .filter(plan => !Object.hasOwn(plan, 'deleted'))
+          .map(({ Name, Brouillon }) => {
+            const isSelected = Name === place;
+            return (
+              <Card
+                key={Name}
+                elevation={0}
+                className={clsx({
+                  [classes.card]: true,
+                  [classes.selected]: isSelected,
+                  [classes.brouillon]: Brouillon,
+                })}
               >
-                <Typography
-                  variant="h4"
-                  fontWeight={isSelected ? 'bold' : 'unset'}
-                  className={classes.cardTitle}
-                >{Name}
-                </Typography>
+                <CardActionArea
+                  className={classes.cardContent}
+                  onClick={() => history.push(`/admin/${Name}`)}
+                  disableRipple
+                >
+                  <Typography
+                    variant="h4"
+                    fontWeight={isSelected ? 'bold' : 'unset'}
+                    className={classes.cardTitle}
+                  >{Name}
+                  </Typography>
 
-                {isSelected && (
+                  {isSelected && (
                   <Box className={classes.actions}>
                     <Tooltip title="Actif">
                       <Box
@@ -358,11 +388,11 @@ function PlanList () {
                       </Box>
                     </Tooltip>
                   </Box>
-                )}
-              </CardActionArea>
-            </Card>
-          );
-        })}
+                  )}
+                </CardActionArea>
+              </Card>
+            );
+          })}
       </Box>
       {dialogNewOpen && (
         <PlanDialog

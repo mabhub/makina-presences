@@ -141,7 +141,7 @@ function ActionBar ({ onUndoRedu }) {
     }
   };
 
-  const plans = usePlans();
+  const { plans } = usePlans();
   const changedPlan = planUpdate.filter((plan, index) => {
     if (index < plans.length) {
       return plan.Name !== plans[index].Name || plan.Brouillon !== plans[index].Brouillon;
@@ -215,7 +215,7 @@ function ActionBar ({ onUndoRedu }) {
           </Box>
         </Box>
         <Box className={classes.publishActions}>
-          {isBrouillon && hasModification && (
+          {isBrouillon && (
           <Button
             variant="outlined"
             size="medium"
@@ -225,7 +225,7 @@ function ActionBar ({ onUndoRedu }) {
               setPublishOpen(!publishOpen);
               setLiveAndPublish(true);
             }}
-          >Rendre Actif et Publier
+          >Publier
           </Button>
           )}
           {hasModification && (
@@ -238,7 +238,7 @@ function ActionBar ({ onUndoRedu }) {
                 setPublishOpen(!publishOpen);
                 setLiveAndPublish(false);
               }}
-            >Publier
+            >Enregistrer
             </Button>
           )}
         </Box>

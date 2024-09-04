@@ -69,7 +69,7 @@ const Children = ({ children }) => children;
 const Plan = ({ edit }) => {
   const classes = useStyles();
 
-  const plans = usePlans();
+  const { plans } = usePlans();
   const { place } = useParams();
 
   const mapping = useMapping();

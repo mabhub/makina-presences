@@ -123,7 +123,7 @@ const draftStyle = {
 const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
-  const plans = usePlans();
+  const { plans } = usePlans();
   const { place, day } = useParams();
   const history = useHistory();
 

@@ -45,7 +45,7 @@ function AdminPage () {
   const classes = useStyles();
   const { place } = useParams();
 
-  const plans = usePlans();
+  const { plans } = usePlans();
 
   const defaultStack = plans
     .reduce((acc, curr) => {

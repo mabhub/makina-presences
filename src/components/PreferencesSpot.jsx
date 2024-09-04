@@ -31,7 +31,7 @@ const PreferencesSpot = () => {
   const { place } = useParams();
   const mapping = useMapping();
   const spots = useTable(Number(spotsTableId));
-  const plans = usePlans();
+  const { plans } = usePlans();
   const classes = useStyles();
 
   const sortedFavorite = plans

@@ -1,8 +1,7 @@
-import React from 'react';
 import clsx from 'clsx';
-import { useParams, useHistory } from 'react-router-dom';
+import React from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 
-import createPersistedState from 'use-persisted-state';
 import {
   Button,
   Container,
@@ -15,9 +14,10 @@ import {
   Typography,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import createPersistedState from 'use-persisted-state';
 
-import usePlans from '../hooks/usePlans';
 import { cleanTri } from '../helpers';
+import usePlans from '../hooks/usePlans';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -55,7 +55,7 @@ const draftPlaceSx = {
 
 const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
-  const plans = usePlans();
+  const { plans } = usePlans();
   const history = useHistory();
 
   const [tri, setTri] = useTriState('');

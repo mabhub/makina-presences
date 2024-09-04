@@ -69,7 +69,7 @@ const SpotDialog = ({
 }) => {
   const classes = useStyles();
   const [favorites] = useFavoritesState([]);
-  const plans = usePlans();
+  const { plans } = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
   const mapping = useMapping();
 
