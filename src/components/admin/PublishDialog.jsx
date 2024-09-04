@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
@@ -31,7 +31,7 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
   const [mapping] = useMapping();
   const placeID = mapping[plan.Name];
 
-  const plans = usePlans(placeID);
+  const { plans, setPlan } = usePlans();
 
   const [amountOfUpdate, setAmountOfUpdate] = useState(
     plans.map(({ id }) => id).includes(plan.id) ? 0 : 1,
@@ -48,12 +48,14 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
   }, [plans]);
 
   const handlePublication = () => {
+    console.log(plan);
+    // setPlan(plan);
     handleClose();
   };
 
   return (
     <Dialog open={open}>
-      <DialogTitle><strong>Publication des Modifications</strong></DialogTitle>
+      <DialogTitle><strong>{isSecondary ? 'Publication des Modifications' : 'Enregistrement des Modifications'}</strong></DialogTitle>
       <DialogContent className={classes.content}>
         L'ensemble des modifications effectuées depuis la dernière publication vont
         être enregistrées dans la base.
@@ -91,14 +93,14 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
 
         {isSecondary && (
         <Alert severity="warning" className={classes.warning}>
-          Attention, <strong>{plan.Name} était inactif</strong>.
-          Ces locaux vont en plus devenir visible par tous les utilisateurs.
+          Attention, <strong>{plan.Name} est inactif</strong>.
+          Ces locaux vont passer actif et vont donc devenir visibles par tous les utilisateurs.
         </Alert>
         )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Annuler</Button>
-        <Button onClick={handlePublication}>Publier</Button>
+        <Button onClick={handlePublication}>{isSecondary ? 'Publier' : 'Enregistrer'} </Button>
       </DialogActions>
     </Dialog>
   );
