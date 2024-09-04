@@ -78,15 +78,12 @@ const usePresences = placeID => {
     { headers, method: 'POST', body: JSON.stringify(record) },
   ), {
     onMutate: async record => {
-      queryClient.setQueryData(queryKey, previous => {
-        console.log('record', record);
-        return {
-          results: [
-            ...previous.results,
-            { ...record, fake: true, id: record.key },
-          ],
-        };
-      });
+      queryClient.setQueryData(queryKey, previous => ({
+        results: [
+          ...previous.results,
+          { ...record, fake: true, id: record.key },
+        ],
+      }));
     },
     onSettled: () => {
       queryClient.invalidateQueries(queryKey);

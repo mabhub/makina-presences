@@ -148,30 +148,18 @@ function PlanList () {
   const [planName, setPlanName] = useState('');
   const { plans: plansDB } = usePlans();
 
-  // console.log(plansDB);
-
-  // const [usedIDs, setUsedIDs] = useState([
-  //   ...new Set([
-  //     0,
-  //     ...plans.map(({ id }) => id),
-  //   ]),
-  // ]);
-
   useEffect(() => {
-    // if (plansDB.length > 0) {
-    //   setUsedIDs([
-    //     ...new Set([
-    //       ...usedIDs,
-    //       ...plansDB.map(({ id }) => id),
-    //     ]),
-    //   ]);
-    // }
     if (plansDB.length > plans.length) {
       setPlanUpdate([
         ...plansDB.reduce((acc, curr) => [
           ...acc,
           plans.find(({ id }) => id === curr.id) || curr,
         ], []),
+      ]);
+    }
+    if (plansDB.length === plans.length) {
+      setPlanUpdate([
+        ...plansDB.map((plan, index) => ({ ...plans[index], ...plan })),
       ]);
     }
   }, [plansDB]);
@@ -190,7 +178,6 @@ function PlanList () {
     }, {});
 
   useEffect(() => {
-    console.log('defaultmapping changed', defaultMapping, mapping);
     if (!mapping
     || (mapping && Object.keys(mapping).length !== Object.keys(defaultMapping).length)
     ) {
@@ -201,27 +188,10 @@ function PlanList () {
   const handleNew = (name, planImage) => {
     setDialogNewOpen(!dialogNewOpen);
     if (name && planImage) {
-      // const newId = Math.max(...Object.values(usedIDs)) + 1;
       const newPlan = {
-        // id: newId,
         Name: name,
-        Postes: [],
-        // plan: [{ name: plan.name.replace(/\s+/g, '') }],
         Brouillon: true,
       };
-      // console.log(plan);
-      // setUsedIDs([
-      //   ...usedIDs,
-      //   newId,
-      // ]);
-      // setPlanUpdate([
-      //   ...plans,
-      //   newPlan,
-      // ]);
-      // setMapping({
-      //   ...mapping,
-      //   [name]: newPlan.id,
-      // });
       createPlan(newPlan, planImage);
     }
   };
