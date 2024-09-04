@@ -157,6 +157,11 @@ function PlanList () {
         ], []),
       ]);
     }
+    if (plansDB.length === plans.length) {
+      setPlanUpdate([
+        ...plansDB.map((plan, index) => ({ ...plans[index], ...plan })),
+      ]);
+    }
   }, [plansDB]);
 
   const defaultMapping = plans
@@ -173,7 +178,6 @@ function PlanList () {
     }, {});
 
   useEffect(() => {
-    console.log('defaultmapping changed', defaultMapping, mapping);
     if (!mapping
     || (mapping && Object.keys(mapping).length !== Object.keys(defaultMapping).length)
     ) {
@@ -184,27 +188,10 @@ function PlanList () {
   const handleNew = (name, planImage) => {
     setDialogNewOpen(!dialogNewOpen);
     if (name && planImage) {
-      // const newId = Math.max(...Object.values(usedIDs)) + 1;
       const newPlan = {
-        // id: newId,
         Name: name,
-        Postes: [],
-        // plan: [{ name: plan.name.replace(/\s+/g, '') }],
         Brouillon: true,
       };
-      // console.log(plan);
-      // setUsedIDs([
-      //   ...usedIDs,
-      //   newId,
-      // ]);
-      // setPlanUpdate([
-      //   ...plans,
-      //   newPlan,
-      // ]);
-      // setMapping({
-      //   ...mapping,
-      //   [name]: newPlan.id,
-      // });
       createPlan(newPlan, planImage);
     }
   };
