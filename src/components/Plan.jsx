@@ -80,7 +80,7 @@ const Plan = ({ edit }) => {
 
   const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
-  const plans = usePlans();
+  const { plans } = usePlans();
   const { place } = useParams();
 
   const mapping = useMapping();

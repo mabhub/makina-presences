@@ -1,6 +1,6 @@
-import clsx from 'clsx';
 import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import clsx from 'clsx';
 
 import {
   Button,
@@ -17,8 +17,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import createPersistedState from 'use-persisted-state';
 
 import { cleanTri } from '../helpers';
-import usePlans from '../hooks/usePlans';
 import { NO_AGENCYPREF_LABEL } from './PreferencesFavorites';
+import usePlans from '../hooks/usePlans';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -57,7 +57,7 @@ const draftPlaceSx = {
 
 const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
-  const plans = usePlans();
+  const { plans } = usePlans();
   const history = useHistory();
 
   const [tri, setTri] = useTriState('');

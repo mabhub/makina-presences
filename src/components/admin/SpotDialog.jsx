@@ -12,13 +12,15 @@ const useMapping = createPersistedState('mapping');
 
 function SpotDialog ({ open, onClose, initialSpot }) {
   const { place } = useParams();
-  const plans = usePlans(place).map(({ id, Name }) => ({ id, Name }));
+  const [mapping] = useMapping();
+  const placeID = mapping[place];
+  const { plans } = usePlans(placeID);
   const [spotInfo, setSpotInfo] = useState(initialSpot || {
     Bloqué: false,
     Cumul: false,
     Description: null,
     Identifiant: null,
-    Plan: plans.filter(({ Name }) => Name === place),
+    Plan: plans.filter(({ id }) => id === placeID),
     Type: null,
     x: 0,
     y: 0,
@@ -26,7 +28,6 @@ function SpotDialog ({ open, onClose, initialSpot }) {
 
   const [idValid, setIdValid] = useState(true);
 
-  const [mapping] = useMapping();
   const spotIds = useSpots(mapping[place]).map(({ Identifiant }) => Identifiant);
   const handleChange = (key, value) => {
     if (key === 'Identifiant') {

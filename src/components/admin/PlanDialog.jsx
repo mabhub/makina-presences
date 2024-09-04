@@ -43,6 +43,7 @@ const PlanDialog = ({ open, onClose, edit, planName }) => {
   const [name, setName] = useState(planName);
   const nameValid = !planUpdate
     .filter(({ Name }) => Name !== planName)
+    .filter(plan => !Object.hasOwn(plan, 'deleted'))
     .map(({ Name }) => Name)
     .includes(name);
 
@@ -67,11 +68,14 @@ const PlanDialog = ({ open, onClose, edit, planName }) => {
     if (edit) {
       onClose(planName, name);
     } else {
-      const reader = new FileReader();
-      reader.onload = e => {
-        onClose(name, e.target.result);
-      };
-      reader.readAsDataURL(selectedFile);
+      // const reader = new FileReader();
+      // reader.onload = e => {
+      //   onClose(name, e.target.result);
+      // };
+      // reader.readAsDataURL(selectedFile);
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      onClose(name, formData);
     }
   };
 
@@ -118,9 +122,7 @@ const PlanDialog = ({ open, onClose, edit, planName }) => {
           onClick={handleSubmit}
           disabled={name === ''
             || (!edit && !selectedFile)
-            || planUpdate
-              .filter(({ Name }) => Name !== planName)
-              .map(({ Name }) => Name).includes(name)}
+            || !nameValid}
         >Créer
         </Button>
       </DialogActions>
