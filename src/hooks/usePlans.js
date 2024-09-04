@@ -22,6 +22,30 @@ const usePlans = () => {
 
   const [toCreate, setToCreate] = useState();
 
+  const updateRow = useMutation(record => fetch(
+    `${basePath}${record.id}/?user_field_names=true`,
+    { headers,
+      method: 'PATCH',
+      body: JSON.stringify({
+        ...record,
+        Postes: record.Postes.map(({ id }) => id),
+      }) },
+  ), {
+    onMutate: async record => {
+      queryClient.setQueryData(queryKey, ({ results = [] }) => {
+        console.log(record);
+        return {
+          result: results.map(result => (
+            result.id === record.id
+              ? { ...result }
+              : result
+          )),
+        };
+      });
+    },
+    onSettled: () => queryClient.invalidateQueries(queryKey),
+  });
+
   const createRow = useMutation(record => fetch(
     `${basePath}?user_field_names=true`,
     { headers, method: 'POST', body: JSON.stringify(record) },
@@ -39,13 +63,7 @@ const usePlans = () => {
 
   const uploadPlan = useMutation(record => fetch(
     `${uploadPath}`,
-    {
-      headers: {
-        Authorization: `Token ${token}`,
-      },
-      method: 'POST',
-      body: record,
-    },
+    { headers: { Authorization: `Token ${token}` }, method: 'POST', body: record },
   ), {
     onSuccess: resp => {
       resp.json().then(planImage => {
@@ -57,14 +75,7 @@ const usePlans = () => {
         });
       });
     },
-    // onSettled: () => queryClient.invalidateQueries(queryKey),
   });
-
-  const createPlan = (plan, rawImage) => {
-    setToCreate({
-      plan, rawImage,
-    });
-  };
 
   useEffect(() => {
     if (toCreate) {
@@ -73,10 +84,22 @@ const usePlans = () => {
     }
   }, [toCreate, uploadPlan]);
 
+  const createPlan = (plan, rawImage) => {
+    setToCreate({
+      plan, rawImage,
+    });
+  };
+
+  const updatePlan = plan => {
+    updateRow.mutate(plan);
+  };
+
   return {
     plans,
     createRow,
+    updateRow,
     createPlan,
+    updatePlan,
   };
 };
 

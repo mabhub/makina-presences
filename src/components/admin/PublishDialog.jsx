@@ -31,11 +31,9 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
   const [mapping] = useMapping();
   const placeID = mapping[plan.Name];
 
-  const { plans, setPlan } = usePlans();
+  const { plans, updatePlan } = usePlans();
 
-  const [amountOfUpdate, setAmountOfUpdate] = useState(
-    plans.map(({ id }) => id).includes(plan.id) ? 0 : 1,
-  );
+  const [amountOfUpdate, setAmountOfUpdate] = useState(0);
 
   useEffect(() => {
     if (!plan || amountOfUpdate) return;
@@ -48,8 +46,9 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
   }, [plans]);
 
   const handlePublication = () => {
-    console.log(plan);
-    // setPlan(plan);
+    updatePlan(isSecondary
+      ? { ...plan, Brouillon: false }
+      : plan);
     handleClose();
   };
 
