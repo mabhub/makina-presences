@@ -9,6 +9,7 @@ import SpotForm from './SpotForm';
 export const CREATED_KEY = 'created';
 
 const useMapping = createPersistedState('mapping');
+const useUpdateStack = createPersistedState('updateStack');
 
 function SpotDialog ({ open, onClose, initialSpot }) {
   const { place } = useParams();
@@ -28,7 +29,13 @@ function SpotDialog ({ open, onClose, initialSpot }) {
 
   const [idValid, setIdValid] = useState(true);
 
-  const spotIds = useSpots(mapping[place]).spots.map(({ Identifiant }) => Identifiant);
+  const [updateStack] = useUpdateStack();
+
+  const { spots } = useSpots(placeID);
+
+  const spotIds = spots
+    .concat(updateStack[placeID])
+    .map(({ Identifiant }) => Identifiant);
   const handleChange = (key, value) => {
     if (key === 'Identifiant') {
       setIdValid(!spotIds.includes(value));
