@@ -40,6 +40,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUndidStack = createPersistedState('undidStack');
+const useUpdateStack = createPersistedState('updateStack');
+const useMapping = createPersistedState('mapping');
 
 function AdminPage () {
   const classes = useStyles();
@@ -60,6 +62,8 @@ function AdminPage () {
     }, {});
 
   const [undidStack, setUndidStack] = useUndidStack({});
+  const [updateStack] = useUpdateStack({});
+  const [mapping] = useMapping();
 
   const initStacks = () => {
     if (Object.keys(defaultStack).length > 0) {
@@ -80,6 +84,13 @@ function AdminPage () {
   useEffect(() => {
     setShowPanel(false);
   }, [place]);
+
+  useEffect(() => {
+    if (place && updateStack[mapping[place]].findLast(({ id }) => id === spot.id)) {
+      const lastState = updateStack[mapping[place]].findLast(({ id }) => id === spot.id);
+      setShowPanel(!Object.hasOwn(lastState, DELETED_KEY));
+    }
+  }, [updateStack]);
 
   const handleClick = Spot => {
     if (!Spot) {

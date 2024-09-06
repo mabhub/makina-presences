@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { useQueryClient } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
@@ -15,14 +14,12 @@ import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
+import useMapping from '../hooks/useMapping';
 import ContextualMenu from './ContextualMenu';
 import SpotButtonHalfDay from './SpotButtonHalfDay';
 import SpotDescription from './SpotDescription';
-import useMapping from '../hooks/useMapping';
 
 const useTriState = createPersistedState('tri');
-
-const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
 const { FF_HALFDAY } = baseFlags;
 
@@ -146,7 +143,6 @@ const CustomTooltip = withStyles(theme => ({
 }))(Tooltip);
 
 const SpotButton = ({
-  edit,
   spot,
   onConflict = () => {},
 }) => {
@@ -171,38 +167,6 @@ const SpotButton = ({
       ...acc,
       [s]: [...(acc[s] || []), presence],
     }), {});
-
-  const queryClient = useQueryClient();
-  const [movingSpot, setMovingSpot] = React.useState();
-  const snap = (v, a = 5) => Math.round(v / a) * a;
-  const handleMouseDown = s => ({ screenX, screenY }) => {
-    if (!edit) { return null; }
-    return setMovingSpot({ spot: s, from: [screenX, screenY] });
-  };
-  const handleDragEnd = async ({ screenX: x2, screenY: y2 }) => {
-    if (!movingSpot || !edit) { return; }
-
-    const { s, from: [x1, y1] = [] } = movingSpot;
-    const deltas = { x: x2 - x1, y: y2 - y1 };
-
-    setMovingSpot();
-
-    const { VITE_BASEROW_TOKEN: token } = import.meta.env;
-
-    await fetch(
-      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
-      {
-        method: 'PATCH',
-        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          x: snap(deltas.x + Number(s.x)),
-          y: snap(deltas.y + Number(s.y)),
-        }),
-      },
-    );
-
-    queryClient.invalidateQueries([spotsTableId]);
-  };
 
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
@@ -356,7 +320,7 @@ const SpotButton = ({
       )}
       <CustomTooltip
         key={spotId}
-        title={(!edit && !isPast) ? tooltip : ''}
+        title={!isPast ? tooltip : ''}
         placement="right"
         enterDelay={500}
       >
@@ -387,9 +351,6 @@ const SpotButton = ({
             borderColor: Type?.color?.replace('-', ''),
           }}
           size="small"
-          draggable={Boolean(edit)}
-          onMouseDown={edit && handleMouseDown(spot)}
-          onDragEnd={edit && handleDragEnd}
           onClick={event => {
             if (isCumulative && triPeriod) return unsubscribe();
             if (mornings.length === 1 && mornings[0].tri !== ownTri) {
@@ -416,7 +377,7 @@ const SpotButton = ({
           }}
         >
           {afternoons.length === 0 && mornings.length === 0
-            ? ((!edit && !isConflict && presenceFullDay?.tri)
+            ? ((!isConflict && presenceFullDay?.tri)
               || (isConflict && (fullDays
                 .some(({ tri }) => sameLowC(ownTri, tri))
                 ? fullDays.find(({ tri }) => sameLowC(ownTri, tri)).tri
