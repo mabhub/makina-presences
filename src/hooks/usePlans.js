@@ -20,7 +20,7 @@ const usePlans = () => {
 
   const plans = useTable(tableId);
 
-  const [toCreate, setToCreate] = useState();
+  const [planToHandle, setPlanToHandle] = useState();
 
   const updateRow = useMutation(record => fetch(
     `${basePath}${record.id}/?user_field_names=true`,
@@ -76,25 +76,34 @@ const usePlans = () => {
   ), {
     onSuccess: resp => {
       resp.json().then(planImage => {
-        createRow.mutate({
-          ...toCreate.plan,
-          plan: [{
-            name: planImage.name,
-          }],
-        });
+        if (planToHandle.plan.id) {
+          updateRow.mutate({
+            ...planToHandle.plan,
+            plan: [{
+              name: planImage.name,
+            }],
+          });
+        } else {
+          createRow.mutate({
+            ...planToHandle.plan,
+            plan: [{
+              name: planImage.name,
+            }],
+          });
+        }
       });
     },
   });
 
   useEffect(() => {
-    if (toCreate) {
-      uploadPlan.mutate(toCreate.rawImage);
-      setToCreate();
+    if (planToHandle) {
+      uploadPlan.mutate(planToHandle.rawImage);
+      setPlanToHandle();
     }
-  }, [toCreate, uploadPlan]);
+  }, [planToHandle, uploadPlan]);
 
-  const createPlan = (plan, rawImage) => {
-    setToCreate({
+  const setPlanWithImage = (plan, rawImage) => {
+    setPlanToHandle({
       plan, rawImage,
     });
   };
@@ -110,7 +119,7 @@ const usePlans = () => {
     createRow,
     updateRow,
     deleteRow,
-    createPlan,
+    setPlanWithImage,
     updatePlan,
     deletePlan,
   };

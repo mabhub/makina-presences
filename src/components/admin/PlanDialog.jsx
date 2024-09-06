@@ -35,20 +35,19 @@ const useStyles = makeStyles(theme => ({
 
 const usePlanUpdate = createPersistedState('planUpdate');
 
-const PlanDialog = ({ open, onClose, edit, planName }) => {
+const PlanDialog = ({ open, onClose, edit, plan }) => {
   const classes = useStyles();
 
   const [planUpdate] = usePlanUpdate();
 
-  const [name, setName] = useState(planName);
+  const [name, setName] = useState(plan ? plan.Name : '');
   const nameValid = !planUpdate
-    .filter(({ Name }) => Name !== planName)
-    .filter(plan => !Object.hasOwn(plan, 'deleted'))
+    .filter(({ Name }) => Name !== plan.Name)
     .map(({ Name }) => Name)
     .includes(name);
 
   const [selectedFile, setSelectedFile] = useState();
-  const [preview, setPreview] = useState();
+  const [preview, setPreview] = useState(plan ? plan.plan[0].url : undefined);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -65,18 +64,19 @@ const PlanDialog = ({ open, onClose, edit, planName }) => {
   };
 
   const handleSubmit = () => {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
     if (edit) {
-      onClose(planName, name);
+      onClose({ old: plan, newName: name, planImage: selectedFile ? formData : undefined });
     } else {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      onClose(name, formData);
+      onClose({ name, planImage: formData });
     }
   };
 
   return (
     <Dialog open={open}>
-      <DialogTitle><strong>{edit ? `Modification de ${planName}` : 'Nouvel Espace'}</strong></DialogTitle>
+      <DialogTitle><strong>{edit ? `Modification de ${plan.Name}` : 'Nouvel Espace'}</strong></DialogTitle>
       <DialogContent dividers>
         <TextField
           size="small"
@@ -89,27 +89,26 @@ const PlanDialog = ({ open, onClose, edit, planName }) => {
         />
         <br />
 
-        {!edit && (
         <Box
           htmlFor="plan-picker"
           className={classes.wrapper}
           sx={{
-            backgroundImage: selectedFile ? `url(${preview})` : '',
+            backgroundImage: preview ? `url(${preview})` : '',
             backgroundPosition: 'center',
             backgroundSize: 'contain',
             backgroundRepeat: 'no-repeat',
           }}
         >
-          {!selectedFile && (<AddPhotoAlternateOutlined className={classes.icon} />)}
+          {!preview && (<AddPhotoAlternateOutlined className={classes.icon} />)}
           <input
             id="plan-picker"
             type="file"
             accept=".png"
             className={classes.input}
             onChange={onSelectFile}
+            title={preview ? 'Changer d\'image' : 'Choisir un fichier'}
           />
         </Box>
-        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={() => onClose()}>Annuler</Button>
