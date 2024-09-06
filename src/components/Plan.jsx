@@ -84,7 +84,7 @@ const Plan = ({ edit }) => {
   const { place } = useParams();
 
   const mapping = useMapping();
-  const spots = useSpots(mapping[place]);
+  const { spots } = useSpots(mapping[place]);
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
 
   const DragWrapper = edit ? Children : TransformWrapper;

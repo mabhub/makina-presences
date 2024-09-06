@@ -48,7 +48,7 @@ const Moment = ({
   const classes = useStyles();
   const { place } = useParams();
 
-  const spots = useSpots(place);
+  const { spots } = useSpots(place);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
   const isCumulativeSpot = React.useCallback(
     identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),

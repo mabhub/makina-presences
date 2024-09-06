@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from 'react-query';
 import { useEffect, useState } from 'react';
+import { useMutation, useQueryClient } from 'react-query';
 import useTable from './useTable';
 
 const {
@@ -32,16 +32,25 @@ const usePlans = () => {
       }) },
   ), {
     onMutate: async record => {
-      queryClient.setQueryData(queryKey, ({ results = [] }) => {
-        console.log(record);
-        return {
-          result: results.map(result => (
-            result.id === record.id
-              ? { ...result }
-              : result
-          )),
-        };
-      });
+      queryClient.setQueryData(queryKey, ({ results = [] }) => ({
+        result: results.map(result => (
+          result.id === record.id
+            ? { ...result }
+            : result
+        )),
+      }));
+    },
+    onSettled: () => queryClient.invalidateQueries(queryKey),
+  });
+
+  const deleteRow = useMutation(record => fetch(
+    `${basePath}${record.id}/`,
+    { headers, method: 'DELETE' },
+  ), {
+    onMutate: async record => {
+      queryClient.setQueryData(queryKey, ({ results = [] }) => ({
+        results: results.filter(result => result.id !== record.id),
+      }));
     },
     onSettled: () => queryClient.invalidateQueries(queryKey),
   });
@@ -90,16 +99,20 @@ const usePlans = () => {
     });
   };
 
-  const updatePlan = plan => {
-    updateRow.mutate(plan);
+  const updatePlan = plan => updateRow.mutateAsync(plan);
+
+  const deletePlan = plan => {
+    deleteRow.mutate(plan);
   };
 
   return {
     plans,
     createRow,
     updateRow,
+    deleteRow,
     createPlan,
     updatePlan,
+    deletePlan,
   };
 };
 

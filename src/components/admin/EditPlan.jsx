@@ -116,6 +116,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
 
   const idUpdateStack = updateStack[placeID].map(({ Identifiant: spotId }) => spotId);
   const spots = useSpots(placeID)
+    .spots
     // add created spot
     .concat([...new Set(
       updateStack[placeID]
