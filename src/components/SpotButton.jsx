@@ -188,7 +188,9 @@ const SpotButton = ({
 
     const morningPresences = spotIdPresences.filter(p => p.period === MORNING_PERIOD);
     const afternoonPresences = spotIdPresences.filter(p => p.period === AFTERNOON_PERIOD);
-    const fullDayPresences = spotIdPresences.filter(p => p.period === FULLDAY_PERIOD);
+    const fullDayPresences = spotIdPresences.filter(p => !Object.hasOwn(p, 'period')
+    || p.period === ''
+    || p.period === FULLDAY_PERIOD);
 
     return [fullDayPresences, morningPresences, afternoonPresences];
   };
