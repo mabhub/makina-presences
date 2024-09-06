@@ -140,12 +140,10 @@ function PlanList () {
   const { place } = useParams();
   const [mapping, setMapping] = useMapping();
 
-  const { createPlan } = usePlans();
+  const { setPlanWithImage } = usePlans();
 
   const [plans, setPlanUpdate] = usePlanUpdate([]);
-  const [dialogNewOpen, setDialogNewOpen] = useState(false);
-  const [dialogUpdateOpen, setDialogUpdateOpen] = useState(false);
-  const [planName, setPlanName] = useState('');
+  const [toUpdate, setToUpdate] = useState();
   const { plans: plansDB, deletePlan } = usePlans();
 
   const [updateStack, setUpdatedStack] = useUpdateStack();
@@ -163,7 +161,8 @@ function PlanList () {
       return acc;
     }, {});
 
-  const defaultMapping = plansDB
+  // Is set from "plans" because Name's changes are stored locally
+  const defaultMapping = plans
     .reduce((acc, curr) => {
       const { Name: key, id } = curr;
       if (!Object.hasOwn(acc, key)) {
@@ -177,52 +176,82 @@ function PlanList () {
 
   useEffect(() => {
     if (plansDB.length > 0) {
-      setPlanUpdate([...plansDB]);
+      setPlanUpdate([...plansDB.map((plan, index) => ({
+        ...plan,
+        ...plans[index],
+        plan: plan.plan,
+      }))]);
       setUpdatedStack({
         ...uptdateTheStack(updateStack),
       });
       setUndidStack({
         ...uptdateTheStack(undidStack),
       });
-      setMapping({ ...defaultMapping });
     }
   }, [plansDB]);
 
-  const handleNew = (name, planImage) => {
-    setDialogNewOpen(!dialogNewOpen);
-    if (name && planImage) {
+  useEffect(() => {
+    if (plans) {
+      setMapping({ ...defaultMapping });
+    }
+  }, [plans]);
+
+  const [isEdit, setIsEdit] = useState();
+  const [dialogOpen, setDialogOpen] = useState();
+
+  const handleDialog = (edit, id) => {
+    setDialogOpen(true);
+    setIsEdit(edit);
+    if (edit) {
+      setToUpdate(plans.find(({ id: planID }) => planID === id));
+    }
+  };
+
+  const handleNew = props => {
+    setDialogOpen(!dialogOpen);
+    if (props) {
+      const { name, planImage } = props;
+      console.log(planImage.length);
       const newPlan = {
         Name: name,
         Brouillon: true,
       };
-      createPlan(newPlan, planImage);
+      setPlanWithImage(newPlan, planImage);
       history.push('/admin');
     }
   };
 
-  const handleUpdate = (oldName, newName) => {
-    setDialogUpdateOpen(!dialogUpdateOpen);
-    setMapping({
-      ...Object.keys(mapping).reduce((acc, curr) => {
-        if (curr === oldName) {
+  const handleUpdate = props => {
+    setDialogOpen(!dialogOpen);
+    if (props) {
+      const { old, newName, planImage } = props;
+      const { Name: oldName } = old;
+      // Update mapping et set local change (for name)
+      setMapping({
+        ...Object.keys(mapping).reduce((acc, curr) => {
+          if (curr === oldName) {
+            return {
+              ...acc,
+              [newName]: mapping[oldName],
+            };
+          }
           return {
             ...acc,
-            [newName]: mapping[oldName],
+            [curr]: mapping[curr],
           };
-        }
-        return {
-          ...acc,
-          [curr]: mapping[curr],
-        };
-      }, {}),
-    });
-    setPlanUpdate([
-      ...plans.map(plan => ({
-        ...plan,
-        Name: plan.Name === oldName ? newName : plan.Name,
-      })),
-    ]);
-    if (oldName && newName) history.push('/admin');
+        }, {}),
+      });
+      setPlanUpdate([
+        ...plans.map(plan => ({
+          ...plan,
+          Name: plan.Name === oldName ? newName : plan.Name,
+        })),
+      ]);
+      if (planImage) {
+        setPlanWithImage(old, planImage);
+      }
+      history.push('/admin');
+    }
   };
 
   const handleDelete = (event, name) => {
@@ -252,13 +281,13 @@ function PlanList () {
           <Box
             className={classes.addPlan}
             component="button"
-            onClick={() => setDialogNewOpen(!dialogNewOpen)}
+            onClick={() => handleDialog(false)}
           >
             <Add />
           </Box>
         </Box>
 
-        {plans.map(({ Name, Brouillon }) => {
+        {plans.map(({ id, Name, Brouillon }) => {
           const isSelected = Name === place;
           return (
             <Card
@@ -297,10 +326,7 @@ function PlanList () {
                     <Tooltip title="Modifier">
                       <Box
                         className={classes.actionButton}
-                        onClick={() => {
-                          setDialogUpdateOpen(!dialogUpdateOpen);
-                          setPlanName(Name);
-                        }}
+                        onClick={() => handleDialog(true, id)}
                       >
                         <Edit />
                       </Box>
@@ -320,19 +346,12 @@ function PlanList () {
           );
         })}
       </Box>
-      {dialogNewOpen && (
+      {dialogOpen && (
         <PlanDialog
-          open={dialogNewOpen}
-          onClose={handleNew}
-          planName=""
-        />
-      )}
-      {dialogUpdateOpen && (
-        <PlanDialog
-          open={dialogUpdateOpen}
-          onClose={handleUpdate}
-          edit
-          planName={planName}
+          open={dialogOpen}
+          onClose={isEdit ? handleUpdate : handleNew}
+          edit={isEdit}
+          plan={isEdit ? toUpdate : ''}
         />
       )}
     </>

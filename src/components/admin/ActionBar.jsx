@@ -72,7 +72,7 @@ function ActionBar ({ onUndoRedu }) {
 
   const [updateStack, setUpdatedStack] = useUpdatedStack({});
   const [undidStack, setUndidStack] = useUndidStack({});
-  const [planUpdate] = usePlanUpdate();
+  const [planUpdate, setPlanUpdate] = usePlanUpdate();
 
   const { spots: defaultSpot } = useSpots(placeID);
 
@@ -159,6 +159,19 @@ function ActionBar ({ onUndoRedu }) {
 
   const onClosePublication = () => {
     setPublishOpen(!publishOpen);
+    if (liveAndPublish) {
+      setPlanUpdate([
+        ...planUpdate.map(plan => {
+          if (plan.id === placeID) {
+            return {
+              ...plan,
+              Brouillon: false,
+            };
+          }
+          return plan;
+        }),
+      ]);
+    }
   };
 
   return (
