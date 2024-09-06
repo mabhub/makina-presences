@@ -7,8 +7,6 @@ import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles(() => ({
   progress: {
-    position: 'fixed',
-    opacity: 0.5,
     top: 0,
     left: 0,
     height: 0,
@@ -38,6 +36,10 @@ const LoadIndicator = props => {
         { [classes.progressVisible]: Boolean(isFetching || isMutating) },
       )}
       color="secondary"
+      sx={{
+        position: 'fixed',
+        opacity: 0.5,
+      }}
       {...props}
     />
   );

@@ -68,11 +68,6 @@ function PlanDialog ({ open, onClose, edit, planName }) {
     if (edit) {
       onClose(planName, name);
     } else {
-      // const reader = new FileReader();
-      // reader.onload = e => {
-      //   onClose(name, e.target.result);
-      // };
-      // reader.readAsDataURL(selectedFile);
       const formData = new FormData();
       formData.append('file', selectedFile);
       onClose(name, formData);
@@ -123,7 +118,7 @@ function PlanDialog ({ open, onClose, edit, planName }) {
           disabled={name === ''
             || (!edit && !selectedFile)
             || !nameValid}
-        >Créer
+        >{edit ? 'Modifier' : 'Créer'}
         </Button>
       </DialogActions>
     </Dialog>

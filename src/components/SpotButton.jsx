@@ -134,7 +134,7 @@ const SpotButton = ({
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
   const mapping = useMapping();
-  const spots = useSpots(mapping[place]);
+  const { spots } = useSpots(mapping[place]);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
   const isCumulativeSpot = React.useCallback(
     identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),

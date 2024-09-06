@@ -92,6 +92,7 @@ const SpotDialog = ({
     }), {});
 
   const spots = useSpots(mapping[selectedPlace])
+    .spots
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
   const favoriteName = favorites
     .filter(({ place: spotPlace }) => spotPlace === mapping[selectedPlace])
