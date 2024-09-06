@@ -20,7 +20,6 @@ const useStyles = makeStyles(theme => ({
   editActions: {
     display: 'inherit',
     alignItems: 'center',
-    // padding: theme.spacing(0.5, 0),
   },
   publishActions: {
     display: 'inherit',
@@ -55,11 +54,10 @@ const useStyles = makeStyles(theme => ({
   },
   btnPublish: {
     textTransform: 'none',
-    // fontWeight: 'bold',
   },
 }));
 
-const useUpdatedStack = createPersistedState('updateStack');
+const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 const usePlanUpdate = createPersistedState('planUpdate');
@@ -70,7 +68,7 @@ function ActionBar ({ onUndoRedu }) {
   const [mapping] = useMapping();
   const placeID = mapping[place];
 
-  const [updateStack, setUpdatedStack] = useUpdatedStack({});
+  const [updateStack, setUpdateStack] = useUpdateStack({});
   const [undidStack, setUndidStack] = useUndidStack({});
   const [planUpdate, setPlanUpdate] = usePlanUpdate();
 
@@ -95,7 +93,7 @@ function ActionBar ({ onUndoRedu }) {
         updateStack[placeID][updateStack[placeID].length - 1],
       ],
     });
-    setUpdatedStack({
+    setUpdateStack({
       ...updateStack,
       [placeID]: [
         ...updateStack[placeID].slice(0, -1),
@@ -105,7 +103,7 @@ function ActionBar ({ onUndoRedu }) {
 
   const handleRedo = () => {
     onUndoRedu(undidStack[placeID][undidStack[placeID].length - 1]);
-    setUpdatedStack({
+    setUpdateStack({
       ...updateStack,
       [placeID]: [
         ...updateStack[placeID],
@@ -131,7 +129,7 @@ function ActionBar ({ onUndoRedu }) {
           ...acc,
           [curr]: [],
         }), {}));
-      setUpdatedStack({
+      setUpdateStack({
         ...updateStack,
         [placeID]: [
           ...updateStack[placeID],
@@ -178,7 +176,6 @@ function ActionBar ({ onUndoRedu }) {
     <>
       <Box className={classes.root}>
         <Box className={classes.editActions}>
-
           <Box className={classes.section}>
             <Tooltip
               title="Annuler"
@@ -198,7 +195,6 @@ function ActionBar ({ onUndoRedu }) {
               title="Refaire"
             >
               <span>
-
                 <Box
                   className={classes.button}
                   component="button"
@@ -221,7 +217,6 @@ function ActionBar ({ onUndoRedu }) {
                 component="button"
                 onClick={() => (setDialogOpen(true))}
               >
-                {/* <AddCircleOutline /> */}
                 <img src="/add_spot.svg" alt="add spot" className={classes.svg} />
               </Box>
             </Tooltip>

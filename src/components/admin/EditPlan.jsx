@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const useUpdatedStack = createPersistedState('updateStack');
+const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
 
@@ -60,7 +60,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const [mapping] = useMapping();
   const placeID = mapping[place];
 
-  const [updateStack, setUpdatedStack] = useUpdatedStack({});
+  const [updateStack, setUpdateStack] = useUpdateStack({});
 
   const [selectedSpot, setSelectedSpot] = useState({});
 
@@ -105,7 +105,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
 
   useEffect(() => {
     if (Object.keys(updatedSpot).length) {
-      setUpdatedStack({
+      setUpdateStack({
         ...updateStack,
         [placeID]: [
           ...updateStack[placeID].filter((spot, index) => keepSpotUpdate(spot, index)),
@@ -174,11 +174,10 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
               }}
             />
             )}
-
             {spots.map(Spot => (
               <EditSpot
                 key={Spot.Identifiant}
-                Spot={Spot}
+                spot={Spot}
                 isSelected={selectedSpot.Identifiant === Spot.Identifiant && panelOpen}
                 onClick={onSpotSelect}
                 planRef={planRef}

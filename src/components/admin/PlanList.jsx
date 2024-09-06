@@ -211,7 +211,6 @@ function PlanList () {
     setDialogOpen(!dialogOpen);
     if (props) {
       const { name, planImage } = props;
-      console.log(planImage.length);
       const newPlan = {
         Name: name,
         Brouillon: true,

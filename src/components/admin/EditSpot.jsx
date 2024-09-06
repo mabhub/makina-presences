@@ -99,7 +99,7 @@ const useMapping = createPersistedState('mapping');
 
 const EditSpot = forwardRef((
   {
-    Spot,
+    spot,
     onClick = () => {},
     isSelected,
     planRef,
@@ -108,7 +108,7 @@ const EditSpot = forwardRef((
 ) => {
   const classes = useStyles();
 
-  const { Identifiant: spotId, x, y, Type } = Spot;
+  const { Identifiant: spotId, x, y, Type } = spot;
   const [isMoving, setIsMoving] = useState(false);
   const [deltas, setDeltas] = useState({
     x: 0,
@@ -184,7 +184,7 @@ const EditSpot = forwardRef((
       [placeID]: [
         ...updateStack[placeID],
         {
-          ...Spot,
+          ...spot,
           ...getNewPosition(event),
         },
       ],
@@ -200,7 +200,7 @@ const EditSpot = forwardRef((
 
   const handleClick = event => {
     onClick({
-      ...Spot,
+      ...spot,
       ...coords,
     });
     if (isMoving) {
@@ -216,7 +216,7 @@ const EditSpot = forwardRef((
       [placeID]: [
         ...updateStack[placeID],
         {
-          ...Spot,
+          ...spot,
           [DELETED_KEY]: true,
         },
       ],
@@ -229,24 +229,24 @@ const EditSpot = forwardRef((
   const handleDuplicate = () => {
     setShowDialog(true);
     setInitialSpot({
-      ...Spot,
-      x: parseInt(Spot.x, 10) + 15,
-      y: parseInt(Spot.y, 10) + 15,
+      ...spot,
+      x: parseInt(spot.x, 10) + 15,
+      y: parseInt(spot.y, 10) + 15,
       [CREATED_KEY]: true,
     });
   };
 
-  const handleDuplicateValidation = spot => {
-    if (spot) {
+  const handleDuplicateValidation = newSpot => {
+    if (newSpot) {
       resestUndidStack();
       setUpdateStack({
         ...updateStack,
         [placeID]: [
           ...updateStack[placeID],
-          spot,
+          newSpot,
         ],
       });
-      onClick(spot);
+      onClick(newSpot);
     }
     setShowDialog(false);
   };
