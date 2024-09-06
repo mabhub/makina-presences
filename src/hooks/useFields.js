@@ -5,7 +5,7 @@ const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 const useFields = tableId => {
   const basePath = `https://api.baserow.io/api/database/fields/table/${tableId}/`;
 
-  const queryKey = [tableId];
+  const queryKey = [tableId, 'fields'];
 
   const { data = [] } = useQuery(
     queryKey,

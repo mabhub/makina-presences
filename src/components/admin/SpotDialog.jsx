@@ -28,7 +28,7 @@ function SpotDialog ({ open, onClose, initialSpot }) {
 
   const [idValid, setIdValid] = useState(true);
 
-  const spotIds = useSpots(mapping[place]).map(({ Identifiant }) => Identifiant);
+  const spotIds = useSpots(mapping[place]).spots.map(({ Identifiant }) => Identifiant);
   const handleChange = (key, value) => {
     if (key === 'Identifiant') {
       setIdValid(!spotIds.includes(value));

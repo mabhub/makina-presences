@@ -72,7 +72,7 @@ function ActionBar ({ onUndoRedu }) {
   const [undidStack, setUndidStack] = useUndidStack({});
   const [planUpdate] = usePlanUpdate();
 
-  const defaultSpot = useSpots(placeID);
+  const { spots: defaultSpot } = useSpots(placeID);
 
   const getPreviousSpotInfo = () => {
     const spot = updateStack[placeID][updateStack[placeID].length - 1];

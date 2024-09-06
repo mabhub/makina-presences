@@ -3,6 +3,8 @@ import { Alert, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
 import makeStyles from '@mui/styles/makeStyles';
 import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
+import useSpots from '../../hooks/useSpots';
+import LoadIndicator from '../LoadIndicator';
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -23,20 +25,23 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useUpdateStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
 function PublishDialog ({ open, plan, handleClose, isSecondary }) {
   const classes = useStyles();
-  const [updateStack] = useUpdateStack();
+  const [updateStack, setUpdateStack] = useUpdateStack();
+  const [undidStack, setUndidStack] = useUndidStack();
   const [mapping] = useMapping();
   const placeID = mapping[plan.Name];
 
   const { plans, updatePlan } = usePlans();
+  const { setSpot } = useSpots(placeID);
 
   const [amountOfUpdate, setAmountOfUpdate] = useState(0);
 
   useEffect(() => {
-    if (!plan || amountOfUpdate) return;
+    if (!plan || amountOfUpdate || plans.length === 0) return;
     const existingPlan = plans.find(({ id }) => id === plan.id);
     Object.keys(existingPlan).forEach(key => {
       if (typeof existingPlan[key] !== 'object' && existingPlan[key] !== plan[key]) {
@@ -45,15 +50,52 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
     });
   }, [plans]);
 
+  const resetStack = () => {
+    setUpdateStack({
+      ...updateStack,
+      [placeID]: [],
+    });
+    setUndidStack({
+      ...undidStack,
+      [placeID]: [],
+    });
+  };
+
   const handlePublication = () => {
-    updatePlan(isSecondary
-      ? { ...plan, Brouillon: false }
-      : plan);
-    handleClose();
+    const lastModification = [
+      ...updateStack[placeID]
+        .reverse()
+        .reduce((acc, curr) => {
+          if (acc.map(({ id }) => id).includes(curr.id)) {
+            return acc;
+          }
+          return [
+            ...acc,
+            curr,
+          ];
+        }, []),
+    ];
+
+    (amountOfUpdate > 0 || isSecondary
+      ? updatePlan(isSecondary ? { ...plan, Brouillon: false } : plan)
+      : Promise.resolve())
+      .then(() => (lastModification.length
+        ? Promise.all(lastModification.map(spotModif => setSpot(spotModif)))
+        : Promise.resolve()))
+      .then(() => {
+        resetStack();
+        handleClose();
+      });
   };
 
   return (
     <Dialog open={open}>
+      <LoadIndicator
+        sx={{
+          position: 'absolute',
+          opacity: 1,
+        }}
+      />
       <DialogTitle><strong>{isSecondary ? 'Publication des Modifications' : 'Enregistrement des Modifications'}</strong></DialogTitle>
       <DialogContent className={classes.content}>
         L'ensemble des modifications effectuées depuis la dernière publication vont

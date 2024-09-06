@@ -146,26 +146,24 @@ function PlanList () {
   const [dialogNewOpen, setDialogNewOpen] = useState(false);
   const [dialogUpdateOpen, setDialogUpdateOpen] = useState(false);
   const [planName, setPlanName] = useState('');
-  const { plans: plansDB } = usePlans();
+  const { plans: plansDB, deletePlan } = usePlans();
 
-  useEffect(() => {
-    if (plansDB.length > plans.length) {
-      setPlanUpdate([
-        ...plansDB.reduce((acc, curr) => [
+  const [updateStack, setUpdatedStack] = useUpdateStack();
+  const [undidStack, setUndidStack] = useUndidStack();
+
+  const uptdateTheStack = stack => plansDB
+    .reduce((acc, curr) => {
+      const { id } = curr;
+      if (!Object.hasOwn(acc, id)) {
+        return {
           ...acc,
-          plans.find(({ id }) => id === curr.id) || curr,
-        ], []),
-      ]);
-    }
-    if (plansDB.length === plans.length) {
-      setPlanUpdate([
-        ...plansDB.map((plan, index) => ({ ...plans[index], ...plan })),
-      ]);
-    }
-  }, [plansDB]);
+          [id]: stack[id] ? stack[id] : [],
+        };
+      }
+      return acc;
+    }, {});
 
-  const defaultMapping = plans
-    .filter(plan => !Object.hasOwn(plan, 'deleted'))
+  const defaultMapping = plansDB
     .reduce((acc, curr) => {
       const { Name: key, id } = curr;
       if (!Object.hasOwn(acc, key)) {
@@ -178,12 +176,17 @@ function PlanList () {
     }, {});
 
   useEffect(() => {
-    if (!mapping
-    || (mapping && Object.keys(mapping).length !== Object.keys(defaultMapping).length)
-    ) {
+    if (plansDB.length > 0) {
+      setPlanUpdate([...plansDB]);
+      setUpdatedStack({
+        ...uptdateTheStack(updateStack),
+      });
+      setUndidStack({
+        ...uptdateTheStack(undidStack),
+      });
       setMapping({ ...defaultMapping });
     }
-  }, [defaultMapping]);
+  }, [plansDB]);
 
   const handleNew = (name, planImage) => {
     setDialogNewOpen(!dialogNewOpen);
@@ -193,6 +196,7 @@ function PlanList () {
         Brouillon: true,
       };
       createPlan(newPlan, planImage);
+      history.push('/admin');
     }
   };
 
@@ -222,26 +226,7 @@ function PlanList () {
   };
 
   const handleDelete = (event, name) => {
-    setPlanUpdate([
-      // ...plans.filter(({ Name }) => Name !== name),
-      ...plans.map(plan => {
-        if (plan.Name === name) {
-          return {
-            ...plan,
-            deleted: true,
-          };
-        }
-        return plan;
-      }),
-    ]);
-    setMapping({
-      ...Object.keys(mapping)
-        .filter(key => key !== name)
-        .reduce((acc, curr) => ({
-          ...acc,
-          [curr]: mapping[curr],
-        }), {}),
-    });
+    deletePlan(plans.find(({ Name }) => Name === name));
     history.push('/admin');
     event.stopPropagation();
   };
@@ -260,33 +245,6 @@ function PlanList () {
     ]);
   };
 
-  const [updateStack, setUpdatedStack] = useUpdateStack();
-  const [undidStack, setUndidStack] = useUndidStack();
-
-  const uptdateTheStack = stack => plans
-    .filter(plan => !Object.hasOwn(plan, 'deleted'))
-    .reduce((acc, curr) => {
-      const { id } = curr;
-      if (!Object.hasOwn(acc, id)) {
-        return {
-          ...acc,
-          [id]: stack[id] ? stack[id] : [],
-        };
-      }
-      return acc;
-    }, {});
-
-  useEffect(() => {
-    setTimeout(() => {
-      setUpdatedStack({
-        ...uptdateTheStack(updateStack),
-      });
-      setUndidStack({
-        ...uptdateTheStack(undidStack),
-      });
-    }, 0);
-  }, [plans]);
-
   return (
     <>
       <Box className={classes.root}>
@@ -300,33 +258,31 @@ function PlanList () {
           </Box>
         </Box>
 
-        {plans
-          .filter(plan => !Object.hasOwn(plan, 'deleted'))
-          .map(({ Name, Brouillon }) => {
-            const isSelected = Name === place;
-            return (
-              <Card
-                key={Name}
-                elevation={0}
-                className={clsx({
-                  [classes.card]: true,
-                  [classes.selected]: isSelected,
-                  [classes.brouillon]: Brouillon,
-                })}
+        {plans.map(({ Name, Brouillon }) => {
+          const isSelected = Name === place;
+          return (
+            <Card
+              key={Name}
+              elevation={0}
+              className={clsx({
+                [classes.card]: true,
+                [classes.selected]: isSelected,
+                [classes.brouillon]: Brouillon,
+              })}
+            >
+              <CardActionArea
+                className={classes.cardContent}
+                onClick={() => history.push(`/admin/${Name}`)}
+                disableRipple
               >
-                <CardActionArea
-                  className={classes.cardContent}
-                  onClick={() => history.push(`/admin/${Name}`)}
-                  disableRipple
-                >
-                  <Typography
-                    variant="h4"
-                    fontWeight={isSelected ? 'bold' : 'unset'}
-                    className={classes.cardTitle}
-                  >{Name}
-                  </Typography>
+                <Typography
+                  variant="h4"
+                  fontWeight={isSelected ? 'bold' : 'unset'}
+                  className={classes.cardTitle}
+                >{Name}
+                </Typography>
 
-                  {isSelected && (
+                {isSelected && (
                   <Box className={classes.actions}>
                     <Tooltip title="Actif">
                       <Box
@@ -358,11 +314,11 @@ function PlanList () {
                       </Box>
                     </Tooltip>
                   </Box>
-                  )}
-                </CardActionArea>
-              </Card>
-            );
-          })}
+                )}
+              </CardActionArea>
+            </Card>
+          );
+        })}
       </Box>
       {dialogNewOpen && (
         <PlanDialog
