@@ -106,6 +106,7 @@ const PreferenceDisplay = () => {
                   key={day}
                   sx={{
                     background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.08)' : '#FFFFFF'),
+                    color: theme => theme.palette.primary.bg,
                     filter: theme => (theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)'),
                     border: '1px solid rgba(0, 0, 0, 0.12)',
                     borderRadius: '8px',

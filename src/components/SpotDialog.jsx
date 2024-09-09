@@ -100,7 +100,8 @@ const SpotDialog = ({
       ({ Identifiant: a }, { Identifiant: b }) => favoriteName.indexOf(a) - favoriteName.indexOf(b),
     );
 
-  const defaultFavoriteSpot = favoriteSpots.find(({ Identifiant: spot }) => !spotPresences[spot]);
+  const defaultFavoriteSpot = favoriteSpots
+    .find(({ Identifiant: spot }) => !spotPresences[spot] && displayFavorite);
 
   const [selectedValue, setSelectedValue] = React.useState((
     defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
@@ -162,6 +163,12 @@ const SpotDialog = ({
     }
   }, [periodPref]);
 
+  const handleKeyDown = event => {
+    if (event.keyCode === 27) {
+      handleCancel();
+    }
+  };
+
   return (
     <Dialog
       maxWidth="xs"
@@ -169,6 +176,7 @@ const SpotDialog = ({
       fullScreen={fullScreen}
       open={open}
       onClick={event => event.stopPropagation()}
+      onKeyDown={handleKeyDown}
     >
       {!displayFavorite && (
         <Tabs
