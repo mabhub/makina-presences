@@ -321,7 +321,6 @@ const SpotButton = ({
             left: `${x}px`,
             top: `${y}px`,
             borderColor: Type?.color?.replace('-', ''),
-            // borderImage: `linear-gradient(to bottom, ${Type?.color} 50%, red 50%) 1`,
           }}
           size="small"
           draggable={Boolean(edit)}
