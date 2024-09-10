@@ -140,6 +140,11 @@ const PresencePage = () => {
     <div className="PresencePage">
       <LoadIndicator />
 
+      {/* <Toaster
+        richColors
+        visibleToasts={7}
+      /> */}
+
       {(!isTriValid || !place) && (
         <PresenceForm />
       )}

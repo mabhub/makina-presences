@@ -1,9 +1,9 @@
-import React from 'react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
+import React from 'react';
 
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { CardHeader, IconButton } from '@mui/material';
-import { RemoveCircleOutline, AddCircleOutline } from '@mui/icons-material';
 import { emphasize } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
@@ -69,16 +69,19 @@ const DayHeader = ({
     return null;
   };
 
+  const dateObj = dayjs(date);
+
   const handleDialogClose = React.useCallback((...args) => {
     const { 0: spotId, [args.length - 1]: periodPref } = args;
     if (spotId) {
       setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
+      // toast.success(`Inscription au poste ${spotId}`, {
+      //   description: `${Days[(dateObj.day()) % 7]} ${dateObj.date().toString()} ${Months[dateObj.month()]}`,
+      // });
     }
     setDialogOpen(false);
     setFastOpen(false);
   }, [date, place, setPresence, tri]);
-
-  const dateObj = dayjs(date);
 
   return (
     <>
