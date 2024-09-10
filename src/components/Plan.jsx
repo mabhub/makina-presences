@@ -9,6 +9,8 @@ import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
+import useAdditionals from '../hooks/useAdditionals';
+import SpotAdditionals from './SpotAdditionals';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -97,8 +99,18 @@ const Plan = ({ edit }) => {
 
   const planRef = useRef(null);
 
+  const additionals = useAdditionals(place);
+
   return (
     <>
+      {additionals
+        .filter(({ Fixe }) => Fixe)
+        .map(additional => (
+          <SpotAdditionals
+            key={additional.Titre}
+            additional={additional}
+          />
+        ))}
       <DragWrapper
         {...transformWrapperProps}
         ref={planRef}
@@ -130,6 +142,15 @@ const Plan = ({ edit }) => {
                 onConflict={handleConflict}
               />
             ))}
+
+            {additionals
+              .filter(({ Fixe }) => !Fixe)
+              .map(additional => (
+                <SpotAdditionals
+                  key={additional.Titre}
+                  additional={additional}
+                />
+              ))}
           </Box>
         </DragComponent>
       </DragWrapper>
