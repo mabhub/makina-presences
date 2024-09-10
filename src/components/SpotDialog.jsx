@@ -61,6 +61,7 @@ const useFavoritesState = createPersistedState('favorites');
 
 const SpotDialog = ({
   open,
+  fastOpen,
   onClose = () => {},
   place,
   date,
@@ -168,6 +169,12 @@ const SpotDialog = ({
       handleCancel();
     }
   };
+
+  useEffect(() => {
+    if (fastOpen && selectedValue) {
+      handleOk();
+    }
+  }, [fastOpen]);
 
   return (
     <Dialog

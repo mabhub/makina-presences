@@ -103,14 +103,6 @@ const Plan = ({ edit }) => {
 
   return (
     <>
-      {additionals
-        .filter(({ Fixe }) => Fixe)
-        .map(additional => (
-          <SpotAdditionals
-            key={additional.Titre}
-            additional={additional}
-          />
-        ))}
       <DragWrapper
         {...transformWrapperProps}
         ref={planRef}
@@ -144,7 +136,6 @@ const Plan = ({ edit }) => {
             ))}
 
             {additionals
-              .filter(({ Fixe }) => !Fixe)
               .map(additional => (
                 <SpotAdditionals
                   key={additional.Titre}
