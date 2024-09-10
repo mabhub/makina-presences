@@ -50,27 +50,32 @@ const DayHeader = ({
   const classes = useStyles();
   const isPresent = Boolean(presence?.spot);
   const [dialogOpen, setDialogOpen] = React.useState();
+  const [fastOpen, setFastOpen] = React.useState(false);
 
   const { setPresence } = usePresences(place);
 
   const handleAction = event => {
+    event.stopPropagation();
     if (isPresent) {
       // Delete presence
-      setPresence({ ...presence, spot: null });
-    } else {
-      // May create presence
-      setDialogOpen(true);
+      return setPresence({ ...presence, spot: null });
     }
+    // May create presence
+    if (event.ctrlKey) {
+      setFastOpen(true);
+    }
+    setDialogOpen(true);
 
-    event.stopPropagation();
+    return null;
   };
 
   const handleDialogClose = React.useCallback((...args) => {
     const { 0: spotId, [args.length - 1]: periodPref } = args;
-    setDialogOpen(false);
     if (spotId) {
       setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
     }
+    setDialogOpen(false);
+    setFastOpen(false);
   }, [date, place, setPresence, tri]);
 
   const dateObj = dayjs(date);
@@ -102,6 +107,7 @@ const DayHeader = ({
       {dialogOpen && (
         <SpotDialog
           open={dialogOpen}
+          fastOpen={fastOpen}
           onClose={handleDialogClose}
           place={place}
           date={date}

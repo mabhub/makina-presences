@@ -61,6 +61,7 @@ const useFavoritesState = createPersistedState('favorites');
 
 const SpotDialog = ({
   open,
+  fastOpen,
   onClose = () => {},
   place,
   date,
@@ -141,9 +142,12 @@ const SpotDialog = ({
     onClose();
   };
 
-  const handleOk = () => {
-    onClose(selectedValue, selectedPlace, periodPref);
-  };
+  const handleOk = React.useCallback(
+    () => {
+      onClose(selectedValue, selectedPlace, periodPref);
+    },
+    [onClose, periodPref, selectedPlace, selectedValue],
+  );
 
   const handleChange = event => {
     setSelectedValue(event.target.value);
@@ -168,6 +172,12 @@ const SpotDialog = ({
       handleCancel();
     }
   };
+
+  useEffect(() => {
+    if (fastOpen && selectedValue) {
+      handleOk();
+    }
+  }, [fastOpen, handleOk, selectedValue]);
 
   return (
     <Dialog

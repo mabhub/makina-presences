@@ -139,7 +139,6 @@ const Plan = ({ edit }) => {
             ))}
 
             {additionals
-              .filter(({ Fixe }) => !Fixe)
               .map(additional => (
                 <SpotAdditionals
                   key={additional.Titre}
