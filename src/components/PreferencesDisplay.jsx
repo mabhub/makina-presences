@@ -38,14 +38,15 @@ const PreferenceDisplay = () => {
   const classes = useStyles();
 
   const handleDayPref = day => {
-    if (dayPrefs.includes(day)) {
-      setDayPrefs(dayPrefs.filter(d => d !== day));
-    } else {
-      setDayPrefs([
+    setDayPrefs(precedents => {
+      if (precedents.includes(day)) {
+        return precedents.filter(d => d !== day);
+      }
+      return [
         ...dayPrefs,
         day,
-      ]);
-    }
+      ];
+    });
   };
 
   return (
@@ -105,10 +106,9 @@ const PreferenceDisplay = () => {
                   component="button"
                   key={day}
                   sx={{
-                    background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.08)' : '#FFFFFF'),
-                    color: theme => theme.palette.primary.bg,
-                    filter: theme => (theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)'),
-                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    background: theme => (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.08)' : theme.palette.primary.bg),
+                    color: theme => theme.palette.primary.fg,
+                    border: theme => `1px solid ${dayPrefs.includes(day) ? theme.palette.primary.main : 'rgba(0, 0, 0, 0.12)'}`,
                     borderRadius: '8px',
                     width: `${SIZE}px`,
                     height: `${SIZE}px`,
@@ -118,7 +118,6 @@ const PreferenceDisplay = () => {
                     justifyContent: 'center',
                     '&:hover': {
                       cursor: 'pointer',
-                      background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.12)' : 'rgba(0, 0, 0, 0.04)'),
                     },
                   }}
                   onClick={() => handleDayPref(day)}

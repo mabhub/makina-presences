@@ -64,7 +64,7 @@ const Legend = () => {
   const theme = useTheme();
   const fields = useFields(spotsTableId);
 
-  const [legendHidden, setLegendHidden] = useLegendState(false);
+  const [legendHidden, setLegendHidden] = useLegendState(true);
   const legendToggle = () => setLegendHidden(p => !p);
 
   const classes = useLegendStyles({ hidden: legendHidden });

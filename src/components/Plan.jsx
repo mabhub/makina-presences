@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
@@ -40,6 +40,9 @@ const transformWrapperProps = {
   minScale: 0.25,
   panning: {
     velocityDisabled: true,
+    excluded: ['MuiButtonBase-root'],
+  },
+  wheel: {
     excluded: ['MuiButtonBase-root'],
   },
   doubleClick: { disabled: true },
@@ -101,6 +104,10 @@ const Plan = ({ edit }) => {
 
   const additionals = useAdditionals(place);
 
+  // useEffect(() => {
+  //   console.log(planRef);
+  // }, [planRef.current.state.scale]);
+
   return (
     <>
       <DragWrapper
@@ -140,6 +147,7 @@ const Plan = ({ edit }) => {
                 <SpotAdditionals
                   key={additional.Titre}
                   additional={additional}
+                  plan={planRef}
                 />
               ))}
           </Box>

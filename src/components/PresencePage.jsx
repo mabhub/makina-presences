@@ -9,7 +9,6 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import createPersistedState from 'use-persisted-state';
-import { Toaster } from 'sonner';
 
 import PresenceForm from './PresenceForm';
 
@@ -143,10 +142,10 @@ const PresencePage = () => {
     <div className="PresencePage">
       <LoadIndicator />
 
-      <Toaster
+      {/* <Toaster
         richColors
         visibleToasts={7}
-      />
+      /> */}
 
       {(!isTriValid || !place) && (
         <PresenceForm />

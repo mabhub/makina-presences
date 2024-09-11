@@ -8,7 +8,6 @@ import { emphasize } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { toast } from 'sonner';
 import usePresences from '../hooks/usePresences';
 import { Days, Months } from '../settings';
 import SpotDialog from './SpotDialog';
@@ -76,9 +75,9 @@ const DayHeader = ({
     const { 0: spotId, [args.length - 1]: periodPref } = args;
     if (spotId) {
       setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
-      toast.success(`Inscription au poste ${spotId}`, {
-        description: `${Days[(dateObj.day()) % 7]} ${dateObj.date().toString()} ${Months[dateObj.month()]}`,
-      });
+      // toast.success(`Inscription au poste ${spotId}`, {
+      //   description: `${Days[(dateObj.day()) % 7]} ${dateObj.date().toString()} ${Months[dateObj.month()]}`,
+      // });
     }
     setDialogOpen(false);
     setFastOpen(false);
