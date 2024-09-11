@@ -75,8 +75,10 @@ const DayHeader = ({
     const { 0: spotId, [args.length - 1]: periodPref } = args;
     if (spotId) {
       setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
+      // === TO ADD AFTER UPGRADING TO REACT 18 ===
       // toast.success(`Inscription au poste ${spotId}`, {
-      //   description: `${Days[(dateObj.day()) % 7]} ${dateObj.date().toString()} ${Months[dateObj.month()]}`,
+      //   description:
+      //  `${Days[(dateObj.day()) % 7]} ${dateObj.date().toString()} ${Months[dateObj.month()]}`,
       // });
     }
     setDialogOpen(false);

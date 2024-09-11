@@ -17,7 +17,7 @@ const headers = {
 const useWeekPrefs = createPersistedState('weekPref');
 
 const usePresences = place => {
-  const [weekPref] = useWeekPrefs('2');
+  const [weekPref] = useWeekPrefs();
 
   let timespan = 14;
   if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;

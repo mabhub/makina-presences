@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 import { Alert, AlertTitle, Box, Snackbar } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import useAdditionals from '../hooks/useAdditionals';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
+import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
-import useAdditionals from '../hooks/useAdditionals';
-import SpotAdditionals from './SpotAdditionals';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 

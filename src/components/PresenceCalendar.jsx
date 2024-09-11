@@ -99,7 +99,7 @@ const PresenceCalendar = () => {
   const [tri] = useTriState('');
   const [weekPref] = useWeekPrefs('2');
   const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
-  const [showPastDays] = usePastDays(true);
+  const [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
   const history = useHistory();
 
@@ -115,6 +115,7 @@ const PresenceCalendar = () => {
     if (isoDate === day || isHoliday) return true;
     if (dayIsFavorite && (!isPast || showPastDays)) return true;
     if (!dayIsFavorite && showPastDays && isPast) return true;
+    if (showPastDays === undefined) return true;
     return false;
   };
 
