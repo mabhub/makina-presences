@@ -142,6 +142,7 @@ const PresencePage = () => {
     <div className="PresencePage">
       <LoadIndicator />
 
+      {/* === TO ADD AFTER UPGRADING TO REACT 18 === */}
       {/* <Toaster
         richColors
         visibleToasts={7}

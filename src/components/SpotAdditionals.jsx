@@ -88,8 +88,8 @@ const useStyles = makeStyles(theme => ({
   popup: {
     transform: 'translate(-50%, -50%)',
     boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
-    opacity: ({ open }) => `${open ? '1' : '0'}`,
-    transition: theme.transitions.create('opacity'),
+    // opacity: ({ open }) => `${open ? '1' : '0'}`,
+    // transition: theme.transitions.create('opacity'),
   },
   header: {
     display: 'flex',
@@ -295,8 +295,8 @@ function SpotAdditionals ({ additional }) {
             [classes.fixed]: Fixe,
           })}
           style={{
-            left: Fixe ? 'unset' : `${x}px`,
-            top: Fixe ? 10 : `${y}px`,
+            left: `${x}px`,
+            top: `${y}px`,
           }}
         >
           <Box className={classes.header}>
@@ -331,7 +331,7 @@ function SpotAdditionals ({ additional }) {
               className={classes.btn}
               onClick={handleRegister}
             >
-              Go
+              Participer
             </Button>
           )}
           {Tache && tris.includes(loggedTri) && (
