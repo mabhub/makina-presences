@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { Add, ErrorOutline, RemoveCircleOutline } from '@mui/icons-material';
-import { Chip, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Tooltip, Typography } from '@mui/material';
+import { Add, Computer, ErrorOutline, RemoveCircleOutline, Room } from '@mui/icons-material';
+import { Chip, Divider, FormControl, IconButton, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tooltip, Typography } from '@mui/material';
 
 import { makeStyles } from '@mui/styles';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
@@ -12,25 +12,45 @@ import SpotDialog from './SpotDialog';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
-const useFavoritesState = createPersistedState('favorites');
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
+  root: {
+    paddingTop: '0',
+  },
   favoriteList: {
-    marginTop: '-8px',
-    paddingBottom: '12px',
+    marginTop: '0px',
+    marginLeft: '25px',
+    marginBottom: '12px',
+    borderLeft: `2px solid ${theme.palette.mode === 'light' ? '#00000030' : '#ededed30'}`,
+    // borderBottomLeftRadius: '5px',
   },
   favoriteItem: {
-    paddingLeft: '30px',
+    marginLeft: '5px',
     paddingTop: '0',
     paddingBottom: '0',
   },
-});
+  select: {
+    '& .MuiSelect-select': {
+      padding: theme.spacing(0.5, 1.5),
+      fontSize: '12px',
+    },
+  },
+}));
 
-const PreferencesSpot = () => {
+const useFavoritesState = createPersistedState('favorites');
+const useAgencyPref = createPersistedState('agency');
+
+export const NO_AGENCYPREF_LABEL = 'Aucune';
+
+const PreferencesFavorites = () => {
   const [favorites, setFavorites] = useFavoritesState([]);
   const { place } = useParams();
   const spots = useTable(Number(spotsTableId));
   const plans = usePlans();
   const classes = useStyles();
+
+  const agencies = [{ Name: NO_AGENCYPREF_LABEL }].concat(plans);
+  const [agencyPref, setAgencyPref] = useAgencyPref();
+  const [selectedAgency, setSelectedAgency] = useState(agencyPref || agencies[0].Name);
 
   const sortedFavorite = plans
     .map(plan => ({
@@ -59,9 +79,6 @@ const PreferencesSpot = () => {
     setFavorites(favorites
       .filter(fav => (fav.name === spotName && fav.place !== spotPlace) || fav.name !== spotName));
   };
-
-  const hasFavorite = () =>
-    sortedFavorite.reduce((acc, curr) => acc || curr.favs.length > 0, false);
 
   const createListItem = favs => {
     const removedFavorites = favs
@@ -118,42 +135,58 @@ const PreferencesSpot = () => {
     });
   };
 
+  const handleChange = event => {
+    setSelectedAgency(event.target.value);
+    setAgencyPref(event.target.value);
+  };
+
   return (
     <>
-      <Divider textAlign="left">
-        Postes Favoris
-        <Chip
-          label="Ajouter"
-          size="small"
-          variant="outlined"
-          color="primary"
-          icon={<Add />}
-          sx={{ ml: 2 }}
-          component="button"
-          onClick={() => setDialogOpen(!dialogOpen)}
-        />
-      </Divider>
-
-      <List
-        dense
-        className={classes.favoriteList}
-      >
-        {!hasFavorite() && (
-          <Typography sx={{ opacity: 0.4, textAlign: 'center', fontSize: '12px', margin: '15px' }}>
-            Aucun postes favoris.
-          </Typography>
-        )}
-        {sortedFavorite.map(({ agency, favs }) => (
-          <React.Fragment key={agency}>
-            {favs.length > 0
+      <Divider textAlign="left"> Favoris </Divider>
+      <List className={classes.root} dense>
+        <ListItem>
+          <ListItemIcon sx={{ marginRight: '-25px' }}><Room /></ListItemIcon>
+          <ListItemText primary="Agence" />
+          <FormControl size="small">
+            <Select
+              className={classes.select}
+              value={selectedAgency}
+              onChange={handleChange}
+            >
+              {agencies
+                .filter(({ Brouillon }) => !Brouillon)
+                .map(({ Name }) => (
+                  <MenuItem key={Name} value={Name}>{Name}</MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        </ListItem>
+        <ListItem>
+          <ListItemIcon sx={{ marginRight: '-25px' }}><Computer /></ListItemIcon>
+          <ListItemText primary="Postes" />
+          <Chip
+            label="Ajouter"
+            size="small"
+            variant="outlined"
+            color="primary"
+            icon={<Add />}
+            component="button"
+            onClick={() => setDialogOpen(!dialogOpen)}
+          />
+        </ListItem>
+        <div className={classes.favoriteList}>
+          {sortedFavorite.map(({ agency, favs }) => (
+            <React.Fragment key={agency}>
+              {favs.length > 0
             && (
-              <ListItem sx={{ mb: '-8px', mt: '-2px', opacity: '.5' }}>
-                <ListItemText primary={agency} />
+              <ListItem sx={{ mb: '-8px', mt: '-2px', ml: '-7px', position: 'relative' }}>
+                <Typography variant="caption" sx={{ opacity: 0.5 }}>{agency}</Typography>
               </ListItem>
             )}
-            {createListItem(favs)}
-          </React.Fragment>
-        ))}
+              {createListItem(favs)}
+            </React.Fragment>
+          ))}
+        </div>
       </List>
 
       {dialogOpen && (
@@ -168,4 +201,4 @@ const PreferencesSpot = () => {
   );
 };
 
-export default React.memo(PreferencesSpot);
+export default React.memo(PreferencesFavorites);
