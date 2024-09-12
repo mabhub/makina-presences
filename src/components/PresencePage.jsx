@@ -83,6 +83,8 @@ const useStyles = makeStyles(theme => {
     },
     calendar: {
       gridArea: 'b',
+      scrollbarWidth: 'thin',
+      colorScheme: theme.palette.mode,
       overflow: 'auto',
       padding: theme.spacing(0, 0.25),
       position: 'relative',
