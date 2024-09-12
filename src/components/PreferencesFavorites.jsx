@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     // borderBottomLeftRadius: '5px',
   },
   favoriteItem: {
-    marginLeft: '5px',
+    paddingLeft: '21px',
     paddingTop: '0',
     paddingBottom: '0',
   },

@@ -9,7 +9,6 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import createPersistedState from 'use-persisted-state';
 
-import zIndex from '@mui/material/styles/zIndex';
 import PresenceForm from './PresenceForm';
 
 import usePlans from '../hooks/usePlans';
