@@ -1,7 +1,7 @@
 import { useHistory, useParams } from 'react-router-dom';
 
 import { GitHub } from '@mui/icons-material';
-import { Box, Container, Grid, Link, Tab, Tabs } from '@mui/material';
+import { alpha, Box, Container, Grid, Link, Tab, Tabs } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
@@ -9,6 +9,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import createPersistedState from 'use-persisted-state';
 
+import zIndex from '@mui/material/styles/zIndex';
 import PresenceForm from './PresenceForm';
 
 import usePlans from '../hooks/usePlans';
@@ -71,6 +72,7 @@ const useStyles = makeStyles(theme => {
     },
     tabs: {
       minHeight: 0,
+      position: 'relative',
     },
     tab: {
       textTransform: 'none',
@@ -119,6 +121,28 @@ const draftStyle = {
   visibility: 'hidden',
 };
 
+const stripeColor = theme => (theme.palette.mode === 'light' ? '#f8f8f8' : '#363535');
+
+const selectedDraftStyle = {
+  backgroundImage: theme => `linear-gradient(45deg, transparent 25%, ${stripeColor(theme)} 25%, ${stripeColor(theme)} 50%, transparent 50%, transparent 75%, ${stripeColor(theme)} 75%, ${stripeColor(theme)} 100%)`,
+  backgroundSize: '12px 12px',
+  '&:after': {
+    content: '"Inactif"',
+    position: 'absolute',
+    right: 1,
+    top: 1,
+    color: alpha('#FF0000', 1),
+    background: theme => theme.palette.primary.bg,
+    border: `2px solid ${alpha('#FF0000', 1)}`,
+    padding: '3px 10px',
+    borderRadius: '10px',
+    fontSize: '0.75rem',
+    zIndex: 1,
+    transform: 'scale(0.7)',
+    transformOrigin: 'top right',
+  },
+};
+
 const PresencePage = () => {
   const classes = useStyles();
   const [tri] = useTriState('');
@@ -134,6 +158,13 @@ const PresencePage = () => {
     const path = ['', newPlace || place];
     if (day) { path.push(day); }
     history.push(path.join('/'));
+  };
+
+  const getDraftTabStyle = placeName => {
+    if (placeName === place) {
+      return selectedDraftStyle;
+    }
+    return draftStyle;
   };
 
   return (
@@ -185,7 +216,7 @@ const PresencePage = () => {
                         value={Name}
                         label={Name}
                         className={classes.tab}
-                        sx={Brouillon ? draftStyle : {}}
+                        sx={Brouillon ? getDraftTabStyle(Name) : {}}
                       />
                     ))}
                 </Tabs>

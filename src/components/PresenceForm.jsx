@@ -1,8 +1,7 @@
-import React from 'react';
 import clsx from 'clsx';
-import { useParams, useHistory } from 'react-router-dom';
+import React from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 
-import createPersistedState from 'use-persisted-state';
 import {
   Button,
   Container,
@@ -15,9 +14,11 @@ import {
   Typography,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import createPersistedState from 'use-persisted-state';
 
-import usePlans from '../hooks/usePlans';
 import { cleanTri } from '../helpers';
+import usePlans from '../hooks/usePlans';
+import { NO_AGENCYPREF_LABEL } from './PreferencesFavorites';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -44,6 +45,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const useTriState = createPersistedState('tri');
+const useAgencyPref = createPersistedState('agency');
 
 const draftPlaceSx = {
   position: 'absolute',
@@ -60,7 +62,12 @@ const PresenceForm = ({ className, ...props }) => {
 
   const [tri, setTri] = useTriState('');
   const [inputValue, setInputValue] = React.useState(tri);
+  const [agencyPref] = useAgencyPref();
   const { place } = useParams();
+
+  if (agencyPref && agencyPref !== NO_AGENCYPREF_LABEL && !place) {
+    history.push(`/${agencyPref}`);
+  }
 
   const handleTriChange = event => setInputValue(event.target.value.substr(0, 255));
   const handlePlaceChange = (event, newPlace) => history.push(`/${newPlace || place}`);
@@ -113,15 +120,17 @@ const PresenceForm = ({ className, ...props }) => {
               exclusive
               value={place}
             >
-              {plans.map(({ Name, Brouillon }) => (
-                <ToggleButton
-                  key={Name}
-                  value={Name}
-                  sx={Brouillon ? draftPlaceSx : {}}
-                >
-                  {Name}
-                </ToggleButton>
-              ))}
+              {plans
+                .filter(({ Brouillon }) => !Brouillon)
+                .map(({ Name, Brouillon }) => (
+                  <ToggleButton
+                    key={Name}
+                    value={Name}
+                    sx={Brouillon ? draftPlaceSx : {}}
+                  >
+                    {Name}
+                  </ToggleButton>
+                ))}
             </ToggleButtonGroup>
           </Grid>
 

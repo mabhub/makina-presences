@@ -6,8 +6,8 @@ import { Button, IconButton, Menu, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
 import PreferencesDisplay from './PreferencesDisplay';
-import PreferencesSpot from './PreferencesSpot';
 import PreferencesTri from './PreferencesTri';
+import PreferencesFavorites from './PreferencesFavorites';
 
 const useTriState = createPersistedState('tri');
 
@@ -75,7 +75,7 @@ const UserMenu = () => {
           Préferences
         </Typography>
         <PreferencesDisplay />
-        <PreferencesSpot />
+        <PreferencesFavorites />
         <PreferencesTri />
       </Menu>
     </>
