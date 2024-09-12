@@ -62,7 +62,7 @@ const PreferenceDisplay = () => {
     if (theme.palette.mode === 'dark') {
       return theme.palette.primary.fg;
     }
-    return dayPrefs.includes(day) ? '' : theme.palette.primary.fg;
+    return dayPrefs.includes(day) ? 'black' : theme.palette.primary.fg;
   };
 
   return (
@@ -131,6 +131,7 @@ const PreferenceDisplay = () => {
                     fontSize: `calc(${SIZE}px / 2.2)`,
                     display: 'flex',
                     alignItems: 'center',
+                    textTransform: 'none',
                     justifyContent: 'center',
                     '&:hover': {
                       cursor: 'pointer',
