@@ -2,7 +2,7 @@ import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import { GitHub } from '@mui/icons-material';
-import { alpha, Box, Container, Grid, Link, Tab, Tabs } from '@mui/material';
+import { Box, Container, Grid, Link, Tab, Tabs } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
@@ -134,9 +134,9 @@ const selectedDraftStyle = {
     position: 'absolute',
     right: 1,
     top: 1,
-    color: alpha('#FF0000', 1),
+    color: theme => theme.palette.error.main,
     background: theme => theme.palette.primary.bg,
-    border: `2px solid ${alpha('#FF0000', 1)}`,
+    border: theme => `2px solid ${theme.palette.error.main}`,
     padding: '3px 10px',
     borderRadius: '10px',
     fontSize: '0.75rem',
