@@ -4,10 +4,11 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import useSpots from '../../hooks/useSpots';
-import SpotDialog from './SpotDialog';
 import usePlans from '../../hooks/usePlans';
+import useSpots from '../../hooks/useSpots';
 import PublishDialog from './PublishDialog';
+import SpotDialog from './SpotDialog';
+import AdditionalsDialog from './AdditionalsDialog';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -33,7 +34,10 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     display: 'flex',
-    padding: theme.spacing(0.5),
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
     border: 'unset',
     background: 'unset',
     borderRadius: '5px',
@@ -45,12 +49,12 @@ const useStyles = makeStyles(theme => ({
     },
   },
   separator: {
-    margin: theme.spacing(0, 1, 0, 0.5),
+    margin: theme.spacing(0, 0.5, 0, 0.5),
     borderRight: '2px solid #00000015',
     height: '100%',
   },
   svg: {
-    height: '24px',
+    height: '20px',
   },
   btnPublish: {
     textTransform: 'none',
@@ -172,6 +176,15 @@ function ActionBar ({ onUndoRedu }) {
     }
   };
 
+  const [additionalsOpen, setAdditionalsOpen] = useState(false);
+
+  const onAddtionalsClose = additionalsInfo => {
+    setAdditionalsOpen(!additionalsOpen);
+    if (additionalsInfo) {
+      console.log(additionalsInfo);
+    }
+  };
+
   return (
     <>
       <Box className={classes.root}>
@@ -222,6 +235,17 @@ function ActionBar ({ onUndoRedu }) {
                 <img src="/add_spot.svg" alt="add spot" className={classes.svg} />
               </Box>
             </Tooltip>
+            <Tooltip
+              title="Nouveau Point d'Information"
+            >
+              <Box
+                className={classes.button}
+                component="button"
+                onClick={() => (setAdditionalsOpen(!additionalsOpen))}
+              >
+                <img src="/add_additionals.svg" alt="add additionals" className={classes.svg} />
+              </Box>
+            </Tooltip>
           </Box>
         </Box>
         <Box className={classes.publishActions}>
@@ -265,6 +289,12 @@ function ActionBar ({ onUndoRedu }) {
           handleClose={onClosePublication}
           plan={planUpdate.find(({ Name }) => Name === place)}
           isSecondary={liveAndPublish}
+        />
+      )}
+      {additionalsOpen && (
+        <AdditionalsDialog
+          open={additionalsOpen}
+          onClose={onAddtionalsClose}
         />
       )}
     </>
