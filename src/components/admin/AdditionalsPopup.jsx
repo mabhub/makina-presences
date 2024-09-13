@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
+import { grey } from '@mui/material/colors';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -41,6 +42,29 @@ const useStyles = makeStyles(theme => ({
       background: theme.palette.mode === 'light' ? '#00000010' : '#ededed30',
     },
   },
+  triList: {
+    marginTop: theme.spacing(0.5),
+    display: 'flex',
+    width: 'fit-content',
+    flexWrap: 'wrap',
+    gap: '2px',
+  },
+  text: {
+    wordBreak: 'break-word',
+  },
+  tri: {
+    fontSize: '0.5rem',
+    width: 20,
+    height: 20,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    alignContent: 'center',
+    background: theme.palette.mode === 'light' ? grey[200] : grey[800],
+    borderRadius: 99,
+    color: theme.palette.mode === 'light' ? 'dark' : 'white',
+  },
   btn: {
     marginTop: theme.spacing(1),
     textTransform: 'none',
@@ -48,15 +72,13 @@ const useStyles = makeStyles(theme => ({
     width: '50%',
     float: 'right',
   },
-  text: {
-    wordBreak: 'break-word',
-  },
+
 }));
 
 function AdditionalsPopup ({ info }) {
   const classes = useStyles();
 
-  const { Titre, Description, Tache, Fixe } = info;
+  const { Titre, Description, Tache, Fixe, tris } = info;
 
   const body = 'body2';
   const processor = React.useMemo(
@@ -113,6 +135,18 @@ function AdditionalsPopup ({ info }) {
       <span className={classes.text}>
         {hast}
       </span>
+      {Tache && (
+      <Box className={classes.triList}>
+        {(tris || ['amz']).map(tri => (
+          <Box
+            key={tri}
+            className={classes.tri}
+          >
+            {tri}
+          </Box>
+        ))}
+      </Box>
+      )}
       {Tache && (
         <Button
           variant="contained"
