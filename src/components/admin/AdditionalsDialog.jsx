@@ -77,6 +77,7 @@ function AdditionalsDialog ({ open, onClose }) {
     Icone: '',
     x: '0',
     y: '0',
+    tris: undefined,
   });
 
   const getNewInfo = key => {
