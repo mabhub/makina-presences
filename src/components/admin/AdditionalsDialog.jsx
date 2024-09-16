@@ -1,4 +1,4 @@
-import { Delete, DirectionsCar, HelpOutline } from '@mui/icons-material';
+import { Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline } from '@mui/icons-material';
 import { alpha, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, MenuItem, Select, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
@@ -66,6 +66,14 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+export const icons = {
+  default: <HelpOutline />,
+  delete: <Delete />,
+  car: <DirectionsCar />,
+  dry: <DryCleaning />,
+  bike: <DirectionsBike />,
+};
+
 function AdditionalsDialog ({ open, onClose }) {
   const classes = useStyles();
 
@@ -78,6 +86,7 @@ function AdditionalsDialog ({ open, onClose }) {
     x: '0',
     y: '0',
     tris: undefined,
+    icon: 'default',
   });
 
   const getNewInfo = key => {
@@ -108,12 +117,6 @@ function AdditionalsDialog ({ open, onClose }) {
     if (info.Fixe) return 'fixed';
     if (info.Tache) return 'task';
     return 'popup';
-  };
-
-  const icons = {
-    default: <HelpOutline />,
-    delete: <Delete />,
-    car: <DirectionsCar />,
   };
 
   return (
@@ -162,9 +165,9 @@ function AdditionalsDialog ({ open, onClose }) {
             {info.Tache && (
               <FormControl size="small" className={classes.iconSelector}>
                 <Select
-                  value={Object.keys(icons)[0]}
-                  IconComponent={null}
-                  onChange={event => handleChange('Icone', event.target.value)}
+                  value={info.icon}
+                  IconComponent={() => null}
+                  onChange={event => handleChange('icon', event.target.value)}
                 >
                   {Object.keys(icons).map(key => (
                     <MenuItem key={key} value={key}>{icons[key]}</MenuItem>
