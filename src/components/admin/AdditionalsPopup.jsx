@@ -1,20 +1,32 @@
-import { Box, Button, Divider, Link, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
-import React from 'react';
+import { Close, HelpOutline } from '@mui/icons-material';
+import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import { Close } from '@mui/icons-material';
+import React from 'react';
 
+import { grey } from '@mui/material/colors';
 import Rehype2react from 'rehype-react';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
-import { grey } from '@mui/material/colors';
+import { icons } from './AdditionalsDialog';
 
 const useStyles = makeStyles(theme => ({
   root: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing(1),
+
     minWidth: '200px',
     maxWidth: '300px',
+  },
+
+  additionalContent: {
+    width: '100%',
     minHeight: '50px',
     backgroundColor: theme.palette.primary.bg,
     padding: theme.spacing(1.5),
@@ -73,12 +85,45 @@ const useStyles = makeStyles(theme => ({
     float: 'right',
   },
 
+  additional: {
+    backgroundColor: theme.palette.primary.bg,
+    boxShadow: 'none',
+    width: 20,
+    minWidth: 20,
+    height: 20,
+    minHeight: 20,
+    zIndex: 1,
+    '&:hover': {
+      background: alpha(theme.palette.primary.fg, 0.2),
+    },
+  },
+  icon: {
+    color: theme.palette.primary.fg,
+    width: '100%',
+    height: '100%',
+  },
+  badges: {
+    backgroundColor: theme.palette.primary.bg,
+    position: 'absolute',
+    top: '-70%',
+    textTransform: 'none',
+    padding: theme.spacing(0.5),
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: 'scale(0.6)',
+    transformOrigin: 'right',
+  },
+  triBadge: {
+    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+  },
 }));
 
 function AdditionalsPopup ({ info }) {
   const classes = useStyles();
 
-  const { Titre, Description, Tache, Fixe, tris } = info;
+  const { Titre, Description, Tache, Fixe, tris = ['amz'], icon } = info;
 
   const body = 'body2';
   const processor = React.useMemo(
@@ -115,39 +160,87 @@ function AdditionalsPopup ({ info }) {
     [Description, processor],
   );
 
+  const trisLeft = 0;
+  const TaskIcon = React.cloneElement(
+    icons[icon],
+    { className: classes.icon },
+  );
+
   return (
-    <Box className={clsx({
-      [classes.root]: true,
-      [classes.fixed]: Fixe,
-      [classes.popup]: !Fixe,
-    })}
-    >
-      <Box className={classes.header}>
-        <Typography variant={Fixe ? 'h6' : 'unset'} sx={{ fontWeight: 'bold' }} className={classes.text}>
-          {Titre}
-        </Typography>
-        {!Fixe && (
-        <Close
-          className={classes.closeIcon}
-        />
+    <Box className={classes.root}>
+      <Fab
+        className={classes.additional}
+        style={{
+          display: `${Fixe ? 'none' : 'block'}`,
+        }}
+      >
+        {Tache
+          ? (
+            <>
+              {TaskIcon}
+              <Box
+                className={classes.badges}
+              >
+                {tris
+                  .slice(0, 3)
+                  .map((tri, index) => (
+                    <Box
+                      key={tri}
+                      className={clsx([classes.tri], [classes.triBadge])}
+                      sx={{
+                        zIndex: 3 - index,
+                        marginLeft: index > 0 ? '-10px' : 'unset',
+                      }}
+                    >
+                      {tri}
+                    </Box>
+                  ))}
+                {trisLeft > 0 && (
+                <Typography className={classes.trisLeft}>
+                  + {trisLeft}
+                </Typography>
+                )}
+              </Box>
+            </>
+          )
+          : (
+            <HelpOutline
+              className={classes.icon}
+            />
+          )}
+      </Fab>
+      <Box className={clsx({
+        [classes.additionalContent]: true,
+        [classes.fixed]: Fixe,
+        [classes.popup]: !Fixe,
+      })}
+      >
+        <Box className={classes.header}>
+          <Typography variant={Fixe ? 'h6' : 'unset'} sx={{ fontWeight: 'bold' }} className={classes.text}>
+            {Titre}
+          </Typography>
+          {!Fixe && (
+          <Close
+            className={classes.closeIcon}
+          />
+          )}
+        </Box>
+        <span className={classes.text}>
+          {hast}
+        </span>
+        {Tache && (
+        <Box className={classes.triList}>
+          {tris.map(tri => (
+            <Box
+              key={tri}
+              className={classes.tri}
+            >
+              {tri}
+            </Box>
+          ))}
+        </Box>
         )}
-      </Box>
-      <span className={classes.text}>
-        {hast}
-      </span>
-      {Tache && (
-      <Box className={classes.triList}>
-        {(tris || ['amz']).map(tri => (
-          <Box
-            key={tri}
-            className={classes.tri}
-          >
-            {tri}
-          </Box>
-        ))}
-      </Box>
-      )}
-      {Tache && (
+        {Tache && (
         <Button
           variant="contained"
           size="small"
@@ -156,7 +249,8 @@ function AdditionalsPopup ({ info }) {
         >
           Participer
         </Button>
-      )}
+        )}
+      </Box>
     </Box>
   );
 }
