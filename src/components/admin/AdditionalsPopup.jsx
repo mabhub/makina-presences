@@ -2,7 +2,7 @@ import { Close, Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline 
 import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { grey } from '@mui/material/colors';
 import Rehype2react from 'rehype-react';
@@ -26,6 +26,7 @@ const useStyles = makeStyles(theme => ({
 
   additional: {
     backgroundColor: theme.palette.primary.bg,
+    background: 'red',
     boxShadow: 'none',
     width: 20,
     minWidth: 20,
@@ -34,6 +35,9 @@ const useStyles = makeStyles(theme => ({
     zIndex: 1,
     '&:hover': {
       background: alpha(theme.palette.primary.fg, 0.2),
+    },
+    '&:disabled': {
+      backgroundColor: theme.palette.primary.bg,
     },
   },
   icon: {
@@ -53,6 +57,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     transform: 'scale(0.6)',
     transformOrigin: 'right',
+    color: 'black',
   },
   triBadge: {
     border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
@@ -92,6 +97,8 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(0.5),
     padding: theme.spacing(0.1),
     borderRadius: '4px',
+  },
+  mountedCloseIcon: {
     '&:hover': {
       cursor: 'pointer',
       background: theme.palette.mode === 'light' ? '#00000010' : '#ededed30',
@@ -127,6 +134,10 @@ const useStyles = makeStyles(theme => ({
     width: '50%',
     display: 'block',
     marginLeft: 'auto',
+    '&:disabled': {
+      background: theme.palette.primary.main,
+      color: 'white',
+    },
   },
 }));
 
@@ -195,7 +206,6 @@ function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = ()
           title={Titre}
           placement="right"
           enterDelay={100}
-          disableHoverListener={!mounted}
         >
           <Fab
             className={clsx({
@@ -205,6 +215,7 @@ function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = ()
               display: `${Fixe || open ? 'none' : 'block'}`,
             }}
             onClick={handleClick}
+            disabled={!mounted}
           >
             <TaskIcon className={classes.icon} />
             {Tache && tris && (
@@ -252,7 +263,10 @@ function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = ()
             </Typography>
             {!Fixe && (
               <Close
-                className={classes.closeIcon}
+                className={clsx({
+                  [classes.closeIcon]: true,
+                  [classes.mountedCloseIcon]: mounted,
+                })}
                 onClick={handleClick}
               />
             )}
@@ -278,6 +292,7 @@ function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = ()
               size="small"
               disableElevation
               className={classes.btn}
+              disabled={!mounted}
             >
               Participer
             </Button>
