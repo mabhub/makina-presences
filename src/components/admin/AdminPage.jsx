@@ -6,7 +6,7 @@ import createPersistedState from 'use-persisted-state';
 import LoadIndicator from '../LoadIndicator';
 import EditPlan from './EditPlan';
 import PlanList from './PlanList';
-import SpotPanel, { DELETED_KEY } from './SpotPanel';
+import Panel, { DELETED_KEY } from './Panel';
 import usePlans from '../../hooks/usePlans';
 
 const useStyles = makeStyles(theme => ({
@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   editSpot: {
     gridArea: 'c',
     border: '2px solid #00000015',
-    minWidth: '300px',
+    minWidth: '330px',
   },
 }));
 
@@ -79,7 +79,7 @@ function AdminPage () {
   && typeof localStorage.planUpdate !== 'undefined';
 
   const [showPanel, setShowPanel] = React.useState(false);
-  const [spot, setSelectedSpot] = React.useState({});
+  const [entity, setSelectedEntity] = React.useState({});
   const [updatedSpot, setUpdatedSpot] = React.useState({});
 
   useEffect(() => {
@@ -87,20 +87,20 @@ function AdminPage () {
   }, [place]);
 
   useEffect(() => {
-    if (place && updateStack[mapping[place]].findLast(({ id }) => id === spot.id)) {
-      const lastState = updateStack[mapping[place]].findLast(({ id }) => id === spot.id);
+    if (place && updateStack[mapping[place]].findLast(({ id }) => id === entity.id)) {
+      const lastState = updateStack[mapping[place]].findLast(({ id }) => id === entity.id);
       setShowPanel(!Object.hasOwn(lastState, DELETED_KEY));
     }
   }, [updateStack]);
 
-  const handleClick = Spot => {
-    if (!Spot) {
+  const handleClick = entitySelected => {
+    if (!entitySelected) {
       setShowPanel(false);
-      setSelectedSpot();
+      setSelectedEntity();
       return;
     }
     setShowPanel(true);
-    setSelectedSpot({ ...Spot });
+    setSelectedEntity({ ...entitySelected });
   };
 
   const onPanelClose = () => {
@@ -148,8 +148,8 @@ function AdminPage () {
             </Box>
             <Box className={classes.editSpot}>
               {showPanel && (
-                <SpotPanel
-                  spot={spot}
+                <Panel
+                  entity={entity}
                   onClose={onPanelClose}
                   handleUpdate={handleUpdate}
                 />

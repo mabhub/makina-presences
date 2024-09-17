@@ -53,7 +53,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function EditAdditional ({ additional }) {
+function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }) {
   const classes = useStyles();
   const [updateStack, setUpdateStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
@@ -63,11 +63,12 @@ function EditAdditional ({ additional }) {
 
   const { Fixe, x, y } = additional;
 
-  const [open, setOpen] = useState(false);
+  // const [selected, setIsSelected] = useState(isSelected);
   const [edit, setEdit] = useState(false);
 
   const handleClick = () => {
-    setOpen(!open);
+    // setIsSelected(!selected);
+    onSelect(additional);
   };
 
   const handleEdit = editedAdditional => {
@@ -84,6 +85,7 @@ function EditAdditional ({ additional }) {
           editedAdditional,
         ],
       });
+      onSelect(editedAdditional);
     }
   };
 
@@ -107,7 +109,7 @@ function EditAdditional ({ additional }) {
           mounted
           onClick={handleClick}
         />
-        {open && quickActions.map(({ icon, method }, index) => {
+        {isSelected && quickActions.map(({ icon, method }, index) => {
           const key = `icon-${index}`;
           const Icon = icon;
           return (
