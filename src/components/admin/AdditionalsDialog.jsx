@@ -181,7 +181,7 @@ function AdditionalsDialog ({ open, onClose, baseInfo }) {
                 <MenuItem onClick={() => handleChange('Fixe', true)} value="fixed">Fixe</MenuItem>
               </Select>
             </FormControl>
-            {info.Tache && (
+            {!info.Fixe && (
               <FormControl size="small" className={classes.iconSelector}>
                 <Select
                   value={info.icon}
