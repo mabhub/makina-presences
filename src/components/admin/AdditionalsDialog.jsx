@@ -1,9 +1,12 @@
 import { Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline } from '@mui/icons-material';
+import createPersistedState from 'use-persisted-state';
 import { alpha, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, MenuItem, Select, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import AdditionalsPopup from './AdditionalsPopup';
+import useAdditionals from '../../hooks/useAdditionals';
 
 const GAP_BETWEEN_SECTION = 1.5;
 
@@ -67,26 +70,48 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export const icons = {
-  default: <HelpOutline />,
-  delete: <Delete />,
-  car: <DirectionsCar />,
-  dry: <DryCleaning />,
-  bike: <DirectionsBike />,
+  default: HelpOutline,
+  delete: Delete,
+  car: DirectionsCar,
+  bike: DirectionsBike,
+  dry: DryCleaning,
 };
+
+export const ADDITIONAL_ENTITY = 'additional';
+const useMapping = createPersistedState('mapping');
+const useUpdateStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
 
 function AdditionalsDialog ({ open, onClose }) {
   const classes = useStyles();
+  const { place } = useParams();
+  const [mapping] = useMapping();
+  const placeID = mapping[place];
+
+  const [updateStack] = useUpdateStack();
+  const [undidStack] = useUndidStack();
+
+  const additionals = useAdditionals(placeID);
 
   const [info, setInfo] = useState({
+    id: Math.max(...[
+      ...additionals.map(({ id }) => id),
+      ...updateStack[placeID]
+        .filter(({ entity }) => entity === ADDITIONAL_ENTITY)
+        .map(({ id }) => id),
+      ...undidStack[placeID]
+        .filter(({ entity }) => entity === ADDITIONAL_ENTITY)
+        .map(({ id }) => id),
+    ]) + 1,
     Titre: '',
     Description: '',
     Fixe: false,
     Tache: false,
-    Icone: '',
     x: '0',
     y: '0',
     tris: undefined,
     icon: 'default',
+    entity: ADDITIONAL_ENTITY,
   });
 
   const getNewInfo = key => {
@@ -169,9 +194,14 @@ function AdditionalsDialog ({ open, onClose }) {
                   IconComponent={() => null}
                   onChange={event => handleChange('icon', event.target.value)}
                 >
-                  {Object.keys(icons).map(key => (
-                    <MenuItem key={key} value={key}>{icons[key]}</MenuItem>
-                  ))}
+                  {Object.keys(icons).map(key => {
+                    const Icon = icons[key];
+                    return (
+                      <MenuItem key={key} value={key}>
+                        <Icon />
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             )}
@@ -192,7 +222,7 @@ function AdditionalsDialog ({ open, onClose }) {
           />
         </Box>
         <Box className={classes.preview}>
-          <AdditionalsPopup info={info} />
+          <AdditionalsPopup info={info} mounted={false} />
         </Box>
       </DialogContent>
       <DialogActions>

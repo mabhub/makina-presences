@@ -7,7 +7,7 @@ import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import PublishDialog from './PublishDialog';
-import SpotDialog from './SpotDialog';
+import SpotDialog, { CREATED_KEY } from './SpotDialog';
 import AdditionalsDialog from './AdditionalsDialog';
 
 const useStyles = makeStyles(theme => ({
@@ -181,7 +181,20 @@ function ActionBar ({ onUndoRedu }) {
   const onAddtionalsClose = additionalsInfo => {
     setAdditionalsOpen(!additionalsOpen);
     if (additionalsInfo) {
-      console.log(additionalsInfo);
+      setUndidStack({
+        ...undidStack,
+        [placeID]: [],
+      });
+      setUpdateStack({
+        ...updateStack,
+        [placeID]: [
+          ...updateStack[placeID],
+          {
+            ...additionalsInfo,
+            [CREATED_KEY]: true,
+          },
+        ],
+      });
     }
   };
 

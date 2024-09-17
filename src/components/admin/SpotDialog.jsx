@@ -11,6 +11,8 @@ export const CREATED_KEY = 'created';
 const useMapping = createPersistedState('mapping');
 const useUpdateStack = createPersistedState('updateStack');
 
+export const SPOT_ENTITY = 'spot';
+
 function SpotDialog ({ open, onClose, initialSpot }) {
   const { place } = useParams();
   const [mapping] = useMapping();
@@ -25,6 +27,7 @@ function SpotDialog ({ open, onClose, initialSpot }) {
     Type: null,
     x: 0,
     y: 0,
+    entity: SPOT_ENTITY,
   });
 
   const [idValid, setIdValid] = useState(true);
