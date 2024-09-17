@@ -1,8 +1,8 @@
-import { Close, HelpOutline } from '@mui/icons-material';
+import { Close, Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline } from '@mui/icons-material';
 import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 
 import { grey } from '@mui/material/colors';
 import Rehype2react from 'rehype-react';
@@ -10,7 +10,6 @@ import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
-import { icons } from './AdditionalsDialog';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -131,10 +130,18 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+export const icons = {
+  default: HelpOutline,
+  delete: Delete,
+  car: DirectionsCar,
+  bike: DirectionsBike,
+  dry: DryCleaning,
+};
+
 function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
   const classes = useStyles();
 
-  const { Titre, Description, Tache, Fixe, tris = ['amz'], icon, x, y } = info;
+  const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon } = info;
   const trisLeft = tris.length - 3;
 
   const body = 'body2';
@@ -174,7 +181,7 @@ function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
 
   const TaskIcon = icons[icon];
 
-  const [open, setOpen] = useState(Fixe);
+  const [open] = useState(Fixe);
 
   const handleClick = () => {
     onClick();
@@ -184,7 +191,7 @@ function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
     <Box className={clsx({ [classes.root]: !mounted })}>
       <Tooltip
         title={Titre}
-        placement="bottom"
+        placement="right"
         enterDelay={100}
         disableHoverListener={!mounted}
       >
@@ -197,10 +204,9 @@ function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
           }}
           onClick={handleClick}
         >
-          {Tache
+          {Tache && tris
             ? (
               <>
-                {/* {TaskIcon} */}
                 <TaskIcon className={classes.icon} />
                 <Box
                   className={classes.badges}
