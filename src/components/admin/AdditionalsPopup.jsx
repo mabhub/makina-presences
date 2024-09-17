@@ -2,7 +2,7 @@ import { Close, Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline 
 import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { grey } from '@mui/material/colors';
 import Rehype2react from 'rehype-react';
@@ -138,7 +138,7 @@ export const icons = {
   dry: DryCleaning,
 };
 
-function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
+function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = () => {} }) {
   const classes = useStyles();
 
   const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon } = info;
@@ -189,57 +189,52 @@ function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
 
   return (
     <Box className={clsx({ [classes.root]: !mounted })}>
-      <Tooltip
-        title={Titre}
-        placement="right"
-        enterDelay={100}
-        disableHoverListener={!mounted}
-      >
-        <Fab
-          className={clsx({
-            [classes.additional]: true,
-          })}
-          style={{
-            display: `${Fixe || open ? 'none' : 'block'}`,
-          }}
-          onClick={handleClick}
+      {showPin && (
+
+        <Tooltip
+          title={Titre}
+          placement="right"
+          enterDelay={100}
+          disableHoverListener={!mounted}
         >
-          {Tache && tris
-            ? (
-              <>
-                <TaskIcon className={classes.icon} />
-                <Box
-                  className={classes.badges}
-                >
-                  {tris
-                    .slice(0, 3)
-                    .map((tri, index) => (
-                      <Box
-                        key={tri}
-                        className={clsx([classes.tri], [classes.triBadge])}
-                        sx={{
-                          zIndex: 3 - index,
-                          marginLeft: index > 0 ? '-10px' : 'unset',
-                        }}
-                      >
-                        {tri}
-                      </Box>
-                    ))}
-                  {trisLeft > 0 && (
-                  <Typography className={classes.trisLeft}>
-                    + {trisLeft}
-                  </Typography>
-                  )}
-                </Box>
-              </>
-            )
-            : (
-              <HelpOutline
-                className={classes.icon}
-              />
+          <Fab
+            className={clsx({
+              [classes.additional]: true,
+            })}
+            style={{
+              display: `${Fixe || open ? 'none' : 'block'}`,
+            }}
+            onClick={handleClick}
+          >
+            <TaskIcon className={classes.icon} />
+            {Tache && tris && (
+            <Box
+              className={classes.badges}
+            >
+              {tris
+                .slice(0, 3)
+                .map((tri, index) => (
+                  <Box
+                    key={tri}
+                    className={clsx([classes.tri], [classes.triBadge])}
+                    sx={{
+                      zIndex: 3 - index,
+                      marginLeft: index > 0 ? '-10px' : 'unset',
+                    }}
+                  >
+                    {tri}
+                  </Box>
+                ))}
+              {trisLeft > 0 && (
+              <Typography className={classes.trisLeft}>
+                + {trisLeft}
+              </Typography>
+              )}
+            </Box>
             )}
-        </Fab>
-      </Tooltip>
+          </Fab>
+        </Tooltip>
+      )}
       {((open && mounted) || !mounted) && (
         <Box
           className={clsx({

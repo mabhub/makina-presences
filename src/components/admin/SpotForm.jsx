@@ -83,14 +83,14 @@ function SpotForm ({ edit, isDuplicating, isIDValid, spotInfo, handleChange }) {
           <ListItemText>Bloqué</ListItemText>
           <Switch
             onChange={() => handleChange('Bloqué', !spotInfo.Bloqué)}
-            checked={spotInfo.Bloqué}
+            checked={spotInfo.Bloqué || false}
           />
         </ListItem>
         <ListItem disablePadding>
           <ListItemText>Cumulable</ListItemText>
           <Switch
             onChange={() => handleChange('Cumul', !spotInfo.Cumul)}
-            checked={spotInfo.Cumul}
+            checked={spotInfo.Cumul || false}
           />
         </ListItem>
         <ListItem disablePadding>
