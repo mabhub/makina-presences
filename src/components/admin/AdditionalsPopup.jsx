@@ -1,8 +1,8 @@
 import { Close, HelpOutline } from '@mui/icons-material';
-import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { grey } from '@mui/material/colors';
 import Rehype2react from 'rehype-react';
@@ -25,6 +25,40 @@ const useStyles = makeStyles(theme => ({
     maxWidth: '300px',
   },
 
+  additional: {
+    backgroundColor: theme.palette.primary.bg,
+    boxShadow: 'none',
+    width: 20,
+    minWidth: 20,
+    height: 20,
+    minHeight: 20,
+    zIndex: 1,
+    '&:hover': {
+      background: alpha(theme.palette.primary.fg, 0.2),
+    },
+  },
+  icon: {
+    color: theme.palette.primary.fg,
+    width: '100%',
+    height: '100%',
+  },
+  badges: {
+    backgroundColor: theme.palette.primary.bg,
+    position: 'absolute',
+    top: '-70%',
+    textTransform: 'none',
+    padding: theme.spacing(0.5),
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: 'scale(0.6)',
+    transformOrigin: 'right',
+  },
+  triBadge: {
+    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+  },
+
   additionalContent: {
     width: '100%',
     minHeight: '50px',
@@ -32,8 +66,18 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(1.5),
     borderRadius: '6px',
   },
+  mountedAdditionalContent: {
+    zIndex: 2,
+    minWidth: '200px',
+    maxWidth: '300px',
+  },
   fixed: {
     border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+  },
+  mountedFixed: {
+    '&:hover': {
+      cursor: 'pointer',
+    },
   },
   popup: {
     boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
@@ -82,48 +126,16 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'none',
     padding: theme.spacing(0.1),
     width: '50%',
-    float: 'right',
-  },
-
-  additional: {
-    backgroundColor: theme.palette.primary.bg,
-    boxShadow: 'none',
-    width: 20,
-    minWidth: 20,
-    height: 20,
-    minHeight: 20,
-    zIndex: 1,
-    '&:hover': {
-      background: alpha(theme.palette.primary.fg, 0.2),
-    },
-  },
-  icon: {
-    color: theme.palette.primary.fg,
-    width: '100%',
-    height: '100%',
-  },
-  badges: {
-    backgroundColor: theme.palette.primary.bg,
-    position: 'absolute',
-    top: '-70%',
-    textTransform: 'none',
-    padding: theme.spacing(0.5),
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: 'scale(0.6)',
-    transformOrigin: 'right',
-  },
-  triBadge: {
-    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    display: 'block',
+    marginLeft: 'auto',
   },
 }));
 
-function AdditionalsPopup ({ info }) {
+function AdditionalsPopup ({ info, mounted = false, onClick = () => {} }) {
   const classes = useStyles();
 
-  const { Titre, Description, Tache, Fixe, tris = ['amz'], icon } = info;
+  const { Titre, Description, Tache, Fixe, tris = ['amz'], icon, x, y } = info;
+  const trisLeft = tris.length - 3;
 
   const body = 'body2';
   const processor = React.useMemo(
@@ -160,97 +172,117 @@ function AdditionalsPopup ({ info }) {
     [Description, processor],
   );
 
-  const trisLeft = 0;
-  const TaskIcon = React.cloneElement(
-    icons[icon],
-    { className: classes.icon },
-  );
+  const TaskIcon = icons[icon];
+
+  const [open, setOpen] = useState(Fixe);
+
+  const handleClick = () => {
+    onClick();
+  };
 
   return (
-    <Box className={classes.root}>
-      <Fab
-        className={classes.additional}
-        style={{
-          display: `${Fixe ? 'none' : 'block'}`,
-        }}
+    <Box className={clsx({ [classes.root]: !mounted })}>
+      <Tooltip
+        title={Titre}
+        placement="bottom"
+        enterDelay={100}
+        disableHoverListener={!mounted}
       >
-        {Tache
-          ? (
-            <>
-              {TaskIcon}
-              <Box
-                className={classes.badges}
-              >
-                {tris
-                  .slice(0, 3)
-                  .map((tri, index) => (
-                    <Box
-                      key={tri}
-                      className={clsx([classes.tri], [classes.triBadge])}
-                      sx={{
-                        zIndex: 3 - index,
-                        marginLeft: index > 0 ? '-10px' : 'unset',
-                      }}
-                    >
-                      {tri}
-                    </Box>
-                  ))}
-                {trisLeft > 0 && (
-                <Typography className={classes.trisLeft}>
-                  + {trisLeft}
-                </Typography>
-                )}
-              </Box>
-            </>
-          )
-          : (
-            <HelpOutline
-              className={classes.icon}
-            />
-          )}
-      </Fab>
-      <Box className={clsx({
-        [classes.additionalContent]: true,
-        [classes.fixed]: Fixe,
-        [classes.popup]: !Fixe,
-      })}
-      >
-        <Box className={classes.header}>
-          <Typography variant={Fixe ? 'h6' : 'unset'} sx={{ fontWeight: 'bold' }} className={classes.text}>
-            {Titre}
-          </Typography>
-          {!Fixe && (
-          <Close
-            className={classes.closeIcon}
-          />
-          )}
-        </Box>
-        <span className={classes.text}>
-          {hast}
-        </span>
-        {Tache && (
-        <Box className={classes.triList}>
-          {tris.map(tri => (
-            <Box
-              key={tri}
-              className={classes.tri}
-            >
-              {tri}
-            </Box>
-          ))}
-        </Box>
-        )}
-        {Tache && (
-        <Button
-          variant="contained"
-          size="small"
-          disableElevation
-          className={classes.btn}
+        <Fab
+          className={clsx({
+            [classes.additional]: true,
+          })}
+          style={{
+            display: `${Fixe || open ? 'none' : 'block'}`,
+          }}
+          onClick={handleClick}
         >
-          Participer
-        </Button>
-        )}
-      </Box>
+          {Tache
+            ? (
+              <>
+                {/* {TaskIcon} */}
+                <TaskIcon className={classes.icon} />
+                <Box
+                  className={classes.badges}
+                >
+                  {tris
+                    .slice(0, 3)
+                    .map((tri, index) => (
+                      <Box
+                        key={tri}
+                        className={clsx([classes.tri], [classes.triBadge])}
+                        sx={{
+                          zIndex: 3 - index,
+                          marginLeft: index > 0 ? '-10px' : 'unset',
+                        }}
+                      >
+                        {tri}
+                      </Box>
+                    ))}
+                  {trisLeft > 0 && (
+                  <Typography className={classes.trisLeft}>
+                    + {trisLeft}
+                  </Typography>
+                  )}
+                </Box>
+              </>
+            )
+            : (
+              <HelpOutline
+                className={classes.icon}
+              />
+            )}
+        </Fab>
+      </Tooltip>
+      {((open && mounted) || !mounted) && (
+        <Box
+          className={clsx({
+            [classes.additionalContent]: true,
+            [classes.mountedAdditionalContent]: mounted,
+            [classes.fixed]: Fixe,
+            [classes.mountedFixed]: Fixe && mounted,
+            [classes.popup]: !Fixe,
+          })}
+          onClick={handleClick}
+        >
+          <Box className={classes.header}>
+            <Typography variant={Fixe ? 'h6' : 'unset'} sx={{ fontWeight: 'bold' }} className={classes.text}>
+              {Titre}
+            </Typography>
+            {!Fixe && (
+              <Close
+                className={classes.closeIcon}
+                onClick={handleClick}
+              />
+            )}
+          </Box>
+          <span className={classes.text}>
+            {hast}
+          </span>
+          {Tache && (
+            <Box className={classes.triList}>
+              {tris.map(tri => (
+                <Box
+                  key={tri}
+                  className={classes.tri}
+                >
+                  {tri}
+                </Box>
+              ))}
+            </Box>
+          )}
+          {Tache && (
+            <Button
+              variant="contained"
+              size="small"
+              disableElevation
+              className={classes.btn}
+            >
+              Participer
+            </Button>
+          )}
+        </Box>
+      )}
     </Box>
   );
 }
