@@ -8,7 +8,7 @@ import useSpots from '../../hooks/useSpots';
 import ActionBar from './ActionBar';
 import EditSpot from './EditSpot';
 import { CREATED_KEY, SPOT_ENTITY } from './SpotDialog';
-import { DELETED_KEY } from './SpotPanel';
+import { DELETED_KEY } from './Panel';
 import useAdditionals from '../../hooks/useAdditionals';
 import EditAdditional from './EditAdditional';
 
@@ -70,16 +70,16 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const additionalUpdateStack = updateStack[placeID]
     .filter(({ entity }) => entity === ADDITIONAL_ENTITY);
 
-  const [selectedSpot, setSelectedSpot] = useState({});
+  const [selectedEntity, setSelectedEntity] = useState({});
 
   const planRef = useRef(null);
   const movingSpotRef = useRef(null);
 
-  const onSpotSelect = spot => {
-    setSelectedSpot({
-      ...spot,
+  const onEntitySelect = entity => {
+    setSelectedEntity({
+      ...entity,
     });
-    handleClick(spot);
+    handleClick(entity);
   };
 
   const handleMove = event => {
@@ -186,7 +186,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
       className={classes.root}
       onPointerMove={handleMove}
     >
-      <ActionBar onUndoRedu={onSpotSelect} />
+      <ActionBar onUndoRedu={onEntitySelect} />
       <TransformWrapper
         ref={planRef}
         disabled
@@ -212,8 +212,10 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
               <EditSpot
                 key={Spot.Identifiant}
                 spot={Spot}
-                isSelected={selectedSpot.Identifiant === Spot.Identifiant && panelOpen}
-                onClick={onSpotSelect}
+                isSelected={selectedEntity.entity === SPOT_ENTITY
+                  && selectedEntity.Identifiant === Spot.Identifiant
+                  && panelOpen}
+                onClick={onEntitySelect}
                 planRef={planRef}
                 ref={movingSpotRef}
               />
@@ -222,6 +224,10 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
               <EditAdditional
                 key={additional.Titre}
                 additional={additional}
+                onSelect={onEntitySelect}
+                isSelected={selectedEntity.entity === ADDITIONAL_ENTITY
+                    && selectedEntity.id === additional.id
+                    && panelOpen}
               />
             ))}
           </Box>

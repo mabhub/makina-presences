@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import { DELETED_KEY } from './SpotPanel';
+import { DELETED_KEY } from './Panel';
 import SpotDialog, { CREATED_KEY } from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({

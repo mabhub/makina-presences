@@ -113,9 +113,9 @@ function AdditionalsDialog ({ open, onClose, baseInfo }) {
       return { ...info, Fixe: false, Tache: true };
     }
     if (key === 'Fixe') {
-      return { ...info, Fixe: true, Tache: false };
+      return { ...info, Fixe: true, Tache: false, icon: 'default' };
     }
-    return { ...info, Fixe: false, Tache: false };
+    return { ...info, Fixe: false, Tache: false, icon: 'default' };
   };
 
   const handleChange = (key, value) => {
