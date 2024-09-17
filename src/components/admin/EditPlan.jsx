@@ -7,8 +7,10 @@ import createPersistedState from 'use-persisted-state';
 import useSpots from '../../hooks/useSpots';
 import ActionBar from './ActionBar';
 import EditSpot from './EditSpot';
-import { CREATED_KEY } from './SpotDialog';
+import { CREATED_KEY, SPOT_ENTITY } from './SpotDialog';
 import { DELETED_KEY } from './SpotPanel';
+import useAdditionals from '../../hooks/useAdditionals';
+import EditAdditional from './EditAdditional';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -51,6 +53,8 @@ const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
 
+export const ADDITIONAL_ENTITY = 'additional';
+
 function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const classes = useStyles();
   const { place } = useParams();
@@ -61,6 +65,8 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const placeID = mapping[place];
 
   const [updateStack, setUpdateStack] = useUpdateStack({});
+  const spotStack = updateStack[placeID].filter(({ entity }) => entity === SPOT_ENTITY);
+  const additionalStack = updateStack[placeID].filter(({ entity }) => entity === ADDITIONAL_ENTITY);
 
   const [selectedSpot, setSelectedSpot] = useState({});
 
@@ -116,22 +122,26 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
     }
   }, [updatedSpot]);
 
-  const idUpdateStack = updateStack[placeID].map(({ Identifiant: spotId }) => spotId);
+  const idSpotStack = spotStack.map(({ Identifiant: spotId }) => spotId);
   const spots = useSpots(placeID)
     .spots
+    .map(spot => ({
+      ...spot,
+      entity: SPOT_ENTITY,
+    }))
     // add created spot
     .concat([...new Set(
-      updateStack[placeID]
+      spotStack
         .filter(spot => Object.hasOwn(spot, CREATED_KEY))
         .map(({ Identifiant }) => Identifiant),
-    )].map(Identifiant => updateStack[placeID][
-      updateStack[placeID].findLastIndex(({ Identifiant: spotId }) => spotId === Identifiant)
+    )].map(Identifiant => spotStack[
+      spotStack.findLastIndex(({ Identifiant: spotId }) => spotId === Identifiant)
     ]))
     // remove deleted spot
     .filter(spot => {
-      if (idUpdateStack.includes(spot.Identifiant)
+      if (idSpotStack.includes(spot.Identifiant)
         && Object.hasOwn(
-          updateStack[placeID][idUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
+          spotStack[idSpotStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
         )) {
         return false;
       }
@@ -139,11 +149,25 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
     })
     // update updated spot
     .map(spot => {
-      if (idUpdateStack.includes(spot.Identifiant)) {
-        return updateStack[placeID][idUpdateStack.lastIndexOf(spot.Identifiant)];
+      if (idSpotStack.includes(spot.Identifiant)) {
+        return spotStack[idSpotStack.lastIndexOf(spot.Identifiant)];
       }
       return spot;
     });
+
+  // const idAdditionalStack = additionalStack.map(({ id }) => id);
+  const additionals = useAdditionals(placeID)
+    .map(additional => ({
+      ...additional,
+      entity: ADDITIONAL_ENTITY,
+    }))
+    .concat([...new Set(
+      additionalStack
+        .filter(additional => Object.hasOwn(additional, CREATED_KEY))
+        .map(({ id }) => id),
+    )].map(additionalID => additionalStack[
+      additionalStack.findLastIndex(({ id }) => id === additionalID)
+    ]));
 
   const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};
 
@@ -182,6 +206,12 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
                 onClick={onSpotSelect}
                 planRef={planRef}
                 ref={movingSpotRef}
+              />
+            ))}
+            {additionals.map(additional => (
+              <EditAdditional
+                key={additional.Titre}
+                additional={additional}
               />
             ))}
           </Box>
