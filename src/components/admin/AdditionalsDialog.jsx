@@ -1,14 +1,14 @@
-import { Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline } from '@mui/icons-material';
-import createPersistedState from 'use-persisted-state';
 import { alpha, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, MenuItem, Select, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
-import AdditionalsPopup from './AdditionalsPopup';
+import createPersistedState from 'use-persisted-state';
 import useAdditionals from '../../hooks/useAdditionals';
+import AdditionalsPopup, { icons } from './AdditionalsPopup';
+import usePlans from '../../hooks/usePlans';
 
-const GAP_BETWEEN_SECTION = 1.5;
+const GAP_BETWEEN_SECTION = 1.2;
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,7 +49,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   coordsInput: {
-    width: 50,
+    width: 55,
     '& input::-webkit-inner-spin-button': {
       '-webkit-appearance': 'none',
       '-moz-appearance': 'none',
@@ -69,31 +69,24 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const icons = {
-  default: HelpOutline,
-  delete: Delete,
-  car: DirectionsCar,
-  bike: DirectionsBike,
-  dry: DryCleaning,
-};
-
 export const ADDITIONAL_ENTITY = 'additional';
 const useMapping = createPersistedState('mapping');
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 
-function AdditionalsDialog ({ open, onClose }) {
+function AdditionalsDialog ({ open, onClose, baseInfo }) {
   const classes = useStyles();
   const { place } = useParams();
   const [mapping] = useMapping();
   const placeID = mapping[place];
+  const { plans } = usePlans();
 
   const [updateStack] = useUpdateStack();
   const [undidStack] = useUndidStack();
 
   const additionals = useAdditionals(placeID);
 
-  const [info, setInfo] = useState({
+  const [info, setInfo] = useState(baseInfo || {
     id: Math.max(...[
       ...additionals.map(({ id }) => id),
       ...updateStack[placeID]
@@ -107,6 +100,7 @@ function AdditionalsDialog ({ open, onClose }) {
     Description: '',
     Fixe: false,
     Tache: false,
+    Plan: plans.find(({ id }) => id === placeID),
     x: '0',
     y: '0',
     tris: undefined,
@@ -149,7 +143,7 @@ function AdditionalsDialog ({ open, onClose }) {
       open={open}
       className={classes.root}
     >
-      <DialogTitle><strong>Nouveau Point d'Information</strong></DialogTitle>
+      <DialogTitle><strong>{baseInfo ? 'Modification du' : 'Nouveau'} Point d'Information</strong></DialogTitle>
       <DialogContent className={classes.content}>
         <Box className={classes.form}>
           <Box className={classes.formHeader}>
@@ -230,7 +224,7 @@ function AdditionalsDialog ({ open, onClose }) {
         <Button
           onClick={() => onClose(info)}
           disabled={!info.Titre || !info.Description || !info.x || !info.y}
-        >Créer
+        > {baseInfo ? 'Modifier' : 'Créer'}
         </Button>
       </DialogActions>
     </Dialog>
