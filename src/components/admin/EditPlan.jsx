@@ -65,8 +65,10 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const placeID = mapping[place];
 
   const [updateStack, setUpdateStack] = useUpdateStack({});
-  const spotStack = updateStack[placeID].filter(({ entity }) => entity === SPOT_ENTITY);
-  const additionalStack = updateStack[placeID].filter(({ entity }) => entity === ADDITIONAL_ENTITY);
+  const spotUpdateStack = updateStack[placeID]
+    .filter(({ entity }) => entity === SPOT_ENTITY);
+  const additionalUpdateStack = updateStack[placeID]
+    .filter(({ entity }) => entity === ADDITIONAL_ENTITY);
 
   const [selectedSpot, setSelectedSpot] = useState({});
 
@@ -122,7 +124,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
     }
   }, [updatedSpot]);
 
-  const idSpotStack = spotStack.map(({ Identifiant: spotId }) => spotId);
+  const idSpotUpdateStack = spotUpdateStack.map(({ Identifiant: spotId }) => spotId);
   const spots = useSpots(placeID)
     .spots
     .map(spot => ({
@@ -131,17 +133,17 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
     }))
     // add created spot
     .concat([...new Set(
-      spotStack
+      spotUpdateStack
         .filter(spot => Object.hasOwn(spot, CREATED_KEY))
         .map(({ Identifiant }) => Identifiant),
-    )].map(Identifiant => spotStack[
-      spotStack.findLastIndex(({ Identifiant: spotId }) => spotId === Identifiant)
+    )].map(Identifiant => spotUpdateStack[
+      spotUpdateStack.findLastIndex(({ Identifiant: spotId }) => spotId === Identifiant)
     ]))
     // remove deleted spot
     .filter(spot => {
-      if (idSpotStack.includes(spot.Identifiant)
+      if (idSpotUpdateStack.includes(spot.Identifiant)
         && Object.hasOwn(
-          spotStack[idSpotStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
+          spotUpdateStack[idSpotUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
         )) {
         return false;
       }
@@ -149,25 +151,33 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
     })
     // update updated spot
     .map(spot => {
-      if (idSpotStack.includes(spot.Identifiant)) {
-        return spotStack[idSpotStack.lastIndexOf(spot.Identifiant)];
+      if (idSpotUpdateStack.includes(spot.Identifiant)) {
+        return spotUpdateStack[idSpotUpdateStack.lastIndexOf(spot.Identifiant)];
       }
       return spot;
     });
 
-  // const idAdditionalStack = additionalStack.map(({ id }) => id);
+  const idAdditionalUpdateStack = additionalUpdateStack.map(({ id }) => id);
   const additionals = useAdditionals(placeID)
     .map(additional => ({
       ...additional,
       entity: ADDITIONAL_ENTITY,
     }))
+    // add created additional
     .concat([...new Set(
-      additionalStack
+      additionalUpdateStack
         .filter(additional => Object.hasOwn(additional, CREATED_KEY))
         .map(({ id }) => id),
-    )].map(additionalID => additionalStack[
-      additionalStack.findLastIndex(({ id }) => id === additionalID)
-    ]));
+    )].map(additionalID => additionalUpdateStack[
+      additionalUpdateStack.findLastIndex(({ id }) => id === additionalID)
+    ]))
+    // update updated additional
+    .map(additional => {
+      if (idAdditionalUpdateStack.includes(additional.id)) {
+        return additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)];
+      }
+      return additional;
+    });
 
   const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};
 

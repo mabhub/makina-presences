@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import { Delete, Edit, OpenWith } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { Delete, Edit, OpenWith, Visibility } from '@mui/icons-material';
 import clsx from 'clsx';
+import React, { useState } from 'react';
+import createPersistedState from 'use-persisted-state';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import AdditionalsDialog from './AdditionalsDialog';
 import AdditionalsPopup from './AdditionalsPopup';
 
 const useStyles = makeStyles(theme => ({
@@ -46,67 +49,104 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const useUpdateStack = createPersistedState('updateStack');
+const useUndidStack = createPersistedState('undidStack');
+const useMapping = createPersistedState('mapping');
+
 function EditAdditional ({ additional }) {
   const classes = useStyles();
+  const [updateStack, setUpdateStack] = useUpdateStack();
+  const [undidStack, setUndidStack] = useUndidStack();
+  const [mapping] = useMapping();
+  const { place } = useParams();
+  const placeID = mapping[place];
 
   const { Fixe, x, y } = additional;
 
   const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState(false);
 
   const handleClick = () => {
     setOpen(!open);
   };
 
+  const handleEdit = editedAdditional => {
+    setEdit(!edit);
+    if (editedAdditional) {
+      setUndidStack({
+        ...undidStack,
+        [placeID]: [],
+      });
+      setUpdateStack({
+        ...updateStack,
+        [placeID]: [
+          ...updateStack[placeID],
+          editedAdditional,
+        ],
+      });
+    }
+  };
+
   const quickActions = [
-    OpenWith,
-    Edit,
-    Delete,
+    { icon: OpenWith, method: () => {} },
+    { icon: Edit, method: handleEdit },
+    { icon: Delete, method: () => {} },
   ];
 
   return (
-    <Box
-      className={classes.root}
-      style={{
-        left: `${x}px`,
-        top: `${y}px`,
-      }}
-    >
-      <AdditionalsPopup
-        info={additional}
-        mounted
-        onClick={handleClick}
-      />
-      {open && quickActions.map((icon, index) => {
-        const key = `icon-${index}`;
-        const Icon = icon;
-        return (
-          <Box
-            key={key}
-            component="button"
-            className={clsx({
-              [classes.quickActionButton]: true,
-              [classes.fixedQuickActionButton]: Fixe,
-              [classes.popupQuickActionButton]: !Fixe,
-            })}
-            sx={{
-              transform: Fixe
-                ? `translateY(${index * 22}px)`
-                : `
+    <>
+      <Box
+        className={classes.root}
+        style={{
+          left: `${x}px`,
+          top: `${y}px`,
+        }}
+      >
+        <AdditionalsPopup
+          info={additional}
+          mounted
+          onClick={handleClick}
+        />
+        {open && quickActions.map(({ icon, method }, index) => {
+          const key = `icon-${index}`;
+          const Icon = icon;
+          return (
+            <Box
+              key={key}
+              component="button"
+              className={clsx({
+                [classes.quickActionButton]: true,
+                [classes.fixedQuickActionButton]: Fixe,
+                [classes.popupQuickActionButton]: !Fixe,
+              })}
+              sx={{
+                transform: Fixe
+                  ? `translateY(${index * 22}px)`
+                  : `
                   rotate(-${index * 60}deg)
                   translateX(-22px)
                 `,
-            }}
-          >
-            <Icon
-              className={classes.quickActionIcon}
-              sx={{
-                transform: Fixe ? '' : `rotate(${index * 60}deg)`,
               }}
-            />
-          </Box>
-        );
-      })}
-    </Box>
+              onClick={() => method()}
+            >
+              <Icon
+                className={classes.quickActionIcon}
+                sx={{
+                  transform: Fixe ? '' : `rotate(${index * 60}deg)`,
+                }}
+              />
+            </Box>
+          );
+        })}
+      </Box>
+      {edit && (
+        <AdditionalsDialog
+          open={edit}
+          onClose={handleEdit}
+          baseInfo={additional}
+        />
+      )}
+    </>
   );
 }
 
