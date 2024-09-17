@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   editSpot: {
     gridArea: 'c',
     border: '2px solid #00000015',
-    minWidth: '330px',
+    minWidth: '370px',
   },
 }));
 
