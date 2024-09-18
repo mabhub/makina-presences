@@ -90,6 +90,7 @@ function ActionBar ({ onUndoRedu }) {
   };
 
   const handleUndo = () => {
+    // console.log(getPreviousSpotInfo());
     onUndoRedu(getPreviousSpotInfo());
     setUndidStack({
       ...undidStack,

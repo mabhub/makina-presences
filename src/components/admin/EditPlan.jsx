@@ -26,8 +26,6 @@ const useStyles = makeStyles(theme => ({
     backgroundSize: '20px 20px',
     backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
   },
-  planWrapper: {
-  },
   cardEdit: {
     position: 'absolute',
     top: 0,
@@ -69,6 +67,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
 
   const planRef = useRef(null);
   const movingSpotRef = useRef(null);
+  const movingAdditionalRef = useRef(null);
 
   const onEntitySelect = entity => {
     setSelectedEntity({
@@ -78,7 +77,11 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   };
 
   const handleMove = event => {
-    if (movingSpotRef.current) {
+    const { entity: entityType } = selectedEntity;
+    if (entityType === ADDITIONAL_ENTITY && movingAdditionalRef.current) {
+      movingAdditionalRef.current.handleMove(event);
+    }
+    if (entityType === SPOT_ENTITY && movingSpotRef.current) {
       movingSpotRef.current.handleMove(event);
     }
   };
@@ -233,6 +236,8 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
                 isSelected={selectedEntity.entity === ADDITIONAL_ENTITY
                     && selectedEntity.id === additional.id
                     && panelOpen}
+                planRef={planRef}
+                ref={movingAdditionalRef}
               />
             ))}
           </Box>
