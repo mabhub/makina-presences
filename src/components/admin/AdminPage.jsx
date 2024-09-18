@@ -88,7 +88,7 @@ function AdminPage () {
   }, [place]);
 
   useEffect(() => {
-    if (place && updateStack[mapping[place]].findLast(({ id }) => id === entity.id)) {
+    if (place && entity && updateStack[mapping[place]].findLast(({ id }) => id === entity.id)) {
       const lastState = updateStack[mapping[place]].findLast(({ id }) => id === entity.id);
       setShowPanel(!Object.hasOwn(lastState, DELETED_KEY));
     }

@@ -206,8 +206,8 @@ function AdditionalsPopup ({
 
   const [open] = useState(Fixe);
 
-  const handleClick = () => {
-    onClick();
+  const handleClick = event => {
+    onClick(event);
   };
 
   return (
@@ -217,7 +217,7 @@ function AdditionalsPopup ({
           title={Titre}
           placement="right"
           enterDelay={100}
-          disableHoverListener={!mounted}
+          disableHoverListener
         >
           <span>
             <Fab
