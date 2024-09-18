@@ -9,7 +9,8 @@ import useSpots from '../../hooks/useSpots';
 import PublishDialog from './PublishDialog';
 import SpotDialog from './SpotDialog';
 import AdditionalsDialog from './AdditionalsDialog';
-import { CREATED_KEY } from './const';
+import { ADDITIONAL_ENTITY, CREATED_KEY, SPOT_ENTITY } from './const';
+import useAdditionals from '../../hooks/useAdditionals';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -77,10 +78,20 @@ function ActionBar ({ onUndoRedu }) {
   const [undidStack, setUndidStack] = useUndidStack({});
   const [planUpdate, setPlanUpdate] = usePlanUpdate();
 
-  const { spots: defaultSpot } = useSpots(placeID);
+  const defaultSpot = useSpots(placeID)
+    .spots
+    .map(spot => ({
+      ...spot,
+      entity: SPOT_ENTITY,
+    }));
 
-  const getPreviousSpotInfo = () => {
-    const spot = updateStack[placeID][updateStack[placeID].length - 1];
+  const defaultAdditional = useAdditionals(placeID)
+    .map(spot => ({
+      ...spot,
+      entity: ADDITIONAL_ENTITY,
+    }));
+
+  const getPreviousSpotInfo = spot => {
     const spotHistory = updateStack[placeID]
       .filter(({ Identifiant }) => Identifiant === spot.Identifiant);
     if (spotHistory.length === 1) {
@@ -89,9 +100,29 @@ function ActionBar ({ onUndoRedu }) {
     return spotHistory[spotHistory.length - 2];
   };
 
+  const getPreviousAdditionalInfo = additional => {
+    const additionalHistory = updateStack[placeID]
+      .filter(({ id }) => id === additional.id);
+    if (additionalHistory.length === 1) {
+      return defaultAdditional.find(({ id }) => id === additional.id);
+    }
+    return additionalHistory[additionalHistory.length - 2];
+  };
+
+  const getPreviousEntityInfo = () => {
+    const entity = updateStack[placeID][updateStack[placeID].length - 1];
+    const { entity: entityType } = entity;
+    if (entityType === SPOT_ENTITY) {
+      return getPreviousSpotInfo(entity);
+    }
+    if (entityType === ADDITIONAL_ENTITY) {
+      return getPreviousAdditionalInfo(entity);
+    }
+    return null;
+  };
+
   const handleUndo = () => {
-    // console.log(getPreviousSpotInfo());
-    onUndoRedu(getPreviousSpotInfo());
+    onUndoRedu(getPreviousEntityInfo());
     setUndidStack({
       ...undidStack,
       [placeID]: [
