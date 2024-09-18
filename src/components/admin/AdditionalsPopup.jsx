@@ -25,8 +25,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   additional: {
-    backgroundColor: theme.palette.primary.bg,
-    background: 'red',
+    backgroundColor: theme.palette.primary,
     boxShadow: 'none',
     width: 20,
     minWidth: 20,
@@ -39,6 +38,10 @@ const useStyles = makeStyles(theme => ({
     '&:disabled': {
       backgroundColor: theme.palette.primary.bg,
     },
+  },
+  selectedAdditional: {
+    backgroundImage: 'linear-gradient(45deg, #ffffff 20%, #e6e6e6 20%, #e6e6e6 50%, #ffffff 50%, #ffffff 70%, #e6e6e6 70%, #e6e6e6 100%)',
+    backgroundSize: '7.07px 7.07px',
   },
   icon: {
     color: theme.palette.primary.fg,
@@ -69,6 +72,9 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.bg,
     padding: theme.spacing(1.5),
     borderRadius: '6px',
+  },
+  selectedAdditionalContent: {
+    borderColor: `${theme.palette.primary.main} !important`,
   },
   mountedAdditionalContent: {
     zIndex: 2,
@@ -149,7 +155,13 @@ export const icons = {
   dry: DryCleaning,
 };
 
-function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = () => {} }) {
+function AdditionalsPopup ({
+  info,
+  mounted = false,
+  showPin = true,
+  onClick = () => {},
+  isSelected,
+}) {
   const classes = useStyles();
 
   const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon } = info;
@@ -201,55 +213,59 @@ function AdditionalsPopup ({ info, mounted = false, showPin = true, onClick = ()
   return (
     <Box className={clsx({ [classes.root]: !mounted })}>
       {showPin && (
-
         <Tooltip
           title={Titre}
           placement="right"
           enterDelay={100}
+          disableHoverListener={!mounted}
         >
-          <Fab
-            className={clsx({
-              [classes.additional]: true,
-            })}
-            style={{
-              display: `${Fixe || open ? 'none' : 'block'}`,
-            }}
-            onClick={handleClick}
-            disabled={!mounted}
-          >
-            <TaskIcon className={classes.icon} />
-            {Tache && tris && (
-            <Box
-              className={classes.badges}
+          <span>
+            <Fab
+              className={clsx({
+                [classes.additional]: true,
+                [classes.selectedAdditional]: isSelected && mounted,
+              })}
+              style={{
+                display: `${Fixe || open ? 'none' : 'block'}`,
+              }}
+              onClick={handleClick}
+              disabled={!mounted}
             >
-              {tris
-                .slice(0, 3)
-                .map((tri, index) => (
-                  <Box
-                    key={tri}
-                    className={clsx([classes.tri], [classes.triBadge])}
-                    sx={{
-                      zIndex: 3 - index,
-                      marginLeft: index > 0 ? '-10px' : 'unset',
-                    }}
-                  >
-                    {tri}
-                  </Box>
-                ))}
-              {trisLeft > 0 && (
-              <Typography className={classes.trisLeft}>
-                + {trisLeft}
-              </Typography>
+              <TaskIcon className={classes.icon} />
+              {Tache && tris && (
+                <Box
+                  className={classes.badges}
+                >
+                  {tris
+                    .slice(0, 3)
+                    .map((tri, index) => (
+                      <Box
+                        key={tri}
+                        className={clsx([classes.tri], [classes.triBadge])}
+                        sx={{
+                          zIndex: 3 - index,
+                          marginLeft: index > 0 ? '-10px' : 'unset',
+                        }}
+                      >
+                        {tri}
+                      </Box>
+                    ))}
+                  {trisLeft > 0 && (
+                  <Typography className={classes.trisLeft}>
+                    + {trisLeft}
+                  </Typography>
+                  )}
+                </Box>
               )}
-            </Box>
-            )}
-          </Fab>
+            </Fab>
+          </span>
         </Tooltip>
       )}
       {((open && mounted) || !mounted) && (
         <Box
           className={clsx({
             [classes.additionalContent]: true,
+            [classes.selectedAdditionalContent]: isSelected && mounted,
             [classes.mountedAdditionalContent]: mounted,
             [classes.fixed]: Fixe,
             [classes.mountedFixed]: Fixe && mounted,
