@@ -3,11 +3,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
+import usePlans from '../../hooks/usePlans';
 import LoadIndicator from '../LoadIndicator';
 import EditPlan from './EditPlan';
+import Panel from './Panel';
 import PlanList from './PlanList';
-import Panel, { DELETED_KEY } from './Panel';
-import usePlans from '../../hooks/usePlans';
+import { DELETED_KEY } from './const';
 
 const useStyles = makeStyles(theme => ({
   container: {

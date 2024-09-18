@@ -5,13 +5,10 @@ import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import SpotForm from './SpotForm';
-
-export const CREATED_KEY = 'created';
+import { CREATED_KEY, SPOT_ENTITY } from './const';
 
 const useMapping = createPersistedState('mapping');
 const useUpdateStack = createPersistedState('updateStack');
-
-export const SPOT_ENTITY = 'spot';
 
 function SpotDialog ({ open, onClose, initialSpot }) {
   const { place } = useParams();

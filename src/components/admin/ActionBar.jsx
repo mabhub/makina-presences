@@ -7,8 +7,9 @@ import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import PublishDialog from './PublishDialog';
-import SpotDialog, { CREATED_KEY } from './SpotDialog';
+import SpotDialog from './SpotDialog';
 import AdditionalsDialog from './AdditionalsDialog';
+import { CREATED_KEY } from './const';
 
 const useStyles = makeStyles(theme => ({
   root: {
