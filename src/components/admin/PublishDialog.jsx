@@ -5,6 +5,8 @@ import createPersistedState from 'use-persisted-state';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
 import LoadIndicator from '../LoadIndicator';
+import { ADDITIONAL_ENTITY, SPOT_ENTITY } from './const';
+import useAdditionals from '../../hooks/useAdditionals';
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -34,14 +36,20 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
   const [undidStack, setUndidStack] = useUndidStack();
   const [mapping] = useMapping();
   const placeID = mapping[plan.Name];
+  const { setAdditionnal } = useAdditionals(placeID);
+
+  const spotStack = updateStack[placeID]
+    .filter(({ entity }) => entity === SPOT_ENTITY);
+  const additionalStack = updateStack[placeID]
+    .filter(({ entity }) => entity === ADDITIONAL_ENTITY);
 
   const { plans, updatePlan } = usePlans();
   const { setSpot } = useSpots(placeID);
 
-  const [amountOfUpdate, setAmountOfUpdate] = useState(0);
+  const [amountOfPlanUpdate, setAmountOfUpdate] = useState(0);
 
   useEffect(() => {
-    if (!plan || amountOfUpdate || plans.length === 0) return;
+    if (!plan || amountOfPlanUpdate || plans.length === 0) return;
     const existingPlan = plans.find(({ id }) => id === plan.id);
     Object.keys(existingPlan).forEach(key => {
       if (typeof existingPlan[key] !== 'object' && existingPlan[key] !== plan[key]) {
@@ -61,6 +69,20 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
     });
   };
 
+  const setEntity = entity => {
+    const { entity: entityType } = entity;
+
+    if (entityType === SPOT_ENTITY) {
+      return setSpot(entity);
+    }
+
+    if (entityType === ADDITIONAL_ENTITY) {
+      return setAdditionnal(entity);
+    }
+
+    return null;
+  };
+
   const handlePublication = () => {
     const lastModification = [
       ...updateStack[placeID]
@@ -76,11 +98,11 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
         }, []),
     ];
 
-    (amountOfUpdate > 0 || isSecondary
+    (amountOfPlanUpdate > 0 || isSecondary
       ? updatePlan(isSecondary ? { ...plan, Brouillon: false } : plan)
       : Promise.resolve())
       .then(() => (lastModification.length
-        ? Promise.all(lastModification.map(spotModif => setSpot(spotModif)))
+        ? Promise.all(lastModification.map(entity => setEntity(entity)))
         : Promise.resolve()))
       .then(() => {
         resetStack();
@@ -119,13 +141,19 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
               <TableRow>
                 <TableCell>Plan</TableCell>
                 <TableCell align="right">
-                  <Chip color={amountOfUpdate ? 'primary' : 'default'} label={amountOfUpdate} />
+                  <Chip color={amountOfPlanUpdate ? 'primary' : 'default'} label={amountOfPlanUpdate} />
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Postes</TableCell>
                 <TableCell align="right">
-                  <Chip color={updateStack[placeID].length ? 'primary' : 'default'} label={updateStack[placeID].length} />
+                  <Chip color={spotStack.length ? 'primary' : 'default'} label={spotStack.length} />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Points d'Information</TableCell>
+                <TableCell align="right">
+                  <Chip color={additionalStack.length ? 'primary' : 'default'} label={additionalStack.length} />
                 </TableCell>
               </TableRow>
             </TableBody>
