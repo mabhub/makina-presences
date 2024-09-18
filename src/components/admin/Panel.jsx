@@ -87,7 +87,6 @@ function Panel ({ entity, onClose, handleUpdate }) {
     });
     setPreviousSpotInfo({});
   }, [entity]);
-  console.log(entity);
 
   const handleChange = (key, value) => {
     setPreviousSpotInfo({

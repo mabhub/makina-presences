@@ -86,6 +86,7 @@ function ActionBar ({ onUndoRedu }) {
     }));
 
   const defaultAdditional = useAdditionals(placeID)
+    .additionals
     .map(spot => ({
       ...spot,
       entity: ADDITIONAL_ENTITY,
