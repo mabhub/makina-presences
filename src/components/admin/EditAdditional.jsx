@@ -2,7 +2,7 @@ import { Delete, Edit, OpenWith } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import createPersistedState from 'use-persisted-state';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import AdditionalsDialog from './AdditionalsDialog';
@@ -54,7 +54,15 @@ const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }) {
+const EditAdditional = forwardRef((
+  {
+    additional,
+    onSelect = () => {},
+    isSelected = false,
+    planRef,
+  },
+  ref,
+) => {
   const classes = useStyles();
   const [updateStack, setUpdateStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
@@ -62,13 +70,9 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
   const { place } = useParams();
   const placeID = mapping[place];
 
-  const { Fixe, x, y } = additional;
+  const { id, Fixe, x, y } = additional;
 
   const [edit, setEdit] = useState(false);
-
-  const handleClick = () => {
-    onSelect(additional);
-  };
 
   const resestUndidStack = () => {
     setUndidStack({
@@ -106,28 +110,104 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
     });
   };
 
+  const [isMoving, setIsMoving] = useState(false);
+  const [deltas, setDeltas] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [coords, setCoords] = useState({ x, y });
+  useEffect(() => {
+    setCoords({ x, y });
+  }, [x, y]);
+
+  const getPositionAtCenter = element => {
+    const { top, left, width, height } = element.getBoundingClientRect();
+    return {
+      x: left + width / 2,
+      y: top + height / 2,
+    };
+  };
+
+  const handleMoveStart = event => {
+    event.stopPropagation();
+    setIsMoving(!isMoving);
+
+    const { current: { state: { scale } = {} } = {} } = planRef;
+    const clicPosition = getPositionAtCenter(document.getElementById(`additional-${id}`));
+    setDeltas({
+      x: clicPosition.x - (coords.x * scale),
+      y: clicPosition.y - (coords.y * scale),
+    });
+  };
+
+  const snap = (v, a = 5) => Math.round(v / a) * a;
+  const getNewPosition = event => {
+    const { current: { state: { scale } = {} } = {} } = planRef;
+    return {
+      x: snap((event.clientX - deltas.x) / scale),
+      y: snap((event.clientY - deltas.y) / scale),
+    };
+  };
+
+  useImperativeHandle(ref, () => {
+    if (isMoving) {
+      return {
+        handleMove (event) {
+          setCoords({
+            ...getNewPosition(event),
+          });
+        },
+      };
+    }
+    return undefined;
+  });
+
+  const handleMoveEnd = event => {
+    resestUndidStack();
+    setUpdateStack({
+      ...updateStack,
+      [placeID]: [
+        ...updateStack[placeID],
+        {
+          ...additional,
+          ...getNewPosition(event),
+        },
+      ],
+    });
+  };
+
   const quickActions = [
-    { icon: OpenWith, method: () => {} },
+    { icon: OpenWith, method: handleMoveStart },
     { icon: Edit, method: handleEdit },
     { icon: Delete, method: handleDelete },
   ];
+
+  const handleClick = event => {
+    onSelect(additional);
+    if (isMoving) {
+      setIsMoving(!isMoving);
+      handleMoveEnd(event);
+    }
+  };
 
   return (
     <>
       <Box
         className={classes.root}
         style={{
-          left: `${x}px`,
-          top: `${y}px`,
+          left: `${coords.x}px`,
+          top: `${coords.y}px`,
         }}
       >
-        <AdditionalsPopup
-          info={additional}
-          mounted
-          onClick={handleClick}
-          isSelected={isSelected}
-        />
-        {isSelected && quickActions.map(({ icon, method }, index) => {
+        <div id={`additional-${id}`}>
+          <AdditionalsPopup
+            info={additional}
+            mounted
+            onClick={handleClick}
+            isSelected={isSelected}
+          />
+        </div>
+        {isSelected && (!isMoving) && quickActions.map(({ icon, method }, index) => {
           const key = `icon-${index}`;
           const Icon = icon;
           return (
@@ -147,7 +227,7 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
                   translateX(-22px)
                 `,
               }}
-              onClick={() => method()}
+              onClick={event => method(event)}
             >
               <Icon
                 className={classes.quickActionIcon}
@@ -168,6 +248,6 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
       )}
     </>
   );
-}
+});
 
 export default React.memo(EditAdditional);
