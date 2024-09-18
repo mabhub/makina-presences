@@ -5,8 +5,9 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
 import useAdditionals from '../../hooks/useAdditionals';
-import AdditionalsPopup, { icons } from './AdditionalsPopup';
 import usePlans from '../../hooks/usePlans';
+import AdditionalsPopup, { icons } from './AdditionalsPopup';
+import { ADDITIONAL_ENTITY } from './const';
 
 const GAP_BETWEEN_SECTION = 1.2;
 
@@ -69,7 +70,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const ADDITIONAL_ENTITY = 'additional';
 const useMapping = createPersistedState('mapping');
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');

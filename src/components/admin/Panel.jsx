@@ -5,9 +5,9 @@ import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
-import AdditionalsDialog, { ADDITIONAL_ENTITY } from './AdditionalsDialog';
+import AdditionalsDialog from './AdditionalsDialog';
 import AdditionalsPopup, { icons } from './AdditionalsPopup';
-import { SPOT_ENTITY } from './SpotDialog';
+import { ADDITIONAL_ENTITY, DELETED_KEY, SPOT_ENTITY } from './const';
 import SpotForm from './SpotForm';
 
 const useStyles = makeStyles(theme => ({
@@ -64,7 +64,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const DELETED_KEY = 'deleted';
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');

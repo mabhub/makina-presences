@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from 'react-query';
 import useTable from './useTable';
-import { DELETED_KEY } from '../components/admin/Panel';
+import { DELETED_KEY } from '../components/admin/const';
 
 const {
   VITE_TABLE_ID_SPOTS: spotsTableId,

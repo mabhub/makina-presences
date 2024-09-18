@@ -7,10 +7,9 @@ import createPersistedState from 'use-persisted-state';
 import useSpots from '../../hooks/useSpots';
 import ActionBar from './ActionBar';
 import EditSpot from './EditSpot';
-import { CREATED_KEY, SPOT_ENTITY } from './SpotDialog';
-import { DELETED_KEY } from './Panel';
 import useAdditionals from '../../hooks/useAdditionals';
 import EditAdditional from './EditAdditional';
+import { ADDITIONAL_ENTITY, CREATED_KEY, DELETED_KEY, SPOT_ENTITY } from './const';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,8 +49,6 @@ const useStyles = makeStyles(theme => ({
 const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
-
-export const ADDITIONAL_ENTITY = 'additional';
 
 function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const classes = useStyles();
