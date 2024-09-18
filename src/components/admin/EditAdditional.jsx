@@ -7,6 +7,7 @@ import createPersistedState from 'use-persisted-state';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import AdditionalsDialog from './AdditionalsDialog';
 import AdditionalsPopup from './AdditionalsPopup';
+import { DELETED_KEY } from './const';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -63,21 +64,23 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
 
   const { Fixe, x, y } = additional;
 
-  // const [selected, setIsSelected] = useState(isSelected);
   const [edit, setEdit] = useState(false);
 
   const handleClick = () => {
-    // setIsSelected(!selected);
     onSelect(additional);
+  };
+
+  const resestUndidStack = () => {
+    setUndidStack({
+      ...undidStack,
+      [placeID]: [],
+    });
   };
 
   const handleEdit = editedAdditional => {
     setEdit(!edit);
     if (editedAdditional) {
-      setUndidStack({
-        ...undidStack,
-        [placeID]: [],
-      });
+      resestUndidStack();
       setUpdateStack({
         ...updateStack,
         [placeID]: [
@@ -89,10 +92,24 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
     }
   };
 
+  const handleDelete = () => {
+    resestUndidStack();
+    setUpdateStack({
+      ...updateStack,
+      [placeID]: [
+        ...updateStack[placeID],
+        {
+          ...additional,
+          [DELETED_KEY]: true,
+        },
+      ],
+    });
+  };
+
   const quickActions = [
     { icon: OpenWith, method: () => {} },
     { icon: Edit, method: handleEdit },
-    { icon: Delete, method: () => {} },
+    { icon: Delete, method: handleDelete },
   ];
 
   return (
@@ -108,6 +125,7 @@ function EditAdditional ({ additional, onSelect = () => {}, isSelected = false }
           info={additional}
           mounted
           onClick={handleClick}
+          isSelected={isSelected}
         />
         {isSelected && quickActions.map(({ icon, method }, index) => {
           const key = `icon-${index}`;

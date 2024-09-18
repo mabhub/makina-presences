@@ -172,6 +172,16 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
         return additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)];
       }
       return additional;
+    })
+    // remove deleted additional
+    .filter(additional => {
+      if (idAdditionalUpdateStack.includes(additional.id)
+        && Object.hasOwn(
+          additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)], DELETED_KEY,
+        )) {
+        return false;
+      }
+      return true;
     });
 
   const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};

@@ -249,6 +249,7 @@ function Panel ({ entity, onClose, handleUpdate }) {
               startIcon={<Delete />}
               className={clsx([classes.btn], [classes.btnDelete])}
               disableElevation
+              onClick={() => handleChange(DELETED_KEY, true)}
             >
               Supprimer
             </Button>
