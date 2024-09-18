@@ -84,7 +84,7 @@ function AdditionalsDialog ({ open, onClose, baseInfo }) {
   const [updateStack] = useUpdateStack();
   const [undidStack] = useUndidStack();
 
-  const additionals = useAdditionals(placeID);
+  const { additionals } = useAdditionals(placeID);
 
   const [info, setInfo] = useState(baseInfo || {
     id: Math.max(...[

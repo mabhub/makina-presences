@@ -157,6 +157,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
 
   const idAdditionalUpdateStack = additionalUpdateStack.map(({ id }) => id);
   const additionals = useAdditionals(placeID)
+    .additionals
     .map(additional => ({
       ...additional,
       entity: ADDITIONAL_ENTITY,
