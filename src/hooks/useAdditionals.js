@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from 'react-query';
 import useTable from './useTable';
+import { CREATED_KEY, DELETED_KEY } from '../components/admin/const';
 
 const {
   VITE_TABLE_ID_ADDITIONALS: tableID,
@@ -23,15 +24,7 @@ const useAdditionals = placeID => {
     `${basePath}?user_field_names=true`,
     { headers, method: 'POST', body: JSON.stringify(record) },
   ), {
-    onMutate: async record => {
-      queryClient.setQueryData(queryKey, previous => ({
-        results: [
-          ...previous.results,
-          { ...record, fake: true, id: record.key },
-        ],
-      }));
-    },
-    onSettled: () => queryClient.invalidateQueries(queryKey),
+    onMutate: () => queryClient.invalidateQueries(queryKey),
   });
 
   const updateRow = useMutation(record => fetch(
@@ -73,13 +66,15 @@ const useAdditionals = placeID => {
   });
 
   const setAdditionnal = additional => {
-    const existingIDs = additionals.map(({ id }) => id);
-
-    if (existingIDs.includes(additional.id)) {
-      return updateAdditional(additional);
+    if (Object.hasOwn(additional, DELETED_KEY)) {
+      return deleteRow.mutateAsync(additional);
     }
 
-    return createAdditional(additional);
+    if (Object.hasOwn(additional, CREATED_KEY)) {
+      return createAdditional(additional);
+    }
+
+    return updateAdditional(additional);
   };
 
   return {

@@ -24,7 +24,7 @@ const useSpots = placeID => {
     `${basePath}?user_field_names=true`,
     { headers, method: 'POST', body: JSON.stringify(record) },
   ), {
-    onSettled: () => queryClient.invalidateQueries(queryKey),
+    onMutate: () => queryClient.invalidateQueries(queryKey),
   });
 
   const updateRow = useMutation(record => fetch(
