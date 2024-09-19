@@ -100,7 +100,7 @@ function AdditionalsDialog ({ open, onClose, baseInfo }) {
     Description: '',
     Fixe: false,
     Tache: false,
-    Plan: plans.find(({ id }) => id === placeID),
+    Plan: [plans.find(({ id }) => id === placeID)],
     x: '0',
     y: '0',
     tris: undefined,
