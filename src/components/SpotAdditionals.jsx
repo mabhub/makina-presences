@@ -63,6 +63,16 @@ const useStyles = makeStyles(theme => ({
   triBadge: {
     border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
   },
+  badgeIcon: {
+    color: alpha('#FF0000', 1),
+    position: 'absolute',
+    width: 15,
+    height: 15,
+    top: '-30%',
+    left: '50%',
+    background: theme.palette.primary.bg,
+    borderRadius: 99,
+  },
   trisLeft: {
     width: 12,
     fontSize: '0.6rem',
@@ -78,15 +88,13 @@ const useStyles = makeStyles(theme => ({
     borderRadius: '6px',
     maxWidth: '300px',
     zIndex: 2,
+    transform: 'translate(-50%, -50%)',
   },
   fixed: {
-    right: 10,
-    transform: 'unset',
     zIndex: 1,
     border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
   },
   popup: {
-    transform: 'translate(-50%, -50%)',
     boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
   },
   header: {
@@ -209,24 +217,12 @@ const SpotAdditionals = ({ additional }) => {
     return 0;
   };
 
-  const getTaskIcon = () => {
-    if (tris.length === 0) {
-      return (
-        <ErrorOutline
-          className={classes.icon}
-          sx={{
-            color: alpha('#FF0000', 1),
-          }}
-        />
-      );
-    }
-    return (
-      <TaskAlt
-        sx={{ color: theme => theme.palette.primary.fg }}
-        className={classes.icon}
-      />
-    );
-  };
+  const getTaskIcon = () => (
+    <HelpOutline
+      sx={{ color: theme => theme.palette.primary.fg }}
+      className={classes.icon}
+    />
+  );
 
   return (
     <>
@@ -247,44 +243,40 @@ const SpotAdditionals = ({ additional }) => {
           }}
           onClick={handleClick}
         >
-          {Tache
-            ? (
-              <>
-                {getTaskIcon()}
-                <Box
-                  className={classes.badges}
-                  sx={{
-                    left: getBadgePosition(),
-                  }}
-                >
-                  {tris
-                    .slice(0, 3)
-                    .map((tri, index) => (
-                      <Box
-                        key={tri}
-                        className={clsx([classes.tri], [classes.triBadge])}
-                        sx={{
-                          zIndex: 3 - index,
-                          marginLeft: index > 0 ? '-10px' : 'unset',
-                        }}
-                      >
-                        {tri}
-                      </Box>
-                    ))}
-                  {trisLeft > 0 && (
-                  <Typography className={classes.trisLeft}>
-                    + {trisLeft}
-                  </Typography>
-                  )}
-                </Box>
-              </>
-            )
-            : (
-              <HelpOutline
-                sx={{ color: theme => theme.palette.primary.fg }}
-                className={classes.icon}
-              />
-            )}
+          {getTaskIcon()}
+          {Tache && tris.length === 0 && (
+            <ErrorOutline
+              className={classes.badgeIcon}
+            />
+          )}
+          {Tache && (
+            <Box
+              className={classes.badges}
+              sx={{
+                left: getBadgePosition(),
+              }}
+            >
+              {tris
+                .slice(0, 3)
+                .map((tri, index) => (
+                  <Box
+                    key={tri}
+                    className={clsx([classes.tri], [classes.triBadge])}
+                    sx={{
+                      zIndex: 3 - index,
+                      marginLeft: index > 0 ? '-10px' : 'unset',
+                    }}
+                  >
+                    {tri}
+                  </Box>
+                ))}
+              {trisLeft > 0 && (
+              <Typography className={classes.trisLeft}>
+                + {trisLeft}
+              </Typography>
+              )}
+            </Box>
+          )}
         </Fab>
       </Tooltip>
       {open && (
