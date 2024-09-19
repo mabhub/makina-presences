@@ -52,7 +52,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
 
-function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
+function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entitySelected }) {
   const classes = useStyles();
   const { place } = useParams();
 
@@ -67,7 +67,10 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen }) {
   const additionalUpdateStack = updateStack[placeID]
     .filter(({ entity }) => entity === ADDITIONAL_ENTITY);
 
-  const [selectedEntity, setSelectedEntity] = useState({});
+  const [selectedEntity, setSelectedEntity] = useState(entitySelected);
+  useEffect(() => {
+    setSelectedEntity({ ...entitySelected });
+  }, [entitySelected]);
 
   const planRef = useRef(null);
   const movingSpotRef = useRef(null);

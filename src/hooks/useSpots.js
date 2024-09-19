@@ -55,11 +55,14 @@ const useSpots = placeID => {
     onSettled: () => queryClient.invalidateQueries(queryKey),
   });
 
-  const createSpot = spot => createRow.mutateAsync({
-    ...spot,
-    Type: spot.Type.id,
-    Plan: [spot.Plan[0].id],
-  });
+  const createSpot = spot => {
+    const { 'Dernière modification': modified, ...rest } = spot;
+    return createRow.mutateAsync({
+      ...rest,
+      Type: rest.Type.id,
+      Plan: [rest.Plan[0].id],
+    });
+  };
 
   const updateSpot = spot => {
     const { 'Dernière modification': modified, ...rest } = spot;
