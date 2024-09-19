@@ -228,12 +228,13 @@ const EditSpot = forwardRef((
 
   const handleDuplicate = () => {
     setShowDialog(true);
-    setInitialSpot({
+    const { id, ...clonedSpot } = {
       ...spot,
       x: parseInt(spot.x, 10) + 15,
       y: parseInt(spot.y, 10) + 15,
       [CREATED_KEY]: true,
-    });
+    };
+    setInitialSpot(clonedSpot);
   };
 
   const handleDuplicateValidation = newSpot => {

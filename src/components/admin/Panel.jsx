@@ -1,4 +1,4 @@
-import { Close, Delete, Edit, OpenWith } from '@mui/icons-material';
+import { Close, ContentCopy, Delete, Edit, OpenWith } from '@mui/icons-material';
 import { alpha, Avatar, Box, Button, Card, CardContent, CardHeader, IconButton, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
@@ -7,8 +7,9 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
 import AdditionalsDialog from './AdditionalsDialog';
 import AdditionalsPopup, { icons } from './AdditionalsPopup';
-import { ADDITIONAL_ENTITY, DELETED_KEY, SPOT_ENTITY } from './const';
+import { ADDITIONAL_ENTITY, CREATED_KEY, DELETED_KEY, SPOT_ENTITY } from './const';
 import SpotForm from './SpotForm';
+import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   cardEdit: {
@@ -21,14 +22,6 @@ const useStyles = makeStyles(theme => ({
     width: '75px',
     marginLeft: theme.spacing(0.5),
   },
-  delete: {
-    width: '100%',
-    margin: theme.spacing(1, 0, 0, 0),
-    padding: theme.spacing(1.5, 0),
-    border: `1.5px solid ${alpha(theme.palette.error.light, 0.5)}`,
-    borderRadius: '8px',
-  },
-
   cardContent: {
     padding: theme.spacing(0, 2),
   },
@@ -40,7 +33,11 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.spacing(5, 2),
-    marginBottom: theme.spacing(3),
+  },
+  actions: {
+    display: 'flex',
+    flexDirection: 'column',
+    paddingTop: theme.spacing(3),
   },
   row: {
     display: 'flex',
@@ -68,7 +65,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function Panel ({ entity, onClose, handleUpdate }) {
+function Panel ({ entity, onClose, handleUpdate, onSelect }) {
   const classes = useStyles();
   const [updateStack, setUpdateStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
@@ -80,6 +77,15 @@ function Panel ({ entity, onClose, handleUpdate }) {
 
   const [entityInfo, setEntityInfo] = useState(entity);
   const [previousSpotInfo, setPreviousSpotInfo] = useState(entityInfo);
+
+  const [isDuplicating, setIsDuplicating] = useState(false);
+
+  const resestUndidStack = () => {
+    setUndidStack({
+      ...undidStack,
+      [placeID]: [],
+    });
+  };
 
   useEffect(() => {
     setEntityInfo({
@@ -113,6 +119,27 @@ function Panel ({ entity, onClose, handleUpdate }) {
     }
   }, [entityInfo]);
 
+  const handleDuplication = newSpot => {
+    if (newSpot) {
+      const { id, ...clonedSpot } = {
+        ...newSpot,
+        x: parseInt(newSpot.x, 10) + 15,
+        y: parseInt(newSpot.y, 10) + 15,
+        [CREATED_KEY]: true,
+      };
+      resestUndidStack();
+      setUpdateStack({
+        ...updateStack,
+        [placeID]: [
+          ...updateStack[placeID],
+          clonedSpot,
+        ],
+      });
+      onSelect(clonedSpot);
+    }
+    setIsDuplicating(false);
+  };
+
   const getAdditionalHeader = () => {
     const { Fixe, Tache } = entity;
     if (Fixe) return 'Fixe';
@@ -131,10 +158,7 @@ function Panel ({ entity, onClose, handleUpdate }) {
   const handleAdditionalUpdate = editedAdditional => {
     setAdditionalOpen(false);
     if (editedAdditional) {
-      setUndidStack({
-        ...undidStack,
-        [placeID]: [],
-      });
+      resestUndidStack();
       setUpdateStack({
         ...updateStack,
         [placeID]: [
@@ -142,9 +166,7 @@ function Panel ({ entity, onClose, handleUpdate }) {
           editedAdditional,
         ],
       });
-      setEntityInfo({
-        ...editedAdditional,
-      });
+      onSelect(editedAdditional);
     }
   };
 
@@ -183,14 +205,40 @@ function Panel ({ entity, onClose, handleUpdate }) {
               spotInfo={entityInfo}
               handleChange={handleChange}
             />
-            <Button
-              size="small"
-              color="error"
-              className={classes.delete}
-              onClick={() => handleChange(DELETED_KEY, true)}
-            >
-              Supprimer Poste
-            </Button>
+            <Box className={classes.actions}>
+              <Box className={classes.row}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disableElevation
+                  className={classes.btn}
+                  startIcon={<OpenWith />}
+                >
+                  Déplacer
+                </Button>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disableElevation
+                  className={classes.btn}
+                  startIcon={<ContentCopy />}
+                  onClick={() => setIsDuplicating(true)}
+                >
+                  Dupliquer
+                </Button>
+              </Box>
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                startIcon={<Delete />}
+                className={clsx([classes.btn], [classes.btnDelete])}
+                disableElevation
+                onClick={() => handleChange(DELETED_KEY, true)}
+              >
+                Supprimer
+              </Button>
+            </Box>
           </CardContent>
         </>
         )}
@@ -221,48 +269,57 @@ function Panel ({ entity, onClose, handleUpdate }) {
                 showPin={false}
               />
             </Box>
-            <Box className={classes.row}>
+            <Box className={classes.actions}>
+              <Box className={classes.row}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disableElevation
+                  className={classes.btn}
+                  startIcon={<OpenWith />}
+                >
+                  Déplacer
+                </Button>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disableElevation
+                  className={classes.btn}
+                  startIcon={<Edit />}
+                  onClick={() => setAdditionalOpen(true)}
+                >
+                  Modifier
+                </Button>
+              </Box>
               <Button
-                variant="contained"
                 fullWidth
-                disableElevation
-                className={classes.btn}
-                startIcon={<OpenWith />}
-              >
-                Déplacer
-              </Button>
-              <Button
                 variant="contained"
-                fullWidth
+                color="error"
+                startIcon={<Delete />}
+                className={clsx([classes.btn], [classes.btnDelete])}
                 disableElevation
-                className={classes.btn}
-                startIcon={<Edit />}
-                onClick={() => setAdditionalOpen(true)}
+                onClick={() => handleChange(DELETED_KEY, true)}
               >
-                Modifier
+                Supprimer
               </Button>
             </Box>
-            <Button
-              fullWidth
-              variant="contained"
-              color="error"
-              startIcon={<Delete />}
-              className={clsx([classes.btn], [classes.btnDelete])}
-              disableElevation
-              onClick={() => handleChange(DELETED_KEY, true)}
-            >
-              Supprimer
-            </Button>
           </CardContent>
         </>
         )}
       </Card>
       {additionalOpen && (
-      <AdditionalsDialog
-        open={additionalOpen}
-        baseInfo={entity}
-        onClose={handleAdditionalUpdate}
-      />
+        <AdditionalsDialog
+          open={additionalOpen}
+          baseInfo={entity}
+          onClose={handleAdditionalUpdate}
+        />
+      )}
+      {isDuplicating && (
+        <SpotDialog
+          open={isDuplicating}
+          onClose={handleDuplication}
+          initialSpot={entity}
+        />
       )}
     </>
   );
