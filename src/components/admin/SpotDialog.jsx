@@ -36,6 +36,7 @@ function SpotDialog ({ open, onClose, initialSpot }) {
   const spotIds = spots
     .concat(updateStack[placeID])
     .map(({ Identifiant }) => Identifiant);
+
   const handleChange = (key, value) => {
     if (key === 'Identifiant') {
       setIdValid(!spotIds.includes(value));

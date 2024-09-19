@@ -144,6 +144,7 @@ function AdminPage () {
                   updatedSpot={updatedSpot}
                   setUpdatedSpot={setUpdatedSpot}
                   panelOpen={showPanel}
+                  entitySelected={entity}
                 />
               )}
             </Box>
@@ -153,6 +154,7 @@ function AdminPage () {
                   entity={entity}
                   onClose={onPanelClose}
                   handleUpdate={handleUpdate}
+                  onSelect={handleClick}
                 />
               )}
             </Box>
