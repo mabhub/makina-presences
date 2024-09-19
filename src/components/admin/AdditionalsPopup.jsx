@@ -1,4 +1,4 @@
-import { Close, Delete, DirectionsBike, DirectionsCar, DryCleaning, HelpOutline } from '@mui/icons-material';
+import { Close, Delete, DirectionsBike, DirectionsCar, DryCleaning, ErrorOutline, HelpOutline } from '@mui/icons-material';
 import { alpha, Box, Button, Divider, Fab, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
@@ -133,6 +133,16 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 99,
     color: theme.palette.mode === 'light' ? 'dark' : 'white',
   },
+  badgeIcon: {
+    color: alpha('#FF0000', 1),
+    position: 'absolute',
+    width: 15,
+    height: 15,
+    top: '-30%',
+    left: '50%',
+    background: theme.palette.primary.bg,
+    borderRadius: 99,
+  },
   btn: {
     marginTop: theme.spacing(1),
     textTransform: 'none',
@@ -232,6 +242,11 @@ function AdditionalsPopup ({
               disabled={!mounted}
             >
               <TaskIcon className={classes.icon} />
+              {Tache && mounted && (
+                <ErrorOutline
+                  className={classes.badgeIcon}
+                />
+              )}
               {Tache && tris && (
                 <Box
                   className={classes.badges}
