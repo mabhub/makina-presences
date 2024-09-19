@@ -1,4 +1,4 @@
-import { Close, ContentCopy, Delete, Edit, OpenWith } from '@mui/icons-material';
+import { Close, ContentCopy, Delete, Edit } from '@mui/icons-material';
 import { alpha, Avatar, Box, Button, Card, CardContent, CardHeader, IconButton, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
@@ -8,8 +8,8 @@ import createPersistedState from 'use-persisted-state';
 import AdditionalsDialog from './AdditionalsDialog';
 import AdditionalsPopup, { icons } from './AdditionalsPopup';
 import { ADDITIONAL_ENTITY, CREATED_KEY, DELETED_KEY, SPOT_ENTITY } from './const';
-import SpotForm from './SpotForm';
 import SpotDialog from './SpotDialog';
+import SpotForm from './SpotForm';
 
 const useStyles = makeStyles(theme => ({
   cardEdit: {
@@ -212,32 +212,23 @@ function Panel ({ entity, onClose, handleUpdate, onSelect }) {
                   fullWidth
                   disableElevation
                   className={classes.btn}
-                  startIcon={<OpenWith />}
-                >
-                  Déplacer
-                </Button>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  disableElevation
-                  className={classes.btn}
                   startIcon={<ContentCopy />}
                   onClick={() => setIsDuplicating(true)}
                 >
                   Dupliquer
                 </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="error"
+                  startIcon={<Delete />}
+                  className={clsx([classes.btn], [classes.btnDelete])}
+                  disableElevation
+                  onClick={() => handleChange(DELETED_KEY, true)}
+                >
+                  Supprimer
+                </Button>
               </Box>
-              <Button
-                fullWidth
-                variant="contained"
-                color="error"
-                startIcon={<Delete />}
-                className={clsx([classes.btn], [classes.btnDelete])}
-                disableElevation
-                onClick={() => handleChange(DELETED_KEY, true)}
-              >
-                Supprimer
-              </Button>
             </Box>
           </CardContent>
         </>
@@ -276,32 +267,23 @@ function Panel ({ entity, onClose, handleUpdate, onSelect }) {
                   fullWidth
                   disableElevation
                   className={classes.btn}
-                  startIcon={<OpenWith />}
-                >
-                  Déplacer
-                </Button>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  disableElevation
-                  className={classes.btn}
                   startIcon={<Edit />}
                   onClick={() => setAdditionalOpen(true)}
                 >
                   Modifier
                 </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="error"
+                  startIcon={<Delete />}
+                  className={clsx([classes.btn], [classes.btnDelete])}
+                  disableElevation
+                  onClick={() => handleChange(DELETED_KEY, true)}
+                >
+                  Supprimer
+                </Button>
               </Box>
-              <Button
-                fullWidth
-                variant="contained"
-                color="error"
-                startIcon={<Delete />}
-                className={clsx([classes.btn], [classes.btnDelete])}
-                disableElevation
-                onClick={() => handleChange(DELETED_KEY, true)}
-              >
-                Supprimer
-              </Button>
             </Box>
           </CardContent>
         </>
