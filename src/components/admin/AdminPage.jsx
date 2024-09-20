@@ -33,6 +33,8 @@ const useStyles = makeStyles(theme => ({
   },
   plan: {
     gridArea: 'b',
+    display: 'flex',
+    flexDirection: 'column',
   },
   editSpot: {
     gridArea: 'c',

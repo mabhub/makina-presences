@@ -23,8 +23,6 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     flexGrow: '1',
     position: 'relatve',
-    backgroundSize: '20px 20px',
-    backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
   },
   cardEdit: {
     position: 'absolute',
@@ -211,67 +209,80 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
 
   const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};
 
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    setScale(1);
+  }, [place]);
+
   return (
-    <Box
-      className={classes.root}
-      onPointerMove={handleMove}
-    >
+    <>
       <ActionBar onUndoRedu={onEntitySelect} />
-      <TransformWrapper
-        ref={planRef}
-        disabled={isEntityMoving}
-        {...transformWrapperProps}
-        id="planContainer"
+      <Box
+        className={classes.root}
+        style={{
+          backgroundSize: `calc(20px * ${scale}) calc(20px * ${scale})`,
+          backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
+        }}
+        onPointerMove={handleMove}
       >
-        <TransformComponent
-          wrapperClass={classes.wrapper}
-          id="plan"
+        <TransformWrapper
+          ref={planRef}
+          disabled={isEntityMoving}
+          onZoom={() => setScale(planRef.current.state.scale)}
+          {...transformWrapperProps}
+          id="planContainer"
         >
-          <Box className={classes.planWrapper}>
-            {plan?.url && (
-            <img
-              src={plan.url}
-              alt=""
-              className={classes.plan}
-              id={place}
-              onLoad={() => {
-                planRef.current.zoomToElement(place, undefined, 300);
-              }}
-            />
-            )}
-            {spots.map(Spot => (
-              <EditSpot
-                key={Spot.Identifiant}
-                spot={Spot}
-                isSelected={selectedEntity.entity === SPOT_ENTITY
+          <TransformComponent
+            wrapperClass={classes.wrapper}
+            id="plan"
+          >
+            <Box className={classes.planWrapper}>
+              {plan?.url && (
+              <img
+                src={plan.url}
+                alt=""
+                className={classes.plan}
+                id={place}
+                onLoad={() => {
+                  planRef.current.zoomToElement(place, undefined, 300);
+                }}
+              />
+              )}
+              {spots.map(Spot => (
+                <EditSpot
+                  key={Spot.Identifiant}
+                  spot={Spot}
+                  isSelected={selectedEntity.entity === SPOT_ENTITY
                   && selectedEntity.Identifiant === Spot.Identifiant
                   && panelOpen}
-                onClick={onEntitySelect}
-                planRef={planRef}
-                ref={movingSpotRef}
-                updatePlanState={updatePlanState}
-                planState={isEntityMoving}
-              />
-            ))}
-            {additionals.map(additional => (
-              <EditAdditional
-                key={additional.Titre}
-                additional={additional}
-                onSelect={onEntitySelect}
-                isSelected={selectedEntity.entity === ADDITIONAL_ENTITY
+                  onClick={onEntitySelect}
+                  planRef={planRef}
+                  ref={movingSpotRef}
+                  updatePlanState={updatePlanState}
+                  planState={isEntityMoving}
+                />
+              ))}
+              {additionals.map(additional => (
+                <EditAdditional
+                  key={additional.Titre}
+                  additional={additional}
+                  onSelect={onEntitySelect}
+                  isSelected={selectedEntity.entity === ADDITIONAL_ENTITY
                     && selectedEntity.id === additional.id
                     && panelOpen}
-                planRef={planRef}
-                ref={movingAdditionalRef}
-                updatePlanState={updatePlanState}
-                planState={isEntityMoving}
-              />
-            ))}
-          </Box>
+                  planRef={planRef}
+                  ref={movingAdditionalRef}
+                  updatePlanState={updatePlanState}
+                  planState={isEntityMoving}
+                />
+              ))}
+            </Box>
 
-        </TransformComponent>
-      </TransformWrapper>
-    </Box>
+          </TransformComponent>
+        </TransformWrapper>
+      </Box>
+    </>
   );
 }
 
