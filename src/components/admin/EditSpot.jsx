@@ -103,6 +103,8 @@ const EditSpot = forwardRef((
     onClick = () => {},
     isSelected,
     planRef,
+    updatePlanState = () => {},
+    planState,
   },
   ref,
 ) => {
@@ -149,9 +151,9 @@ const EditSpot = forwardRef((
     };
   };
 
+  const btnRef = useRef();
   const handleMoveStart = event => {
     event.stopPropagation();
-    setIsMoving(!isMoving);
 
     const { current: { state: { scale } = {} } = {} } = planRef;
     const clicPosition = getPositionAtCenter(document.getElementById(`btn-${spotId}`));
@@ -159,9 +161,14 @@ const EditSpot = forwardRef((
       x: clicPosition.x - (coords.x * scale),
       y: clicPosition.y - (coords.y * scale),
     });
+    updatePlanState(true);
   };
 
-  const btnRef = useRef();
+  useEffect(() => {
+    if (isSelected) {
+      setIsMoving(planState);
+    }
+  }, [planState, isSelected]);
 
   useImperativeHandle(ref, () => {
     if (isMoving) {
@@ -189,12 +196,14 @@ const EditSpot = forwardRef((
         },
       ],
     });
+    // setIsMoving(false);
+    updatePlanState(false);
   };
 
   const handleMoveUndo = event => {
     if (event.keyCode === 27 && isMoving) {
       setCoords({ x, y });
-      setIsMoving(!isMoving);
+      updatePlanState(false);
     }
   };
 

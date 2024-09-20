@@ -48,6 +48,18 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const transformWrapperProps = {
+  minScale: 0.25,
+  panning: {
+    velocityDisabled: true,
+    excluded: ['MuiButtonBase-root', 'MuiSvgIcon-root'],
+  },
+  doubleClick: { disabled: true },
+  zoomAnimation: { disabled: true },
+  alignmentAnimation: { disabled: true },
+  velocityAnimation: { disabled: true },
+};
+
 const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
@@ -81,6 +93,12 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
       ...entity,
     });
     handleClick(entity);
+  };
+
+  const [isEntityMoving, setIsEntityMoving] = useState(false);
+
+  const updatePlanState = state => {
+    setIsEntityMoving(state);
   };
 
   const handleMove = event => {
@@ -205,7 +223,8 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
       <ActionBar onUndoRedu={onEntitySelect} />
       <TransformWrapper
         ref={planRef}
-        disabled
+        disabled={isEntityMoving}
+        {...transformWrapperProps}
         id="planContainer"
       >
         <TransformComponent
@@ -234,6 +253,8 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
                 onClick={onEntitySelect}
                 planRef={planRef}
                 ref={movingSpotRef}
+                updatePlanState={updatePlanState}
+                planState={isEntityMoving}
               />
             ))}
             {additionals.map(additional => (
@@ -246,6 +267,8 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
                     && panelOpen}
                 planRef={planRef}
                 ref={movingAdditionalRef}
+                updatePlanState={updatePlanState}
+                planState={isEntityMoving}
               />
             ))}
           </Box>
