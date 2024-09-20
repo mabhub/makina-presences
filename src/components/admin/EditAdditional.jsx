@@ -60,6 +60,8 @@ const EditAdditional = forwardRef((
     onSelect = () => {},
     isSelected = false,
     planRef,
+    updatePlanState = () => {},
+    planState,
   },
   ref,
 ) => {
@@ -130,7 +132,6 @@ const EditAdditional = forwardRef((
 
   const handleMoveStart = event => {
     event.stopPropagation();
-    setIsMoving(!isMoving);
 
     const { current: { state: { scale } = {} } = {} } = planRef;
     const clicPosition = getPositionAtCenter(document.getElementById(`additional-${id}`));
@@ -138,7 +139,14 @@ const EditAdditional = forwardRef((
       x: clicPosition.x - (coords.x * scale),
       y: clicPosition.y - (coords.y * scale),
     });
+    updatePlanState(true);
   };
+
+  useEffect(() => {
+    if (isSelected) {
+      setIsMoving(planState);
+    }
+  }, [planState, isSelected]);
 
   const snap = (v, a = 5) => Math.round(v / a) * a;
   const getNewPosition = event => {
@@ -177,6 +185,7 @@ const EditAdditional = forwardRef((
         },
       ],
     });
+    updatePlanState(false);
   };
 
   const quickActions = [
@@ -196,7 +205,7 @@ const EditAdditional = forwardRef((
   const handleMoveUndo = () => {
     if (isMoving) {
       setCoords({ x, y });
-      setIsMoving(!isMoving);
+      updatePlanState(false);
     }
   };
 
