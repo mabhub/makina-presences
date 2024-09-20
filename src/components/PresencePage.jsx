@@ -164,7 +164,6 @@ const PresencePage = () => {
   };
 
   const getDraftTabStyle = placeName => {
-    console.log(placeName);
     if (placeName === place) {
       return selectedDraftStyle;
     }
