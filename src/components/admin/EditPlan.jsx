@@ -195,8 +195,6 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
       return true;
     });
 
-  console.log(additionals);
-
   const { plan: [plan] = [] } = planUpdate.find(({ Name }) => Name === place) || {};
 
   return (
