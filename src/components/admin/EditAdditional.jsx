@@ -2,7 +2,7 @@ import { Delete, Edit, OpenWith } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import createPersistedState from 'use-persisted-state';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import AdditionalsDialog from './AdditionalsDialog';
@@ -149,10 +149,13 @@ const EditAdditional = forwardRef((
     };
   };
 
+  const popupRef = useRef(null);
+
   useImperativeHandle(ref, () => {
     if (isMoving) {
       return {
         handleMove (event) {
+          popupRef.current.focus();
           setCoords({
             ...getNewPosition(event),
           });
@@ -190,6 +193,13 @@ const EditAdditional = forwardRef((
     }
   };
 
+  const handleMoveUndo = () => {
+    if (isMoving) {
+      setCoords({ x, y });
+      setIsMoving(!isMoving);
+    }
+  };
+
   return (
     <>
       <Box
@@ -205,6 +215,8 @@ const EditAdditional = forwardRef((
             mounted
             onClick={handleClick}
             isSelected={isSelected}
+            cancelMoving={handleMoveUndo}
+            popupRef={popupRef}
           />
         </div>
         {isSelected && (!isMoving) && quickActions.map(({ icon, method }, index) => {
@@ -245,6 +257,14 @@ const EditAdditional = forwardRef((
           onClose={handleEdit}
           baseInfo={additional}
         />
+      )}
+      {isMoving && (
+      <AdditionalsPopup
+        info={additional}
+        mounted
+        isSelected={isSelected}
+        isGhost
+      />
       )}
     </>
   );

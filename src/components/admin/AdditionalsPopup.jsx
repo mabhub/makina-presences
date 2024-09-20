@@ -23,6 +23,12 @@ const useStyles = makeStyles(theme => ({
     minWidth: '200px',
     maxWidth: '300px',
   },
+  ghost: {
+    position: 'absolute',
+    opacity: 0.4,
+    top: 0,
+    transform: 'translate(-50%, -50%)',
+  },
 
   additional: {
     backgroundColor: theme.palette.primary,
@@ -72,6 +78,10 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.bg,
     padding: theme.spacing(1.5),
     borderRadius: '6px',
+    textTransform: 'none',
+    border: 'unset',
+    textAlign: 'left',
+    outline: 'none',
   },
   selectedAdditionalContent: {
     borderColor: `${theme.palette.primary.main} !important`,
@@ -79,10 +89,12 @@ const useStyles = makeStyles(theme => ({
   mountedAdditionalContent: {
     zIndex: 2,
     minWidth: '200px',
+    width: 'max-content',
     maxWidth: '300px',
   },
   fixed: {
     border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    outline: 'none',
   },
   mountedFixed: {
     '&:hover': {
@@ -171,10 +183,13 @@ function AdditionalsPopup ({
   showPin = true,
   onClick = () => {},
   isSelected,
+  cancelMoving,
+  popupRef,
+  isGhost = false,
 }) {
   const classes = useStyles();
 
-  const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon } = info;
+  const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon, x, y } = info;
   const trisLeft = tris.length - 3;
 
   const body = 'body2';
@@ -220,8 +235,23 @@ function AdditionalsPopup ({
     onClick(event);
   };
 
+  const handleMoveUndo = event => {
+    if (event.keyCode === 27 && mounted) {
+      cancelMoving();
+    }
+  };
+
   return (
-    <Box className={clsx({ [classes.root]: !mounted })}>
+    <Box
+      className={clsx({
+        [classes.root]: !mounted,
+        [classes.ghost]: isGhost,
+      })}
+      style={{
+        left: isGhost ? `${x}px` : 'unset',
+        top: isGhost ? `${y}px` : 'unset',
+      }}
+    >
       {showPin && (
         <Tooltip
           title={Titre}
@@ -240,6 +270,8 @@ function AdditionalsPopup ({
               }}
               onClick={handleClick}
               disabled={!mounted}
+              onKeyDown={handleMoveUndo}
+              ref={popupRef}
             >
               <TaskIcon className={classes.icon} />
               {Tache && mounted && (
@@ -287,6 +319,9 @@ function AdditionalsPopup ({
             [classes.popup]: !Fixe,
           })}
           onClick={handleClick}
+          component="button"
+          onKeyDown={handleMoveUndo}
+          ref={popupRef}
         >
           <Box className={classes.header}>
             <Typography variant={Fixe ? 'h6' : 'unset'} sx={{ fontWeight: 'bold' }} className={classes.text}>

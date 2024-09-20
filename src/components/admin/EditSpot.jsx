@@ -192,7 +192,7 @@ const EditSpot = forwardRef((
   };
 
   const handleMoveUndo = event => {
-    if (event.keyCode === 27) {
+    if (event.keyCode === 27 && isMoving) {
       setCoords({ x, y });
       setIsMoving(!isMoving);
     }
