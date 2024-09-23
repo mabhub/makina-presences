@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => {
         "a a a"
         "b c c"
         "b c c"`,
-      gridTemplateColumns: '1fr 3fr',
+      gridTemplateColumns: '300px 3fr',
       gridTemplateRows: 'auto 1fr',
       [maxWidth('sm')]: {
         gridTemplateAreas: `
