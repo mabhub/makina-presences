@@ -291,6 +291,7 @@ const SpotDialog = ({
             {displayFavorite && favoriteSpots.length >= 1 && <option disabled>────────────</option>}
             {spots
               .filter(spot => !favoriteSpots.includes(spot) || !displayFavorite)
+              .filter(({ Type: { value } = {} }) => value !== 'Parking' || displayFavorite)
               .map(({
                 id,
                 Identifiant: spot,

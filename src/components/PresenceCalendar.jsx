@@ -99,7 +99,7 @@ const PresenceCalendar = () => {
   const [tri] = useTriState('');
   const [weekPref] = useWeekPrefs('2');
   const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
-  const [showPastDays] = usePastDays();
+  const [showPastDays] = usePastDays(true);
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
   const history = useHistory();
 

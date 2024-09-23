@@ -142,11 +142,11 @@ const PreferencesFavorites = () => {
 
   return (
     <>
-      <Divider textAlign="left"> Favoris </Divider>
+      <Divider textAlign="left"> Préférences </Divider>
       <List className={classes.root} dense>
         <ListItem>
           <ListItemIcon sx={{ marginRight: '-25px' }}><Room /></ListItemIcon>
-          <ListItemText primary="Agence" />
+          <ListItemText primary="Agence par défaut" />
           <FormControl size="small">
             <Select
               className={classes.select}
@@ -163,7 +163,7 @@ const PreferencesFavorites = () => {
         </ListItem>
         <ListItem>
           <ListItemIcon sx={{ marginRight: '-25px' }}><Computer /></ListItemIcon>
-          <ListItemText primary="Postes" />
+          <ListItemText primary="Postes favoris" />
           <Chip
             label="Ajouter"
             size="small"
