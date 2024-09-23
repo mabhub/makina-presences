@@ -74,7 +74,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
   afternoon: {
-    cursor: 'pointer',
     '&:hover *[class^="makeStyles-bottom"]': {
       backgroundColor: alpha(theme.palette.primary.main, 0.25),
       transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -115,6 +114,9 @@ const useStyles = makeStyles(theme => ({
   },
   fullDayPending: {
     backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.main,
+    },
   },
 
   badge: {
@@ -219,8 +221,6 @@ const SpotButton = ({
   const [fullDays, mornings, afternoons] = getPresence();
 
   const [presenceFullDay] = fullDays;
-  const [presenceMorning, ...restMorning] = mornings;
-  const [presenceAfternon, ...restAfternoon] = afternoons;
 
   const restFullDay = React.useMemo(
     () => fullDays?.slice(1) || [],
@@ -230,9 +230,7 @@ const SpotButton = ({
   const isLocked = Boolean(blocked);
   const isConflict = Boolean(restFullDay.length);
   const isOccupied = Boolean(presenceFullDay || (mornings.length === 1 && afternoons.length === 1));
-  const isOwnSpot = Boolean(sameLowC(presenceFullDay?.tri, ownTri)
-    || sameLowC(presenceMorning?.tri, ownTri)
-    || sameLowC(presenceAfternon?.tri, ownTri));
+  const isOwnSpot = spotPresences[spotId]?.some(({ tri }) => sameLowC(tri, ownTri));
   const isCumulative = Boolean(Cumul);
 
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
@@ -251,10 +249,14 @@ const SpotButton = ({
     }
   }, [fullDays, handleConflict, isConflict, ownTri, restFullDay]);
 
+  const getCurrentPresence = precensePeriod => precensePeriod.find(
+    ({ tri }) => sameLowC(tri, ownTri),
+  );
+
   const removePresence = period => {
-    if (period === FULLDAY_PERIOD) deletePresence(presenceFullDay);
-    if (period === MORNING_PERIOD) deletePresence(presenceMorning);
-    if (period === AFTERNOON_PERIOD) deletePresence(presenceAfternon);
+    if (period === FULLDAY_PERIOD) deletePresence(getCurrentPresence(fullDays));
+    if (period === MORNING_PERIOD) deletePresence(getCurrentPresence(mornings));
+    if (period === AFTERNOON_PERIOD) deletePresence(getCurrentPresence(afternoons));
   };
 
   const [contextualMenu, setContextualMenu] = useState(false);
@@ -317,7 +319,7 @@ const SpotButton = ({
 
   return (
     <>
-      {(isConflict || Boolean(restAfternoon.length) || Boolean(restMorning.length)) && (
+      {(isConflict || Boolean(afternoons.length > 1) || Boolean(mornings.length > 1)) && (
         <Tooltip
           title="Attention, plusieurs personnes sont inscris sur ce poste."
           placement="right"
@@ -345,8 +347,10 @@ const SpotButton = ({
             [classes.fullDay]: currentTriPeriod() === FULLDAY_PERIOD,
             [classes.fullDayPending]: currentTriPeriod() === FULLDAY_PERIOD
               && presenceFullDay?.fake,
-            [classes.morning]: currentTriPeriod() === MORNING_PERIOD,
-            [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD,
+            [classes.morning]: currentTriPeriod() === MORNING_PERIOD
+             && !mornings.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
+            [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD
+              && !afternoons.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
             [classes.locked]: isLocked,
             [`hl-${presenceFullDay?.tri}`]: presenceFullDay?.tri,
             [classes.morningAvailable]: mornings.length === 0
@@ -373,7 +377,8 @@ const SpotButton = ({
             if ((afternoons.length === 1 && afternoons[0].tri !== ownTri) || event.ctrlKey) {
               return morningOnly();
             }
-            if (sameLowC(afternoons[0]?.tri, ownTri) || sameLowC(mornings[0]?.tri, ownTri)) {
+            if (afternoons.some(({ tri }) => sameLowC(tri, ownTri))
+              || mornings.some(({ tri }) => sameLowC(tri, ownTri))) {
               return handleClick(currentTriPeriod());
             }
             return fullDay();
