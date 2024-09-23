@@ -29,6 +29,7 @@ const useStyles = makeStyles(theme => ({
   },
   tri: {
     marginRight: theme.spacing(0.5),
+    marginLeft: theme.spacing(0.5),
     height: theme.spacing(2.5),
     '& .MuiChip-label': {
       padding: theme.spacing(0.5, 1, 0.5, 1),
@@ -164,13 +165,16 @@ const Plan = ({ edit }) => {
             isClosed: true,
           }))}
         >
-          <AlertTitle><strong>Veuillez changer de poste.</strong></AlertTitle>
+          <AlertTitle><strong>Attention</strong></AlertTitle>
+          Vous êtes inscris sur le même poste que
           <TriPresence
             tri={snackBarInfo.currentTri}
             alt
             className={classes.tri}
           />
-          vient de réserver <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
+          (<strong>{snackBarInfo.currentSpot}</strong>)
+          <br />
+          Discutez-en avec lui ou changez de poste.
         </Alert>
       </Snackbar>
     </>

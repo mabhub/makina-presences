@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
 
+import { ErrorOutline } from '@mui/icons-material';
 import { Divider, Fab, Grid, Tooltip } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
@@ -112,6 +113,18 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: alpha(theme.palette.primary.main, 0.5),
     },
   },
+  fullDayPending: {
+    backgroundColor: theme.palette.secondary.main,
+  },
+
+  badge: {
+    position: 'absolute',
+    color: theme.palette.error.main,
+    background: theme.palette.primary.bg,
+    borderRadius: 99,
+    zIndex: 1,
+    transform: 'translate(10%, -100%)',
+  },
 
 }));
 
@@ -129,7 +142,7 @@ const SpotButton = ({
   onConflict = () => {},
 }) => {
   const classes = useStyles();
-  const [tri] = useTriState('');
+  const [ownTri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
   const spots = useSpots(place);
@@ -197,38 +210,41 @@ const SpotButton = ({
 
   const currentTriPeriod = () => {
     const spoIdtPresences = getPresence();
-    if (spoIdtPresences[0].some(({ tri: t }) => t === tri)) return FULLDAY_PERIOD;
-    if (spoIdtPresences[1].some(({ tri: t }) => t === tri)) return MORNING_PERIOD;
-    if (spoIdtPresences[2].some(({ tri: t }) => t === tri)) return AFTERNOON_PERIOD;
+    if (spoIdtPresences[0].some(({ tri }) => tri === ownTri)) return FULLDAY_PERIOD;
+    if (spoIdtPresences[1].some(({ tri }) => tri === ownTri)) return MORNING_PERIOD;
+    if (spoIdtPresences[2].some(({ tri }) => tri === ownTri)) return AFTERNOON_PERIOD;
     return undefined;
   };
 
   const [fullDays, mornings, afternoons] = getPresence();
 
   const [presenceFullDay, ...restFullDay] = fullDays;
-  const [presenceMorning] = mornings;
-  const [presenceAfternon] = afternoons;
+  const [presenceMorning, ...restMorning] = mornings;
+  const [presenceAfternon, ...restAfternoon] = afternoons;
 
   const isLocked = Boolean(blocked);
   const isConflict = Boolean(restFullDay.length);
   const isOccupied = Boolean(presenceFullDay || (mornings.length === 1 && afternoons.length === 1));
-  const isOwnSpot = Boolean(sameLowC(presenceFullDay?.tri, tri)
-    || sameLowC(presenceMorning?.tri, tri)
-    || sameLowC(presenceAfternon?.tri, tri));
+  const isOwnSpot = Boolean(sameLowC(presenceFullDay?.tri, ownTri)
+    || sameLowC(presenceMorning?.tri, ownTri)
+    || sameLowC(presenceAfternon?.tri, ownTri));
   const isCumulative = Boolean(Cumul);
 
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
+  const handleConflict = React.useCallback(
+    (value, tri) => onConflict(value, tri, spotId),
+    [onConflict, spotId],
+  );
+
   useEffect(() => {
-    if (isConflict) {
-      onConflict(
+    if (isConflict && restFullDay.some(({ tri }) => sameLowC(ownTri, tri))) {
+      handleConflict(
         isConflict,
-        fullDays.find(({ tri: t }) => tri !== t).tri,
-        spotId,
+        fullDays.find(({ tri: t }) => ownTri !== t).tri,
       );
-      deletePresence({ id: fullDays.find(({ tri: t }) => t === tri).id });
     }
-  }, [isConflict]);
+  }, [fullDays, handleConflict, isConflict, ownTri, restFullDay]);
 
   const removePresence = period => {
     if (period === FULLDAY_PERIOD) deletePresence(presenceFullDay);
@@ -248,18 +264,18 @@ const SpotButton = ({
 
     if ((!isOccupied && !isLocked) || (currentTriPeriod())) {
       const [firstId, ...extraneous] = dayPresences
-        ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
+        ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points
         .filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
         .filter(() => !isCumulative)
         .map(({ id }) => id) || [];
 
-      setPresence({ id: firstId, day, tri, spot: spotId, plan: place, period: p });
+      setPresence({ id: firstId, day, tri: ownTri, spot: spotId, plan: place, period: p });
       extraneous.forEach(i => deletePresence({ id: i }));
     }
 
     const [previousPeriod] = dayPresences
       .filter(({ spot: s }) => !isCumulativeSpot(s))
-      .filter(({ tri: t }) => sameLowC(t, tri))
+      .filter(({ tri: t }) => sameLowC(t, ownTri))
       .map(({ period }) => period);
     if (isOwnSpot && previousPeriod === p) {
       return unsubscribe();
@@ -281,9 +297,9 @@ const SpotButton = ({
   const contextualMenuItems = [
     { item: 'Journée entière',
       action: fullDay,
-      disabled: mornings.filter(({ tri: t }) => !sameLowC(t, tri)).length > 0
-        || afternoons.filter(({ tri: t }) => !sameLowC(t, tri)).length > 0
-        || fullDays.filter(({ tri: t }) => sameLowC(t, tri)).length === 1 },
+      disabled: mornings.filter(({ tri: t }) => !sameLowC(t, ownTri)).length > 0
+        || afternoons.filter(({ tri: t }) => !sameLowC(t, ownTri)).length > 0
+        || fullDays.filter(({ tri: t }) => sameLowC(t, ownTri)).length === 1 },
     { item: 'Matinée uniquement', action: morningOnly, disabled: mornings.length > 0 },
     { item: 'Après-midi uniquement', action: afternoonOnly, disabled: afternoons.length > 0 },
     { item: 'separator', separator: true },
@@ -296,6 +312,20 @@ const SpotButton = ({
 
   return (
     <>
+      {(isConflict || Boolean(restAfternoon.length) || Boolean(restMorning.length)) && (
+        <Tooltip
+          title="Attention, plusieurs personnes sont inscris sur ce poste."
+          placement="right"
+        >
+          <ErrorOutline
+            className={classes.badge}
+            style={{
+              left: `${x}px`,
+              top: `${y}px`,
+            }}
+          />
+        </Tooltip>
+      )}
       <CustomTooltip
         key={spotId}
         title={(!edit && !isPast) ? tooltip : ''}
@@ -308,6 +338,8 @@ const SpotButton = ({
             [classes.fullDayAvailable]: mornings.length === 0 && afternoons.length === 0,
             [classes.occupied]: isOccupied && !isOwnSpot,
             [classes.fullDay]: currentTriPeriod() === FULLDAY_PERIOD,
+            [classes.fullDayPending]: currentTriPeriod() === FULLDAY_PERIOD
+              && presenceFullDay?.fake,
             [classes.morning]: currentTriPeriod() === MORNING_PERIOD,
             [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD,
             [classes.locked]: isLocked,
@@ -330,13 +362,13 @@ const SpotButton = ({
           onDragEnd={edit && handleDragEnd}
           onClick={event => {
             if (isCumulative && currentTriPeriod()) return unsubscribe();
-            if (mornings.length === 1 && mornings[0].tri !== tri) {
+            if (mornings.length === 1 && mornings[0].tri !== ownTri) {
               return afternoonOnly();
             }
-            if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
+            if ((afternoons.length === 1 && afternoons[0].tri !== ownTri) || event.ctrlKey) {
               return morningOnly();
             }
-            if (sameLowC(afternoons[0]?.tri, tri) || sameLowC(mornings[0]?.tri, tri)) {
+            if (sameLowC(afternoons[0]?.tri, ownTri) || sameLowC(mornings[0]?.tri, ownTri)) {
               return handleClick(currentTriPeriod());
             }
             return fullDay();
@@ -353,15 +385,20 @@ const SpotButton = ({
           }}
         >
           {afternoons.length === 0 && mornings.length === 0
-            ? ((!edit && presenceFullDay?.tri) || spotId)
+            ? ((!edit && !isConflict && presenceFullDay?.tri)
+              || (isConflict && (fullDays
+                .some(({ tri }) => sameLowC(ownTri, tri))
+                ? fullDays.find(({ tri }) => sameLowC(ownTri, tri)).tri
+                : presenceFullDay.tri)
+              )
+              || spotId)
             : (
               <Grid container>
                 {['top', 'bottom'].map((position, i) => (
                   <React.Fragment key={position}>
                     <SpotButtonHalfDay
                       presences={position === 'top' ? mornings : afternoons}
-                      onConflict={onConflict}
-                      spot={spot}
+                      onConflict={handleConflict}
                       disabled={isPast}
                       position={position}
                     />
