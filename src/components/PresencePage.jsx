@@ -107,7 +107,6 @@ const useStyles = makeStyles(theme => {
           width: '100%',
           height: '30px',
           background: theme.palette.primary.elevated,
-          // background: 'orange',
         },
       },
     },
