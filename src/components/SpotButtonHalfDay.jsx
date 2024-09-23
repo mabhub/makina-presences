@@ -67,6 +67,8 @@ function SpotButtonHaldDay ({ presences, onConflict, disabled, position }) {
     if (isConflict && rest.some(({ tri }) => sameLowC(ownTri, tri))) {
       onConflict(isConflict,
         presences.find(({ tri: t }) => ownTri !== t).tri);
+    } else {
+      onConflict(false);
     }
   }, [isConflict]);
 
