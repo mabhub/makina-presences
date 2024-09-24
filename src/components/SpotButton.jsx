@@ -315,7 +315,7 @@ const SpotButton = ({
     <>
       {(isConflict || Boolean(afternoons.length > 1) || Boolean(mornings.length > 1)) && (
         <Tooltip
-          title="Attention, plusieurs personnes sont inscris sur ce poste."
+          title="Plusieurs personnes sont inscrites sur ce poste"
           placement="right"
         >
           <ErrorOutline
