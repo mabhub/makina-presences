@@ -208,6 +208,7 @@ const PresenceCalendar = () => {
                 <DayHeader
                   date={isoDate}
                   presence={currentTodayPresences}
+                  presences={todayPresences}
                   tri={tri}
                   place={place}
                   isHoliday={isHoliday}
