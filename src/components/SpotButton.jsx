@@ -11,6 +11,7 @@ import { Divider, Fab, Grid, Tooltip } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
+import { FF_HALFDAY, isEnable } from '../feature_flag_service';
 import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
@@ -20,7 +21,7 @@ import SpotDescription from './SpotDescription';
 
 const useTriState = createPersistedState('tri');
 
-const { VITE_TABLE_ID_SPOTS: spotsTableId, VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
+const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
 export const FULLDAY_PERIOD = 'fullday';
 export const MORNING_PERIOD = 'morning';
@@ -42,6 +43,9 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     fontSize: '0.75em',
+    '&:hover': {
+      background: 'unset',
+    },
   },
 
   fullDayAvailable: {
@@ -146,6 +150,8 @@ const SpotButton = ({
   const classes = useStyles();
   const [ownTri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
+
+  const enableHalfDay = isEnable(FF_HALFDAY);
 
   const spots = useSpots(place);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
@@ -384,7 +390,7 @@ const SpotButton = ({
             return fullDay();
           }}
           onContextMenu={event => {
-            if (enableHalfDay === 'false') return null;
+            if (!enableHalfDay) return null;
             event.preventDefault();
 
             if (event.ctrlKey) return afternoonOnly();
