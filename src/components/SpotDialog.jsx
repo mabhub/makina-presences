@@ -91,8 +91,6 @@ const SpotDialog = ({
       ...acc,
       [spot]: tri,
     }), {});
-  console.log(presences);
-  console.log(spotPresences);
 
   const spots = useSpots(selectedPlace)
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
