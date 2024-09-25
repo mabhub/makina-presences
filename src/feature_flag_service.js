@@ -7,6 +7,7 @@ export const FF_WEEKDAY = 'weekDay';
 export const FF_AGENCY = 'agency';
 export const FF_FAVORITE = 'favorite';
 export const FF_HALFDAY = 'halfDay';
+export const FF_COMPLEMENTARY = 'complementayInformation';
 
 const baseFlags = [
   FF_FULLSCREEN,
@@ -16,12 +17,14 @@ const baseFlags = [
   FF_AGENCY,
   FF_FAVORITE,
   FF_HALFDAY,
+  FF_COMPLEMENTARY,
 ];
 
 const getFeatureFlags = () => {
   const parsedFlag = flags.split(',');
-  if (parsedFlag.includes('*')) return baseFlags;
-  return baseFlags.filter(flag => parsedFlag.includes(flag));
+  const ff = baseFlags.filter(flag => !parsedFlag.includes(`-${flag}`));
+  if (parsedFlag.includes('*')) return ff;
+  return ff.filter(flag => parsedFlag.includes(flag));
 };
 
 const featureFlags = getFeatureFlags();

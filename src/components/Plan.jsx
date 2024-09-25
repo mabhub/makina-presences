@@ -11,6 +11,7 @@ import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
+import { FF_COMPLEMENTARY, isEnable } from '../feature_flag_service';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -73,6 +74,8 @@ const Children = ({ children }) => children;
 
 const Plan = ({ edit }) => {
   const classes = useStyles();
+
+  const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
   const plans = usePlans();
   const { place } = useParams();
@@ -142,7 +145,7 @@ const Plan = ({ edit }) => {
               />
             ))}
 
-            {additionals
+            {enableComplementary && additionals
               .map(additional => (
                 <SpotAdditionals
                   key={additional.Titre}

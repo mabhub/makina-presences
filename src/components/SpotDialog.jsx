@@ -27,8 +27,7 @@ import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
-
-const { VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
+import { FF_FAVORITE, FF_HALFDAY, isEnable } from '../feature_flag_service';
 
 const useStyles = makeStyles(theme => ({
   buttonGroup: {
@@ -53,7 +52,6 @@ const useStyles = makeStyles(theme => ({
   },
 
   optionsTitle: {
-    // margin: theme.spacing(2, 0, 1, 2),
     opacity: 0.5,
   },
   options: {
@@ -74,6 +72,9 @@ const SpotDialog = ({
   const [favorites] = useFavoritesState([]);
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
+
+  const enableFavorite = isEnable(FF_FAVORITE);
+  const enableHalfDay = isEnable(FF_HALFDAY);
 
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
 
@@ -107,12 +108,13 @@ const SpotDialog = ({
     .find(({ Identifiant: spot }) => !spotPresences[spot] && displayFavorite);
 
   const [selectedValue, setSelectedValue] = React.useState((
-    defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
+    enableFavorite && defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
   ));
 
   const addDefaultSelect = () => {
     if (favoriteSpots.filter(({ Identifiant: spot }) => !spotPresences[spot]).length >= 1
-        && displayFavorite) {
+        && displayFavorite
+        && enableFavorite) {
       return '';
     }
     return <option aria-label="Aucun" value="" />;
@@ -162,7 +164,7 @@ const SpotDialog = ({
   };
 
   useEffect(() => {
-    if (defaultFavoriteSpot) {
+    if (defaultFavoriteSpot && enableFavorite) {
       setSelectedValue(defaultFavoriteSpot.Identifiant);
     } else {
       setSelectedValue('');
@@ -223,7 +225,7 @@ const SpotDialog = ({
             }}
           >
             {addDefaultSelect()}
-            {displayFavorite && favoriteSpots.length >= 1 && (
+            {displayFavorite && enableFavorite && favoriteSpots.length >= 1 && (
               <optgroup label="Vos Favoris">
                 {favoriteSpots.map(({
                   id,
@@ -234,9 +236,12 @@ const SpotDialog = ({
 
               </optgroup>
             )}
-            {displayFavorite && favoriteSpots.length >= 1 && <option disabled>────────────</option>}
+            {displayFavorite
+              && enableFavorite
+              && favoriteSpots.length >= 1
+              && <option disabled>────────────</option>}
             {spots
-              .filter(spot => !favoriteSpots.includes(spot) || !displayFavorite)
+              .filter(spot => !favoriteSpots.includes(spot) || !displayFavorite || !enableFavorite)
               .filter(({ Type: { value } = {} }) => value !== 'Parking' || displayFavorite)
               .map(({
                 id,
