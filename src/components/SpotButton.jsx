@@ -11,7 +11,7 @@ import { Divider, Fab, Grid, Tooltip } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
-import { FF_HALFDAY, isEnable } from '../feature_flag_service';
+import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
@@ -151,7 +151,7 @@ const SpotButton = ({
   const [ownTri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
-  const enableHalfDay = isEnable(FF_HALFDAY);
+  const enableHalfDay = isEnable(baseFlags.FF_HALFDAY);
 
   const spots = useSpots(place);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);

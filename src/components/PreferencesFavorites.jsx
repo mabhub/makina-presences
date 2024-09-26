@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
 import SpotDialog from './SpotDialog';
-import { FF_AGENCY, FF_FAVORITE, isEnable } from '../feature_flag_service';
+import { baseFlags, isEnable } from '../feature_flag_service';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -49,8 +49,8 @@ const PreferencesFavorites = () => {
   const plans = usePlans();
   const classes = useStyles();
 
-  const enableAgency = isEnable(FF_AGENCY);
-  const enableFavorite = isEnable(FF_FAVORITE);
+  const enableAgency = isEnable(baseFlags.FF_AGENCY);
+  const enableFavorite = isEnable(baseFlags.FF_FAVORITE);
 
   const agencies = [{ Name: NO_AGENCYPREF_LABEL }].concat(plans);
   const [agencyPref, setAgencyPref] = useAgencyPref();
