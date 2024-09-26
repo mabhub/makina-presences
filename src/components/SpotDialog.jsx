@@ -27,7 +27,7 @@ import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
-import { FF_FAVORITE, FF_HALFDAY, isEnable } from '../feature_flag_service';
+import { baseFlags, isEnable } from '../feature_flag_service';
 
 const useStyles = makeStyles(theme => ({
   buttonGroup: {
@@ -73,8 +73,8 @@ const SpotDialog = ({
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
 
-  const enableFavorite = isEnable(FF_FAVORITE);
-  const enableHalfDay = isEnable(FF_HALFDAY);
+  const enableFavorite = isEnable(baseFlags.FF_FAVORITE);
+  const enableHalfDay = isEnable(baseFlags.FF_HALFDAY);
 
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
 

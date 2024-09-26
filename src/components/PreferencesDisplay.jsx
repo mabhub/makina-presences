@@ -4,7 +4,7 @@ import createPersistedState from 'use-persisted-state';
 import { CalendarToday, DarkMode, EventBusy, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
 import { alpha, Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { FF_PASTDAYS, FF_WEEKDAY, FF_WEEKPREF, isEnable } from '../feature_flag_service';
+import { baseFlags, isEnable } from '../feature_flag_service';
 
 const useMaxWidthState = createPersistedState('useMaxWidth');
 const useThemePrefs = createPersistedState('themePref');
@@ -36,10 +36,10 @@ const PreferenceDisplay = () => {
   const [dayPrefs, setDayPrefs] = useDayPrefs(weekDay);
   const [pastDays, setPastDays] = usePastDays(true);
 
-  const enableFullScreen = isEnable(FF_PASTDAYS);
-  const enableWeekPref = isEnable(FF_WEEKPREF);
-  const enablePastDays = isEnable(FF_PASTDAYS);
-  const enableDayPref = isEnable(FF_WEEKDAY);
+  const enableFullScreen = isEnable(baseFlags.FF_FULLSCREEN);
+  const enableWeekPref = isEnable(baseFlags.FF_WEEKPREF);
+  const enablePastDays = isEnable(baseFlags.FF_PASTDAYS);
+  const enableDayPref = isEnable(baseFlags.FF_WEEKDAY);
 
   const classes = useStyles();
 
