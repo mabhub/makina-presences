@@ -60,6 +60,8 @@ const useStyles = makeStyles(theme => ({
 }));
 const useFavoritesState = createPersistedState('favorites');
 
+const { FF_FAVORITE, FF_HALFDAY } = baseFlags;
+
 const SpotDialog = ({
   open,
   fastOpen,
@@ -73,8 +75,8 @@ const SpotDialog = ({
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
 
-  const enableFavorite = isEnable(baseFlags.FF_FAVORITE);
-  const enableHalfDay = isEnable(baseFlags.FF_HALFDAY);
+  const enableFavorite = isEnable(FF_FAVORITE);
+  const enableHalfDay = isEnable(FF_HALFDAY);
 
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
 

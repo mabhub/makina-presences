@@ -13,6 +13,8 @@ import { baseFlags, isEnable } from '../feature_flag_service';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
+const { FF_AGENCY, FF_FAVORITE } = baseFlags;
+
 const useStyles = makeStyles(theme => ({
   root: {
     paddingTop: '0',
@@ -49,8 +51,8 @@ const PreferencesFavorites = () => {
   const plans = usePlans();
   const classes = useStyles();
 
-  const enableAgency = isEnable(baseFlags.FF_AGENCY);
-  const enableFavorite = isEnable(baseFlags.FF_FAVORITE);
+  const enableAgency = isEnable(FF_AGENCY);
+  const enableFavorite = isEnable(FF_FAVORITE);
 
   const agencies = [{ Name: NO_AGENCYPREF_LABEL }].concat(plans);
   const [agencyPref, setAgencyPref] = useAgencyPref();
