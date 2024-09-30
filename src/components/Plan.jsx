@@ -13,6 +13,8 @@ import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
 
+const { FF_COMPLEMENTARY } = baseFlags;
+
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
 const useStyles = makeStyles(theme => ({
@@ -75,7 +77,7 @@ const Children = ({ children }) => children;
 const Plan = ({ edit }) => {
   const classes = useStyles();
 
-  const enableComplementary = isEnable(baseFlags.FF_COMPLEMENTARY);
+  const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
   const plans = usePlans();
   const { place } = useParams();

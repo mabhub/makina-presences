@@ -6,6 +6,8 @@ import { alpha, Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
 
+const { FF_FULLSCREEN, FF_WEEKPREF, FF_WEEKDAY, FF_PASTDAYS } = baseFlags;
+
 const useMaxWidthState = createPersistedState('useMaxWidth');
 const useThemePrefs = createPersistedState('themePref');
 const useWeekPrefs = createPersistedState('weekPref');
@@ -36,10 +38,10 @@ const PreferenceDisplay = () => {
   const [dayPrefs, setDayPrefs] = useDayPrefs(weekDay);
   const [pastDays, setPastDays] = usePastDays(true);
 
-  const enableFullScreen = isEnable(baseFlags.FF_FULLSCREEN);
-  const enableWeekPref = isEnable(baseFlags.FF_WEEKPREF);
-  const enablePastDays = isEnable(baseFlags.FF_PASTDAYS);
-  const enableDayPref = isEnable(baseFlags.FF_WEEKDAY);
+  const enableFullScreen = isEnable(FF_FULLSCREEN);
+  const enableWeekPref = isEnable(FF_WEEKPREF);
+  const enablePastDays = isEnable(FF_PASTDAYS);
+  const enableDayPref = isEnable(FF_WEEKDAY);
 
   const classes = useStyles();
 

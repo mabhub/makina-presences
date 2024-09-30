@@ -23,6 +23,8 @@ const useTriState = createPersistedState('tri');
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
+const { FF_HALFDAY } = baseFlags;
+
 export const FULLDAY_PERIOD = 'fullday';
 export const MORNING_PERIOD = 'morning';
 export const AFTERNOON_PERIOD = 'afternoon';
@@ -151,7 +153,7 @@ const SpotButton = ({
   const [ownTri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
-  const enableHalfDay = isEnable(baseFlags.FF_HALFDAY);
+  const enableHalfDay = isEnable(FF_HALFDAY);
 
   const spots = useSpots(place);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
