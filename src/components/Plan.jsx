@@ -5,8 +5,10 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 import { Alert, AlertTitle, Box, Snackbar } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import useAdditionals from '../hooks/useAdditionals';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
+import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
 
@@ -38,6 +40,9 @@ const transformWrapperProps = {
   minScale: 0.25,
   panning: {
     velocityDisabled: true,
+    excluded: ['MuiButtonBase-root'],
+  },
+  wheel: {
     excluded: ['MuiButtonBase-root'],
   },
   doubleClick: { disabled: true },
@@ -97,6 +102,8 @@ const Plan = ({ edit }) => {
 
   const planRef = useRef(null);
 
+  const additionals = useAdditionals(place);
+
   return (
     <>
       <DragWrapper
@@ -130,6 +137,15 @@ const Plan = ({ edit }) => {
                 onConflict={handleConflict}
               />
             ))}
+
+            {additionals
+              .map(additional => (
+                <SpotAdditionals
+                  key={additional.Titre}
+                  additional={additional}
+                  plan={planRef}
+                />
+              ))}
           </Box>
         </DragComponent>
       </DragWrapper>

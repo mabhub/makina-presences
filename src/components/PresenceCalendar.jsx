@@ -112,10 +112,10 @@ const PresenceCalendar = () => {
   const holidays = useHolidays();
 
   const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {
-    if (showPastDays === undefined) return true;
     if (isoDate === day || isHoliday) return true;
     if (dayIsFavorite && (!isPast || showPastDays)) return true;
     if (!dayIsFavorite && showPastDays && isPast) return true;
+    if (showPastDays === undefined) return true;
     return false;
   };
 

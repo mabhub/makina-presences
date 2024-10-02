@@ -2,7 +2,7 @@ import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
 import { CalendarToday, DarkMode, EventBusy, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
-import { Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { alpha, Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
 const useMaxWidthState = createPersistedState('useMaxWidth');
@@ -38,14 +38,31 @@ const PreferenceDisplay = () => {
   const classes = useStyles();
 
   const handleDayPref = day => {
-    if (dayPrefs.includes(day)) {
-      setDayPrefs(dayPrefs.filter(d => d !== day));
-    } else {
-      setDayPrefs([
+    setDayPrefs(precedents => {
+      if (precedents.includes(day)) {
+        return precedents.filter(d => d !== day);
+      }
+      return [
         ...dayPrefs,
         day,
-      ]);
+      ];
+    });
+  };
+
+  const getBackground = (theme, day) => {
+    if (theme.palette.mode === 'dark') {
+      return dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.08)' : theme.palette.primary.bg;
     }
+    return dayPrefs.includes(day)
+      ? alpha(theme.palette.primary.main, 0.1)
+      : theme.palette.primary.bg;
+  };
+
+  const getColor = (theme, day) => {
+    if (theme.palette.mode === 'dark') {
+      return theme.palette.primary.fg;
+    }
+    return dayPrefs.includes(day) ? 'black' : theme.palette.primary.fg;
   };
 
   return (
@@ -105,20 +122,19 @@ const PreferenceDisplay = () => {
                   component="button"
                   key={day}
                   sx={{
-                    background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.08)' : '#FFFFFF'),
-                    color: theme => theme.palette.primary.bg,
-                    filter: theme => (theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)'),
-                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    background: theme => getBackground(theme, day),
+                    color: theme => getColor(theme, day),
+                    border: theme => `1px solid ${dayPrefs.includes(day) ? theme.palette.primary.main : 'rgba(0, 0, 0, 0.12)'}`,
                     borderRadius: '8px',
                     width: `${SIZE}px`,
                     height: `${SIZE}px`,
                     fontSize: `calc(${SIZE}px / 2.2)`,
                     display: 'flex',
                     alignItems: 'center',
+                    textTransform: 'none',
                     justifyContent: 'center',
                     '&:hover': {
                       cursor: 'pointer',
-                      background: (dayPrefs.includes(day) ? 'rgba(0, 0, 0, 0.12)' : 'rgba(0, 0, 0, 0.04)'),
                     },
                   }}
                   onClick={() => handleDayPref(day)}

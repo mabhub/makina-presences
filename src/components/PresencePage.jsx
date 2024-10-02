@@ -72,6 +72,7 @@ const useStyles = makeStyles(theme => {
     },
     tabs: {
       minHeight: 0,
+      position: 'relative',
     },
     tab: {
       textTransform: 'none',
@@ -83,6 +84,8 @@ const useStyles = makeStyles(theme => {
     },
     calendar: {
       gridArea: 'b',
+      scrollbarWidth: 'thin',
+      colorScheme: theme.palette.mode,
       overflow: 'auto',
       padding: theme.spacing(0, 0.25),
       position: 'relative',
@@ -104,6 +107,7 @@ const useStyles = makeStyles(theme => {
           width: '100%',
           height: '30px',
           background: theme.palette.primary.elevated,
+          // background: 'orange',
         },
       },
     },
@@ -118,6 +122,28 @@ const useStyles = makeStyles(theme => {
 const draftStyle = {
   position: 'absolute',
   visibility: 'hidden',
+};
+
+const stripeColor = theme => (theme.palette.mode === 'light' ? '#f8f8f8' : '#363535');
+
+const selectedDraftStyle = {
+  backgroundImage: theme => `linear-gradient(45deg, transparent 25%, ${stripeColor(theme)} 25%, ${stripeColor(theme)} 50%, transparent 50%, transparent 75%, ${stripeColor(theme)} 75%, ${stripeColor(theme)} 100%)`,
+  backgroundSize: '12px 12px',
+  '&:after': {
+    content: '"Inactif"',
+    position: 'absolute',
+    right: 1,
+    top: 1,
+    color: theme => theme.palette.error.main,
+    background: theme => theme.palette.primary.bg,
+    border: theme => `2px solid ${theme.palette.error.main}`,
+    padding: '3px 10px',
+    borderRadius: '10px',
+    fontSize: '0.75rem',
+    zIndex: 1,
+    transform: 'scale(0.7)',
+    transformOrigin: 'top right',
+  },
 };
 
 const PresencePage = () => {
@@ -137,9 +163,23 @@ const PresencePage = () => {
     history.push(path.join('/'));
   };
 
+  const getDraftTabStyle = placeName => {
+    console.log(placeName);
+    if (placeName === place) {
+      return selectedDraftStyle;
+    }
+    return draftStyle;
+  };
+
   return (
     <div className="PresencePage">
       <LoadIndicator />
+
+      {/* === TO ADD AFTER UPGRADING TO REACT 18 === */}
+      {/* <Toaster
+        richColors
+        visibleToasts={7}
+      /> */}
 
       {(!isTriValid || !place) && (
         <PresenceForm />
@@ -180,7 +220,7 @@ const PresencePage = () => {
                         value={Name}
                         label={Name}
                         className={classes.tab}
-                        sx={Brouillon ? draftStyle : {}}
+                        sx={Brouillon ? getDraftTabStyle(Name) : {}}
                       />
                     ))}
                 </Tabs>
