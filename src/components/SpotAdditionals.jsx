@@ -97,8 +97,6 @@ const useStyles = makeStyles(theme => ({
   },
   popup: {
     boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
-    // opacity: ({ open }) => `${open ? '1' : '0'}`,
-    // transition: theme.transitions.create('opacity'),
   },
   header: {
     display: 'flex',

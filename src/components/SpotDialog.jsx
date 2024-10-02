@@ -276,7 +276,7 @@ const SpotDialog = ({
                     onChange={event => { setPeriodPref(event.target.value); }}
                   >
                     <MenuItem value={FULLDAY_PERIOD}>Journée</MenuItem>
-                    <MenuItem value={MORNING_PERIOD}>Matiné</MenuItem>
+                    <MenuItem value={MORNING_PERIOD}>Matinée</MenuItem>
                     <MenuItem value={AFTERNOON_PERIOD}>Après-midi</MenuItem>
                   </Select>
                 </FormControl>
