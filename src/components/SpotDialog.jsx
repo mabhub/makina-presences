@@ -251,7 +251,7 @@ const SpotDialog = ({
           </Select>
         </FormControl>
 
-        {enableHalfDay && (
+        {displayFavorite && enableHalfDay && (
           <>
             <Divider
               sx={{
