@@ -151,6 +151,10 @@ const PresenceForm = ({ className, ...props }) => {
               <InputLabel htmlFor="tri">Trigramme</InputLabel>
               <Input
                 id="tri"
+                inputProps={{
+                  autoCapitalize: 'off',
+                  autoCorrect: 'off',
+                }}
                 value={inputValue}
                 onChange={handleTriChange}
                 onKeyPress={handleKeyPress}
