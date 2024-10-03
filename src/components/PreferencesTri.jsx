@@ -32,6 +32,8 @@ const PreferencesTri = () => {
           defaultValue={textValue}
           inputProps={{
             maxLength: 10,
+            autoCapitalize: 'off',
+            autoCorrect: 'off',
           }}
           inputRef={input => input && input.focus()}
           disabled={disableInput}
