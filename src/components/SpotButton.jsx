@@ -288,7 +288,7 @@ const SpotButton = ({
       extraneous.forEach(i => deletePresence({ id: i }));
     }
 
-    const [previousPeriod] = dayPresences
+    const [previousPeriod = FULLDAY_PERIOD] = dayPresences
       .filter(({ spot: s }) => !isCumulativeSpot(s))
       .filter(({ tri: t }) => sameLowC(t, ownTri))
       .map(({ period }) => period);
