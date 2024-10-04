@@ -116,7 +116,7 @@ const DayHeader = ({
           <>
             {isConflict && (
             <Tooltip
-              title="Vous êtres inscrits à plusieurs sur le même poste"
+              title="Vous êtes inscrits à plusieurs sur le même poste"
               placement="right"
             >
               <ErrorOutline className={classes.badge} />
