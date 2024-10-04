@@ -2,8 +2,8 @@ import clsx from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
 
-import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
-import { CardHeader, IconButton } from '@mui/material';
+import { AddCircleOutline, ErrorOutline, RemoveCircleOutline } from '@mui/icons-material';
+import { CardHeader, IconButton, Tooltip } from '@mui/material';
 import { emphasize } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
@@ -16,6 +16,9 @@ const useStyles = makeStyles(theme => ({
   cardHeader: {
     padding: theme.spacing(1, 1.5, 1, 2),
     background: theme.palette.secondary.bg,
+  },
+  conflict: {
+    padding: theme.spacing(1, 1.5, 1, 1),
   },
 
   dayName: {
@@ -33,6 +36,18 @@ const useStyles = makeStyles(theme => ({
     fontSize: '10px',
     color: theme.palette.primary.main,
   },
+
+  badge: {
+    position: 'relative',
+    bottom: '-3px',
+    marginRight: theme.spacing(0.7),
+    background: theme.palette.primary.bg,
+    borderRadius: 99,
+    zIndex: 1,
+    width: 18,
+    height: 18,
+    color: theme.palette.error.main,
+  },
 }));
 
 const DayHeader = ({
@@ -40,6 +55,7 @@ const DayHeader = ({
   isHoliday,
   highlight,
   presence,
+  presences,
   tri,
   place,
   isPast,
@@ -85,17 +101,34 @@ const DayHeader = ({
     setFastOpen(false);
   }, [date, place, setPresence, tri]);
 
+  const isConflict = Boolean(
+    presences
+      .filter(({ tri: triPresence, spot, period }) =>
+        triPresence !== tri && spot === presence?.spot && period === presence?.period)
+      .length,
+  );
+
   return (
     <>
+
       <CardHeader
         subheader={(
           <>
+            {isConflict && (
+            <Tooltip
+              title="Vous êtes inscrits à plusieurs sur le même poste"
+              placement="right"
+            >
+              <ErrorOutline className={classes.badge} />
+            </Tooltip>
+            )}
             <strong className={classes.dayName}>{Days[(dateObj.day()) % 7]}</strong>{' '}
             {dateObj.date().toString()}{' '}
             {Months[dateObj.month()]}
             {isClosed && (
               <span className={classes.personsPresent}>{`(${persons})`}</span>
             )}
+
           </>
         )}
         action={(!isHoliday && !isPast) && (
@@ -105,7 +138,10 @@ const DayHeader = ({
         )}
         className={clsx(
           classes.cardHeader,
-          { [classes.highlight]: highlight },
+          {
+            [classes.highlight]: highlight,
+            [classes.conflict]: isConflict,
+          },
         )}
         {...props}
       />

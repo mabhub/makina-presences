@@ -5,12 +5,15 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 import { Alert, AlertTitle, Box, Snackbar } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import { baseFlags, isEnable } from '../feature_flag_service';
 import useAdditionals from '../hooks/useAdditionals';
 import usePlans from '../hooks/usePlans';
 import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
+
+const { FF_COMPLEMENTARY } = baseFlags;
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -29,6 +32,7 @@ const useStyles = makeStyles(theme => ({
   },
   tri: {
     marginRight: theme.spacing(0.5),
+    marginLeft: theme.spacing(0.5),
     height: theme.spacing(2.5),
     '& .MuiChip-label': {
       padding: theme.spacing(0.5, 1, 0.5, 1),
@@ -72,6 +76,8 @@ const Children = ({ children }) => children;
 
 const Plan = ({ edit }) => {
   const classes = useStyles();
+
+  const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
   const plans = usePlans();
   const { place } = useParams();
@@ -138,7 +144,7 @@ const Plan = ({ edit }) => {
               />
             ))}
 
-            {additionals
+            {enableComplementary && additionals
               .map(additional => (
                 <SpotAdditionals
                   key={additional.Titre}
@@ -160,13 +166,16 @@ const Plan = ({ edit }) => {
             showSnackBar: !snackBarInfo.showSnackBar,
           }))}
         >
-          <AlertTitle><strong>Veuillez changer de poste.</strong></AlertTitle>
+          <AlertTitle><strong>Attention</strong></AlertTitle>
+          Vous êtes inscris sur le même poste que
           <TriPresence
             tri={snackBarInfo.currentTri}
             alt
             className={classes.tri}
           />
-          vient de réserver <strong>{snackBarInfo.currentSpot}</strong> juste avant vous !
+          (<strong>{snackBarInfo.currentSpot}</strong>)
+          <br />
+          Discutez-en avec lui ou changez de poste.
         </Alert>
       </Snackbar>
     </>

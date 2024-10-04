@@ -4,7 +4,6 @@ import createPersistedState from 'use-persisted-state';
 
 import {
   Button,
-  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -12,28 +11,23 @@ import {
   FormControl,
   InputLabel,
   List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
+  ListItem,
   MenuItem,
   Select,
   Tab,
   Tabs,
-  ToggleButton,
-  ToggleButtonGroup,
+  Typography,
   useMediaQuery,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { Brightness4, Brightness5, Brightness7, ExpandLess, ExpandMore, Settings } from '@mui/icons-material';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
-
-const { VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
+import { baseFlags, isEnable } from '../feature_flag_service';
 
 const useStyles = makeStyles(theme => ({
   buttonGroup: {
@@ -56,8 +50,17 @@ const useStyles = makeStyles(theme => ({
       display: 'none',
     },
   },
+
+  optionsTitle: {
+    opacity: 0.5,
+  },
+  options: {
+    paddingLeft: theme.spacing(0),
+  },
 }));
 const useFavoritesState = createPersistedState('favorites');
+
+const { FF_FAVORITE, FF_HALFDAY } = baseFlags;
 
 const SpotDialog = ({
   open,
@@ -72,8 +75,10 @@ const SpotDialog = ({
   const plans = usePlans();
   const [selectedPlace, setSelectedPlace] = useState(place);
 
+  const enableFavorite = isEnable(FF_FAVORITE);
+  const enableHalfDay = isEnable(FF_HALFDAY);
+
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
-  const [optionsOpen, setOptionsOpen] = useState(false);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -105,12 +110,13 @@ const SpotDialog = ({
     .find(({ Identifiant: spot }) => !spotPresences[spot] && displayFavorite);
 
   const [selectedValue, setSelectedValue] = React.useState((
-    defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
+    enableFavorite && defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
   ));
 
   const addDefaultSelect = () => {
     if (favoriteSpots.filter(({ Identifiant: spot }) => !spotPresences[spot]).length >= 1
-        && displayFavorite) {
+        && displayFavorite
+        && enableFavorite) {
       return '';
     }
     return <option aria-label="Aucun" value="" />;
@@ -157,7 +163,7 @@ const SpotDialog = ({
   };
 
   useEffect(() => {
-    if (defaultFavoriteSpot) {
+    if (defaultFavoriteSpot && enableFavorite) {
       setSelectedValue(defaultFavoriteSpot.Identifiant);
     } else {
       setSelectedValue('');
@@ -205,62 +211,6 @@ const SpotDialog = ({
       )}
 
       <DialogContent dividers>
-        {fullScreen ? displayFavorite && enableHalfDay === 'true' && (
-          <ToggleButtonGroup
-            value={periodPref}
-            exclusive
-            size="small"
-            className={classes.buttonGroup}
-            fullWidth
-          >
-            <ToggleButton onClick={() => setPeriodPref(FULLDAY_PERIOD)} value={FULLDAY_PERIOD}>
-              <Brightness7 className={classes.toggleIcon} />
-              <span className={classes.toggleLabel}>Journée</span>
-            </ToggleButton>
-            <ToggleButton onClick={() => setPeriodPref(MORNING_PERIOD)} value={MORNING_PERIOD}>
-              <Brightness5 className={classes.toggleIcon} />
-              <span className={classes.toggleLabel}>Matinée</span>
-            </ToggleButton>
-            <ToggleButton onClick={() => setPeriodPref(AFTERNOON_PERIOD)} value={AFTERNOON_PERIOD}>
-              <Brightness4 className={classes.toggleIcon} />
-              <span className={classes.toggleLabel}>Après-midi</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
-        ) : displayFavorite && enableHalfDay === 'true' && (
-          <List dense disablePadding>
-            <ListItemButton onClick={() => { setOptionsOpen(!optionsOpen); }} disableGutters>
-              <ListItemIcon><Settings /></ListItemIcon>
-              <ListItemText primary="Options" sx={{ ml: '-24px' }} />
-              {optionsOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-            <Collapse in={optionsOpen} timeout="auto" unmountOnExit>
-              <List component="div" sx={{ pl: '18px' }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Période</InputLabel>
-                  <Select
-                    label="Période"
-                    value={periodPref}
-                    onChange={event => { setPeriodPref(event.target.value); }}
-                  >
-                    <MenuItem value={FULLDAY_PERIOD}>Journée</MenuItem>
-                    <MenuItem value={MORNING_PERIOD}>Matiné</MenuItem>
-                    <MenuItem value={AFTERNOON_PERIOD}>Après-midi</MenuItem>
-                  </Select>
-                </FormControl>
-              </List>
-            </Collapse>
-          </List>
-        )}
-
-        {displayFavorite && enableHalfDay === 'true' && (
-        <Divider sx={{
-          mb: t => t.spacing(2.5),
-          mt: t => t.spacing(1),
-          mx: '-24px',
-        }}
-        />
-        )}
-
         <FormControl variant="outlined" fullWidth>
           <InputLabel htmlFor="spot-native-select">Poste</InputLabel>
           <Select
@@ -274,7 +224,7 @@ const SpotDialog = ({
             }}
           >
             {addDefaultSelect()}
-            {displayFavorite && favoriteSpots.length >= 1 && (
+            {displayFavorite && enableFavorite && favoriteSpots.length >= 1 && (
               <optgroup label="Vos Favoris">
                 {favoriteSpots.map(({
                   id,
@@ -285,9 +235,13 @@ const SpotDialog = ({
 
               </optgroup>
             )}
-            {displayFavorite && favoriteSpots.length >= 1 && <option disabled>────────────</option>}
+            {displayFavorite
+              && enableFavorite
+              && favoriteSpots.length >= 1
+              && <option disabled>────────────</option>}
             {spots
-              .filter(spot => !favoriteSpots.includes(spot) || !displayFavorite)
+              .filter(spot => !favoriteSpots.includes(spot) || !displayFavorite || !enableFavorite)
+              .filter(({ Type: { value } = {} }) => value !== 'Parking' || displayFavorite)
               .map(({
                 id,
                 Identifiant: spot,
@@ -296,6 +250,40 @@ const SpotDialog = ({
               }) => createSelectOption(id, spot, type, locked))}
           </Select>
         </FormControl>
+
+        {displayFavorite && enableHalfDay && (
+          <>
+            <Divider
+              sx={{
+                mt: t => t.spacing(2),
+                mb: t => t.spacing(1),
+              }}
+              textAlign="right"
+            >
+              <Typography variant="subtitle2" className={classes.optionsTitle}>Options</Typography>
+            </Divider>
+            <List
+              dense
+              disablePadding
+              className={classes.options}
+            >
+              <ListItem disableGutters>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Période</InputLabel>
+                  <Select
+                    label="Période"
+                    value={periodPref}
+                    onChange={event => { setPeriodPref(event.target.value); }}
+                  >
+                    <MenuItem value={FULLDAY_PERIOD}>Journée</MenuItem>
+                    <MenuItem value={MORNING_PERIOD}>Matinée</MenuItem>
+                    <MenuItem value={AFTERNOON_PERIOD}>Après-midi</MenuItem>
+                  </Select>
+                </FormControl>
+              </ListItem>
+            </List>
+          </>
+        )}
       </DialogContent>
 
       <DialogActions>

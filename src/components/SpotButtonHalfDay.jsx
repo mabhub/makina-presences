@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import { alpha, Box, lighten } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
+import React, { useEffect } from 'react';
 import createPersistedState from 'use-persisted-state';
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { sameLowC } from '../helpers';
-import usePresences from '../hooks/usePresences';
 
 const useTriState = createPersistedState('tri');
 
@@ -17,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     bottom: 0,
   },
 
-  common: {
+  base: {
     position: 'absolute',
     width: '100%',
     height: '50%',
@@ -44,6 +42,9 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
   },
+  ownSpotPending: {
+    backgroundColor: theme.palette.secondary.main,
+  },
 
   disabled: {
     backgroundColor: 'transparent',
@@ -52,26 +53,22 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function SpotButtonHaldDay ({ presences, onConflict, spot, disabled, position }) {
+function SpotButtonHaldDay ({ presences, onConflict, disabled, position }) {
   const classes = useStyles();
-  const [tri] = useTriState('');
-  const { place } = useParams();
-  const { deletePresence } = usePresences(place);
-
-  const { Identifiant: spotId } = spot;
+  const [ownTri] = useTriState('');
 
   const [presence, ...rest] = presences;
 
   const isConflict = Boolean(rest.length);
   const isOccupied = Boolean(presence);
-  const isOwnSpot = Boolean(sameLowC(presence?.tri, tri));
+  const isOwnSpot = presences.some(({ tri }) => sameLowC(ownTri, tri));
 
   useEffect(() => {
-    if (isConflict) {
+    if (isConflict && rest.some(({ tri }) => sameLowC(ownTri, tri))) {
       onConflict(isConflict,
-        presences.find(({ tri: t }) => tri !== t).tri,
-        spotId);
-      deletePresence({ id: presences.find(({ tri: t }) => t === tri).id });
+        presences.find(({ tri: t }) => ownTri !== t).tri);
+    } else {
+      onConflict(false);
     }
   }, [isConflict]);
 
@@ -80,15 +77,19 @@ function SpotButtonHaldDay ({ presences, onConflict, spot, disabled, position })
       className={clsx({
         [classes.top]: position === 'top',
         [classes.bottom]: position === 'bottom',
-        [classes.common]: true,
+        [classes.base]: true,
         [classes.ownSpot]: isOwnSpot,
+        [classes.ownSpotPending]: isOwnSpot && presence?.fake,
         [classes.occupied]: isOccupied,
-        [classes.conflict]: isConflict,
         [classes.disabled]: disabled,
         [`hl-${presence?.tri}`]: presence?.tri && !disabled,
       })}
     >
-      {presence?.tri}
+      {(!isConflict && presence?.tri)
+        || (isConflict && (presences
+          .some(({ tri }) => sameLowC(ownTri, tri))
+          ? presences.find(({ tri }) => sameLowC(ownTri, tri)).tri
+          : presence.tri))}
     </Box>
   );
 }

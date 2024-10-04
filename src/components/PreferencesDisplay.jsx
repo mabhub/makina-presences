@@ -4,6 +4,9 @@ import createPersistedState from 'use-persisted-state';
 import { CalendarToday, DarkMode, EventBusy, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
 import { alpha, Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import { baseFlags, isEnable } from '../feature_flag_service';
+
+const { FF_FULLSCREEN, FF_WEEKPREF, FF_WEEKDAY, FF_PASTDAYS } = baseFlags;
 
 const useMaxWidthState = createPersistedState('useMaxWidth');
 const useThemePrefs = createPersistedState('themePref');
@@ -34,6 +37,11 @@ const PreferenceDisplay = () => {
   const [weekPrefs, setWeekprefs] = useWeekPrefs('2');
   const [dayPrefs, setDayPrefs] = useDayPrefs(weekDay);
   const [pastDays, setPastDays] = usePastDays(true);
+
+  const enableFullScreen = isEnable(FF_FULLSCREEN);
+  const enableWeekPref = isEnable(FF_WEEKPREF);
+  const enablePastDays = isEnable(FF_PASTDAYS);
+  const enableDayPref = isEnable(FF_WEEKDAY);
 
   const classes = useStyles();
 
@@ -90,83 +98,90 @@ const PreferenceDisplay = () => {
             </ToggleButton>
           </ToggleButtonGroup>
         </ListItem>
-        <ListItem>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            fullWidth
-            value={weekPrefs}
-          >
-            <ToggleButton value="1" className={classes.toggleButton} onClick={() => setWeekprefs('1')}>
-              <LooksOne />
-              <span className={classes.themeLabel}>semaine</span>
-            </ToggleButton>
-            <ToggleButton value="2" className={classes.toggleButton} onClick={() => setWeekprefs('2')}>
-              <LooksTwo />
-              <span className={classes.themeLabel}>semaines</span>
-            </ToggleButton>
-            <ToggleButton value="3" className={classes.toggleButton} onClick={() => setWeekprefs('3')}>
-              <Looks3 />
-              <span className={classes.themeLabel}>semaines</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </ListItem>
-        <ListItem sx={{ height: '46px' }}>
-          <ListItemIcon sx={{ marginRight: '-25px' }}><CalendarToday /></ListItemIcon>
-          <ListItemText>Jours </ListItemText>
-          <Box sx={{ display: 'flex', gap: '3px' }}>
-            {weekDay.map(day => {
-              const SIZE = 30;
-              return (
-                <Box
-                  component="button"
-                  key={day}
-                  sx={{
-                    background: theme => getBackground(theme, day),
-                    color: theme => getColor(theme, day),
-                    border: theme => `1px solid ${dayPrefs.includes(day) ? theme.palette.primary.main : 'rgba(0, 0, 0, 0.12)'}`,
-                    borderRadius: '8px',
-                    width: `${SIZE}px`,
-                    height: `${SIZE}px`,
-                    fontSize: `calc(${SIZE}px / 2.2)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    textTransform: 'none',
-                    justifyContent: 'center',
-                    '&:hover': {
-                      cursor: 'pointer',
-                    },
-                  }}
-                  onClick={() => handleDayPref(day)}
-                >
-                  {day}
-                </Box>
-              );
-            })}
+        {enableWeekPref && (
+          <ListItem>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              fullWidth
+              value={weekPrefs}
+            >
+              <ToggleButton value="1" className={classes.toggleButton} onClick={() => setWeekprefs('1')}>
+                <LooksOne />
+                <span className={classes.themeLabel}>semaine</span>
+              </ToggleButton>
+              <ToggleButton value="2" className={classes.toggleButton} onClick={() => setWeekprefs('2')}>
+                <LooksTwo />
+                <span className={classes.themeLabel}>semaines</span>
+              </ToggleButton>
+              <ToggleButton value="3" className={classes.toggleButton} onClick={() => setWeekprefs('3')}>
+                <Looks3 />
+                <span className={classes.themeLabel}>semaines</span>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </ListItem>
+        )}
+        {enableDayPref && (
+          <ListItem sx={{ height: '46px' }}>
+            <ListItemIcon sx={{ marginRight: '-25px' }}><CalendarToday /></ListItemIcon>
+            <ListItemText>Jours </ListItemText>
+            <Box sx={{ display: 'flex', gap: '3px' }}>
+              {weekDay.map(day => {
+                const SIZE = 30;
+                return (
+                  <Box
+                    component="button"
+                    key={day}
+                    sx={{
+                      background: theme => getBackground(theme, day),
+                      color: theme => getColor(theme, day),
+                      border: theme => `1px solid ${dayPrefs.includes(day) ? theme.palette.primary.main : 'rgba(0, 0, 0, 0.12)'}`,
+                      borderRadius: '8px',
+                      width: `${SIZE}px`,
+                      height: `${SIZE}px`,
+                      fontSize: `calc(${SIZE}px / 2.2)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      textTransform: 'none',
+                      justifyContent: 'center',
+                      '&:hover': {
+                        cursor: 'pointer',
+                      },
+                    }}
+                    onClick={() => handleDayPref(day)}
+                  >
+                    {day}
+                  </Box>
+                );
+              })}
 
-          </Box>
-        </ListItem>
-        <ListItem sx={{ height: '38px' }}>
-          <ListItemIcon sx={{ marginRight: '-25px' }}><EventBusy /></ListItemIcon>
-          <ListItemText>Jours passés</ListItemText>
-          <Switch
-            checked={pastDays}
-            onChange={() => {
-              setPastDays(!pastDays);
-            }}
-          />
-        </ListItem>
-        <ListItem sx={{ height: '38px' }}>
-          <ListItemIcon sx={{ marginRight: '-25px' }}><Fullscreen /></ListItemIcon>
-          <ListItemText primary="Pleine largeur" />
-          <Switch
-            checked={useMaxWidth}
-            onChange={() => {
-              setUseMaxWidth(!useMaxWidth);
-            }}
-          />
-        </ListItem>
-
+            </Box>
+          </ListItem>
+        )}
+        {enablePastDays && (
+          <ListItem sx={{ height: '38px' }}>
+            <ListItemIcon sx={{ marginRight: '-25px' }}><EventBusy /></ListItemIcon>
+            <ListItemText>Jours passés</ListItemText>
+            <Switch
+              checked={pastDays}
+              onChange={() => {
+                setPastDays(!pastDays);
+              }}
+            />
+          </ListItem>
+        )}
+        {enableFullScreen && (
+          <ListItem sx={{ height: '38px' }}>
+            <ListItemIcon sx={{ marginRight: '-25px' }}><Fullscreen /></ListItemIcon>
+            <ListItemText primary="Pleine largeur" />
+            <Switch
+              checked={useMaxWidth}
+              onChange={() => {
+                setUseMaxWidth(!useMaxWidth);
+              }}
+            />
+          </ListItem>
+        )}
       </List>
     </>
   );

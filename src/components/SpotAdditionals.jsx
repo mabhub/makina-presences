@@ -1,4 +1,4 @@
-import { Close, ErrorOutline, HelpOutline, TaskAlt } from '@mui/icons-material';
+import { Close, ErrorOutline, HelpOutline } from '@mui/icons-material';
 import {
   alpha,
   Box,
@@ -87,6 +87,7 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(1.5),
     borderRadius: '6px',
     maxWidth: '300px',
+    width: 'max-content',
     zIndex: 2,
     transform: 'translate(-50%, -50%)',
   },
@@ -96,8 +97,6 @@ const useStyles = makeStyles(theme => ({
   },
   popup: {
     boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
-    // opacity: ({ open }) => `${open ? '1' : '0'}`,
-    // transition: theme.transitions.create('opacity'),
   },
   header: {
     display: 'flex',

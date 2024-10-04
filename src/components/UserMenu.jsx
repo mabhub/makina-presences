@@ -72,7 +72,7 @@ const UserMenu = () => {
         }}
       >
         <Typography style={{ paddingLeft: 10, paddingTop: 10 }} gutterBottom variant="h6">
-          Préferences
+          Réglages
         </Typography>
         <PreferencesDisplay />
         <PreferencesFavorites />

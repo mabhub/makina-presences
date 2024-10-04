@@ -113,9 +113,8 @@ const PresenceCalendar = () => {
 
   const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {
     if (isoDate === day || isHoliday) return true;
-    if (dayIsFavorite && (!isPast || showPastDays)) return true;
-    if (!dayIsFavorite && showPastDays && isPast) return true;
-    if (showPastDays === undefined) return true;
+    if (dayIsFavorite && (!isPast || showPastDays || showPastDays === undefined)) return true;
+    if (!dayIsFavorite && (showPastDays || showPastDays === undefined) && isPast) return true;
     return false;
   };
 
@@ -208,6 +207,7 @@ const PresenceCalendar = () => {
                 <DayHeader
                   date={isoDate}
                   presence={currentTodayPresences}
+                  presences={todayPresences}
                   tri={tri}
                   place={place}
                   isHoliday={isHoliday}

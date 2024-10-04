@@ -9,8 +9,11 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
 import SpotDialog from './SpotDialog';
+import { baseFlags, isEnable } from '../feature_flag_service';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
+
+const { FF_AGENCY, FF_FAVORITE } = baseFlags;
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,6 +50,9 @@ const PreferencesFavorites = () => {
   const spots = useTable(Number(spotsTableId));
   const plans = usePlans();
   const classes = useStyles();
+
+  const enableAgency = isEnable(FF_AGENCY);
+  const enableFavorite = isEnable(FF_FAVORITE);
 
   const agencies = [{ Name: NO_AGENCYPREF_LABEL }].concat(plans);
   const [agencyPref, setAgencyPref] = useAgencyPref();
@@ -142,52 +148,62 @@ const PreferencesFavorites = () => {
 
   return (
     <>
-      <Divider textAlign="left"> Favoris </Divider>
-      <List className={classes.root} dense>
-        <ListItem>
-          <ListItemIcon sx={{ marginRight: '-25px' }}><Room /></ListItemIcon>
-          <ListItemText primary="Agence" />
-          <FormControl size="small">
-            <Select
-              className={classes.select}
-              value={selectedAgency}
-              onChange={handleChange}
-            >
-              {agencies
-                .filter(({ Brouillon }) => !Brouillon)
-                .map(({ Name }) => (
-                  <MenuItem key={Name} value={Name}>{Name}</MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </ListItem>
-        <ListItem>
-          <ListItemIcon sx={{ marginRight: '-25px' }}><Computer /></ListItemIcon>
-          <ListItemText primary="Postes" />
-          <Chip
-            label="Ajouter"
-            size="small"
-            variant="outlined"
-            color="primary"
-            icon={<Add />}
-            component="button"
-            onClick={() => setDialogOpen(!dialogOpen)}
-          />
-        </ListItem>
-        <div className={classes.favoriteList}>
-          {sortedFavorite.map(({ agency, favs }) => (
-            <React.Fragment key={agency}>
-              {favs.length > 0
-            && (
-              <ListItem sx={{ mb: '-8px', mt: '-2px', ml: '-7px', position: 'relative' }}>
-                <Typography variant="caption" sx={{ opacity: 0.5 }}>{agency}</Typography>
+      {(enableAgency || enableFavorite) && (
+        <>
+          <Divider textAlign="left"> Préférences </Divider>
+          <List className={classes.root} dense>
+            {enableAgency && (
+              <ListItem>
+                <ListItemIcon sx={{ marginRight: '-25px' }}><Room /></ListItemIcon>
+                <ListItemText primary="Agence par défaut" />
+                <FormControl size="small">
+                  <Select
+                    className={classes.select}
+                    value={selectedAgency}
+                    onChange={handleChange}
+                  >
+                    {agencies
+                      .filter(({ Brouillon }) => !Brouillon)
+                      .map(({ Name }) => (
+                        <MenuItem key={Name} value={Name}>{Name}</MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
               </ListItem>
             )}
-              {createListItem(favs)}
-            </React.Fragment>
-          ))}
-        </div>
-      </List>
+            {enableFavorite && (
+              <>
+                <ListItem>
+                  <ListItemIcon sx={{ marginRight: '-25px' }}><Computer /></ListItemIcon>
+                  <ListItemText primary="Postes favoris" />
+                  <Chip
+                    label="Ajouter"
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    icon={<Add />}
+                    component="button"
+                    onClick={() => setDialogOpen(!dialogOpen)}
+                  />
+                </ListItem>
+                <div className={classes.favoriteList}>
+                  {sortedFavorite.map(({ agency, favs }) => (
+                    <React.Fragment key={agency}>
+                      {favs.length > 0
+                && (
+                  <ListItem sx={{ mb: '-8px', mt: '-2px', ml: '-7px', position: 'relative' }}>
+                    <Typography variant="caption" sx={{ opacity: 0.5 }}>{agency}</Typography>
+                  </ListItem>
+                )}
+                      {createListItem(favs)}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </>
+            )}
+          </List>
+        </>
+      )}
 
       {dialogOpen && (
         <SpotDialog

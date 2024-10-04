@@ -6,10 +6,12 @@ import { useParams } from 'react-router-dom';
 
 import createPersistedState from 'use-persisted-state';
 
+import { ErrorOutline } from '@mui/icons-material';
 import { Divider, Fab, Grid, Tooltip } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
+import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
@@ -19,7 +21,9 @@ import SpotDescription from './SpotDescription';
 
 const useTriState = createPersistedState('tri');
 
-const { VITE_TABLE_ID_SPOTS: spotsTableId, VITE_ENABLE_HALFDAY: enableHalfDay } = import.meta.env;
+const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
+
+const { FF_HALFDAY } = baseFlags;
 
 export const FULLDAY_PERIOD = 'fullday';
 export const MORNING_PERIOD = 'morning';
@@ -41,6 +45,9 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     fontSize: '0.75em',
+    '&:hover': {
+      background: 'unset',
+    },
   },
 
   fullDayAvailable: {
@@ -73,7 +80,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
   afternoon: {
-    cursor: 'pointer',
     '&:hover *[class^="makeStyles-bottom"]': {
       backgroundColor: alpha(theme.palette.primary.main, 0.25),
       transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -112,6 +118,21 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: alpha(theme.palette.primary.main, 0.5),
     },
   },
+  fullDayPending: {
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.main,
+    },
+  },
+
+  badge: {
+    position: 'absolute',
+    color: theme.palette.error.main,
+    background: theme.palette.primary.bg,
+    borderRadius: 99,
+    zIndex: 1,
+    transform: 'translate(10%, -100%)',
+  },
 
 }));
 
@@ -129,8 +150,10 @@ const SpotButton = ({
   onConflict = () => {},
 }) => {
   const classes = useStyles();
-  const [tri] = useTriState('');
+  const [ownTri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
+
+  const enableHalfDay = isEnable(FF_HALFDAY);
 
   const spots = useSpots(place);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
@@ -197,41 +220,45 @@ const SpotButton = ({
 
   const currentTriPeriod = () => {
     const spoIdtPresences = getPresence();
-    if (spoIdtPresences[0].some(({ tri: t }) => t === tri)) return FULLDAY_PERIOD;
-    if (spoIdtPresences[1].some(({ tri: t }) => t === tri)) return MORNING_PERIOD;
-    if (spoIdtPresences[2].some(({ tri: t }) => t === tri)) return AFTERNOON_PERIOD;
+    if (spoIdtPresences[0].some(({ tri }) => tri === ownTri)) return FULLDAY_PERIOD;
+    if (spoIdtPresences[1].some(({ tri }) => tri === ownTri)) return MORNING_PERIOD;
+    if (spoIdtPresences[2].some(({ tri }) => tri === ownTri)) return AFTERNOON_PERIOD;
     return undefined;
   };
 
   const [fullDays, mornings, afternoons] = getPresence();
 
   const [presenceFullDay, ...restFullDay] = fullDays;
-  const [presenceMorning] = mornings;
-  const [presenceAfternon] = afternoons;
 
   const isLocked = Boolean(blocked);
   const isConflict = Boolean(restFullDay.length);
   const isOccupied = Boolean(presenceFullDay || (mornings.length === 1 && afternoons.length === 1));
-  const isOwnSpot = Boolean(sameLowC(presenceFullDay?.tri, tri)
-    || sameLowC(presenceMorning?.tri, tri)
-    || sameLowC(presenceAfternon?.tri, tri));
+  const isOwnSpot = spotPresences[spotId]?.some(({ tri }) => sameLowC(tri, ownTri));
   const isCumulative = Boolean(Cumul);
 
   const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
 
+  const handleConflict = (value, tri) => {
+    onConflict(value, tri, spotId);
+  };
+
   useEffect(() => {
-    if (isConflict) {
-      onConflict(isConflict,
-        fullDays.find(({ tri: t }) => tri !== t).tri,
-        spotId);
-      deletePresence({ id: fullDays.find(({ tri: t }) => t === tri).id });
+    if (isConflict && restFullDay.some(({ tri }) => sameLowC(ownTri, tri))) {
+      handleConflict(isConflict,
+        fullDays.find(({ tri: t }) => ownTri !== t).tri);
+    } else {
+      handleConflict(false);
     }
   }, [isConflict]);
 
+  const getCurrentPresence = precensePeriod => precensePeriod.find(
+    ({ tri }) => sameLowC(tri, ownTri),
+  );
+
   const removePresence = period => {
-    if (period === FULLDAY_PERIOD) deletePresence(presenceFullDay);
-    if (period === MORNING_PERIOD) deletePresence(presenceMorning);
-    if (period === AFTERNOON_PERIOD) deletePresence(presenceAfternon);
+    if (period === FULLDAY_PERIOD) deletePresence(getCurrentPresence(fullDays));
+    if (period === MORNING_PERIOD) deletePresence(getCurrentPresence(mornings));
+    if (period === AFTERNOON_PERIOD) deletePresence(getCurrentPresence(afternoons));
   };
 
   const [contextualMenu, setContextualMenu] = useState(false);
@@ -246,18 +273,18 @@ const SpotButton = ({
 
     if ((!isOccupied && !isLocked) || (currentTriPeriod())) {
       const [firstId, ...extraneous] = dayPresences
-        ?.filter(({ tri: t }) => sameLowC(t, tri)) // Keep only own points
+        ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points
         ?.filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
         ?.filter(() => !isCumulative)
         ?.map(({ id }) => id);
 
-      setPresence({ id: firstId, day, tri, spot: spotId, plan: place, period: p });
+      setPresence({ id: firstId, day, tri: ownTri, spot: spotId, plan: place, period: p });
       extraneous.forEach(i => deletePresence({ id: i }));
     }
 
-    const [previousPeriod] = dayPresences
+    const [previousPeriod = FULLDAY_PERIOD] = dayPresences
       .filter(({ spot: s }) => !isCumulativeSpot(s))
-      .filter(({ tri: t }) => sameLowC(t, tri))
+      .filter(({ tri: t }) => sameLowC(t, ownTri))
       .map(({ period }) => period);
     if (isOwnSpot && previousPeriod === p) {
       return unsubscribe();
@@ -279,9 +306,9 @@ const SpotButton = ({
   const contextualMenuItems = [
     { item: 'Journée entière',
       action: fullDay,
-      disabled: mornings.filter(({ tri: t }) => !sameLowC(t, tri)).length > 0
-        || afternoons.filter(({ tri: t }) => !sameLowC(t, tri)).length > 0
-        || fullDays.filter(({ tri: t }) => sameLowC(t, tri)).length === 1 },
+      disabled: mornings.filter(({ tri: t }) => !sameLowC(t, ownTri)).length > 0
+        || afternoons.filter(({ tri: t }) => !sameLowC(t, ownTri)).length > 0
+        || fullDays.filter(({ tri: t }) => sameLowC(t, ownTri)).length === 1 },
     { item: 'Matinée uniquement', action: morningOnly, disabled: mornings.length > 0 },
     { item: 'Après-midi uniquement', action: afternoonOnly, disabled: afternoons.length > 0 },
     { item: 'separator', separator: true },
@@ -294,6 +321,20 @@ const SpotButton = ({
 
   return (
     <>
+      {(isConflict || Boolean(afternoons.length > 1) || Boolean(mornings.length > 1)) && (
+        <Tooltip
+          title="Plusieurs personnes sont inscrites sur ce poste"
+          placement="right"
+        >
+          <ErrorOutline
+            className={classes.badge}
+            style={{
+              left: `${x}px`,
+              top: `${y}px`,
+            }}
+          />
+        </Tooltip>
+      )}
       <CustomTooltip
         key={spotId}
         title={(!edit && !isPast) ? tooltip : ''}
@@ -306,8 +347,12 @@ const SpotButton = ({
             [classes.fullDayAvailable]: mornings.length === 0 && afternoons.length === 0,
             [classes.occupied]: isOccupied && !isOwnSpot,
             [classes.fullDay]: currentTriPeriod() === FULLDAY_PERIOD,
-            [classes.morning]: currentTriPeriod() === MORNING_PERIOD,
-            [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD,
+            [classes.fullDayPending]: currentTriPeriod() === FULLDAY_PERIOD
+              && presenceFullDay?.fake,
+            [classes.morning]: currentTriPeriod() === MORNING_PERIOD
+             && !mornings.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
+            [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD
+              && !afternoons.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
             [classes.locked]: isLocked,
             [`hl-${presenceFullDay?.tri}`]: presenceFullDay?.tri,
             [classes.morningAvailable]: mornings.length === 0
@@ -321,7 +366,6 @@ const SpotButton = ({
             left: `${x}px`,
             top: `${y}px`,
             borderColor: Type?.color?.replace('-', ''),
-            // borderImage: `linear-gradient(to bottom, ${Type?.color} 50%, red 50%) 1`,
           }}
           size="small"
           draggable={Boolean(edit)}
@@ -329,19 +373,20 @@ const SpotButton = ({
           onDragEnd={edit && handleDragEnd}
           onClick={event => {
             if (isCumulative && currentTriPeriod()) return unsubscribe();
-            if (mornings.length === 1 && mornings[0].tri !== tri) {
+            if (mornings.length === 1 && mornings[0].tri !== ownTri) {
               return afternoonOnly();
             }
-            if ((afternoons.length === 1 && afternoons[0].tri !== tri) || event.ctrlKey) {
+            if ((afternoons.length === 1 && afternoons[0].tri !== ownTri) || event.ctrlKey) {
               return morningOnly();
             }
-            if (sameLowC(afternoons[0]?.tri, tri) || sameLowC(mornings[0]?.tri, tri)) {
+            if (afternoons.some(({ tri }) => sameLowC(tri, ownTri))
+              || mornings.some(({ tri }) => sameLowC(tri, ownTri))) {
               return handleClick(currentTriPeriod());
             }
             return fullDay();
           }}
           onContextMenu={event => {
-            if (enableHalfDay === 'false') return null;
+            if (!enableHalfDay) return null;
             event.preventDefault();
 
             if (event.ctrlKey) return afternoonOnly();
@@ -352,15 +397,20 @@ const SpotButton = ({
           }}
         >
           {afternoons.length === 0 && mornings.length === 0
-            ? ((!edit && presenceFullDay?.tri) || spotId)
+            ? ((!edit && !isConflict && presenceFullDay?.tri)
+              || (isConflict && (fullDays
+                .some(({ tri }) => sameLowC(ownTri, tri))
+                ? fullDays.find(({ tri }) => sameLowC(ownTri, tri)).tri
+                : presenceFullDay.tri)
+              )
+              || spotId)
             : (
               <Grid container>
                 {['top', 'bottom'].map((position, i) => (
                   <React.Fragment key={position}>
                     <SpotButtonHalfDay
                       presences={position === 'top' ? mornings : afternoons}
-                      onConflict={onConflict}
-                      spot={spot}
+                      onConflict={handleConflict}
                       disabled={isPast}
                       position={position}
                     />
