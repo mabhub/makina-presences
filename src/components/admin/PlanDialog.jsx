@@ -103,7 +103,7 @@ function PlanDialog ({ open, onClose, edit, plan }) {
           <input
             id="plan-picker"
             type="file"
-            accept=".png"
+            accept=".png,.svg"
             className={classes.input}
             onChange={onSelectFile}
             title={preview ? 'Changer d\'image' : 'Choisir un fichier'}
