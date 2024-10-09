@@ -88,7 +88,7 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
       ...updateStack[placeID]
         .reverse()
         .reduce((acc, curr) => {
-          if (acc.map(({ id }) => id).includes(curr.id)) {
+          if (acc.map(({ Identifiant }) => Identifiant).includes(curr.Identifiant)) {
             return acc;
           }
           return [
