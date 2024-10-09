@@ -217,7 +217,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
 
   return (
     <>
-      <ActionBar onUndoRedu={onEntitySelect} />
+      <ActionBar selectEntity={onEntitySelect} />
       <Box
         className={classes.root}
         style={{

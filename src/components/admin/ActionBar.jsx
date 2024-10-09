@@ -68,7 +68,7 @@ const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 const usePlanUpdate = createPersistedState('planUpdate');
 
-function ActionBar ({ onUndoRedu }) {
+function ActionBar ({ selectEntity }) {
   const classes = useStyles();
   const { place } = useParams();
   const [mapping] = useMapping();
@@ -123,7 +123,7 @@ function ActionBar ({ onUndoRedu }) {
   };
 
   const handleUndo = () => {
-    onUndoRedu(getPreviousEntityInfo());
+    selectEntity(getPreviousEntityInfo());
     setUndidStack({
       ...undidStack,
       [placeID]: [
@@ -140,7 +140,7 @@ function ActionBar ({ onUndoRedu }) {
   };
 
   const handleRedo = () => {
-    onUndoRedu(undidStack[placeID][undidStack[placeID].length - 1]);
+    selectEntity(undidStack[placeID][undidStack[placeID].length - 1]);
     setUpdateStack({
       ...updateStack,
       [placeID]: [
@@ -174,6 +174,7 @@ function ActionBar ({ onUndoRedu }) {
           spotInfo,
         ],
       });
+      selectEntity(spotInfo);
     }
   };
 
