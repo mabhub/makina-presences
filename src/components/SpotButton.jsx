@@ -244,8 +244,6 @@ const SpotButton = ({
   };
 
   const handleClick = p => {
-    if (edit) { return null; }
-
     if ((!isOccupied && !isLocked) || triPeriod) {
       const [firstId, ...extraneous] = dayPresences
         ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points

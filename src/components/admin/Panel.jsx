@@ -14,6 +14,7 @@ import SpotForm from './SpotForm';
 const useStyles = makeStyles(theme => ({
   cardEdit: {
     paddingBottom: theme.spacing(0.5),
+    borderTop: `2px solid ${alpha(theme.palette.primary.fg, 0.2)}`,
   },
   textField: {
     '& .MuiOutlinedInput-input': {

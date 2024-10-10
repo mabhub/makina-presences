@@ -1,16 +1,17 @@
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
-import { Box, Button, Tooltip } from '@mui/material';
+import { alpha, Box, Button, Tooltip } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import clsx from 'clsx';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
+import useAdditionals from '../../hooks/useAdditionals';
 import usePlans from '../../hooks/usePlans';
 import useSpots from '../../hooks/useSpots';
-import PublishDialog from './PublishDialog';
-import SpotDialog from './SpotDialog';
 import AdditionalsDialog from './AdditionalsDialog';
 import { ADDITIONAL_ENTITY, CREATED_KEY, SPOT_ENTITY } from './const';
-import useAdditionals from '../../hooks/useAdditionals';
+import PublishDialog from './PublishDialog';
+import SpotDialog from './SpotDialog';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -46,8 +47,15 @@ const useStyles = makeStyles(theme => ({
     transition: 'all 100ms cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
       transition: 'all 100ms cubic-bezier(0.4, 0, 0.2, 1)',
-      background: 'rgba(0, 0, 0, 0.05);',
+      background: alpha(theme.palette.primary.fg, 0.2),
       cursor: 'pointer',
+    },
+    color: theme.palette.mode === 'light' ? 'black' : 'white',
+  },
+  disabledButton: {
+    opacity: 0.3,
+    '&:hover': {
+      background: 'unset',
     },
   },
   separator: {
@@ -57,6 +65,7 @@ const useStyles = makeStyles(theme => ({
   },
   svg: {
     height: '20px',
+    filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
   },
   btnPublish: {
     textTransform: 'none',
@@ -244,7 +253,10 @@ function ActionBar ({ selectEntity }) {
             >
               <span>
                 <Box
-                  className={classes.button}
+                  className={clsx({
+                    [classes.button]: true,
+                    [classes.disabledButton]: updateStack[placeID].length === 0,
+                  })}
                   component="button"
                   disabled={updateStack[placeID].length === 0}
                   onClick={handleUndo}
@@ -259,7 +271,10 @@ function ActionBar ({ selectEntity }) {
               <span>
 
                 <Box
-                  className={classes.button}
+                  className={clsx({
+                    [classes.button]: true,
+                    [classes.disabledButton]: undidStack[placeID].length === 0,
+                  })}
                   component="button"
                   disabled={undidStack[placeID].length === 0}
                   onClick={handleRedo}

@@ -1,5 +1,5 @@
 import { AddPhotoAlternateOutlined } from '@mui/icons-material';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { alpha, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect, useState } from 'react';
 import createPersistedState from 'use-persisted-state';
@@ -9,9 +9,11 @@ const useStyles = makeStyles(theme => ({
     width: '400px',
     aspectRatio: '16/9',
     marginTop: theme.spacing(1),
-    border: '2px dashed #00000030',
+    // border: '2px dashed #00000030',
+    border: `2px dashed ${alpha(theme.palette.primary.fg, 0.3)}`,
     '&:hover, &:focus-within': {
-      borderColor: '#000000',
+      // borderColor: '#000000',
+      borderColor: theme.palette.primary.fg,
     },
     borderRadius: '10px',
     position: 'relative',
