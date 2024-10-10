@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { alpha, Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
@@ -18,6 +18,8 @@ const useStyles = makeStyles(theme => ({
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
+    backgroundImage: `linear-gradient(to right, ${alpha(theme.palette.primary.fg, 0.15)} 1px, transparent 1px),
+     linear-gradient(to bottom, ${alpha(theme.palette.primary.fg, 0.15)} 1px, transparent 1px)`,
   },
   wrapper: {
     width: '100%',
@@ -27,6 +29,7 @@ const useStyles = makeStyles(theme => ({
   planWrapper: {
   },
   plan: {
+    filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
   },
   cardEdit: {
     position: 'absolute',
@@ -226,7 +229,6 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
         className={classes.root}
         style={{
           backgroundSize: `calc(20px * ${scale}) calc(20px * ${scale})`,
-          backgroundImage: 'linear-gradient(to right, #e3e3e3 1px, transparent 1px), linear-gradient(to bottom, #e3e3e3 1px, transparent 1px)',
         }}
         onPointerMove={handleMove}
       >

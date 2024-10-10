@@ -5,12 +5,14 @@ import { useIsFetching, useIsMutating } from 'react-query';
 import { LinearProgress } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(theme => ({
   progress: {
     top: 0,
     left: 0,
     height: 0,
     width: '100%',
+    zIndex: 99999,
+    filter: theme.palette.mode === 'dark' ? 'contrast(250%)' : '',
     transition: 'height ease 150ms',
     '& .MuiLinearProgress-bar': {
       animationPlayState: 'paused',
@@ -38,7 +40,7 @@ const LoadIndicator = props => {
       color="secondary"
       sx={{
         position: 'fixed',
-        opacity: 0.5,
+        opacity: theme => (theme.palette.mode === 'dark' ? 1 : 0.5),
       }}
       {...props}
     />
