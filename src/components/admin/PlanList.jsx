@@ -1,5 +1,5 @@
 import { Add, Delete, Edit } from '@mui/icons-material';
-import { Box, Card, CardActionArea, Switch, Tooltip, Typography } from '@mui/material';
+import { alpha, Box, Card, CardActionArea, Switch, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
@@ -53,11 +53,11 @@ const AntSwitch = styled(Switch)(({ theme }) => ({
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
-    padding: theme.spacing(2, 1),
+    padding: theme.spacing(0, 1, 2, 1),
     position: 'relative',
   },
   card: {
-    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    border: `1px solid ${alpha(theme.palette.primary.fg, 0.2)}`,
     borderRadius: '10px',
     margin: theme.spacing(1, 0),
   },
@@ -68,39 +68,34 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-between',
   },
   brouillon: {
-    border: '3px dashed #00000030',
+    borderWidth: '3px',
+    borderStyle: 'dashed',
   },
   selected: {
     borderWidth: '3px',
     borderColor: ` ${theme.palette.primary.main}`,
   },
   wrapper: {
-    background: 'linear-gradient( rgba(255,255,255,1) 88%, rgba(9,9,121,0) 100%)',
     position: 'sticky',
-    top: theme.spacing(2),
+    top: '0',
     zIndex: 1,
     width: '100%',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: `-${theme.spacing(2)}`,
-      left: 0,
-      width: '100%',
-      height: `${theme.spacing(2)}`,
-      background: 'white',
-    },
+    background: theme.palette.mode === 'dark' ? '#121212' : '#fff',
+    display: 'flex',
+    alignItems: 'flex-end',
+    padding: theme.spacing(2, 0, 1, 0),
   },
   addPlan: {
     width: '100%',
     borderRadius: '10px',
     border: 'unset',
     padding: theme.spacing(1.5, 0),
-    marginBottom: theme.spacing(1),
-    opacity: 0.5,
+    background: alpha(theme.palette.primary.fg, 0.2),
+    color: theme.palette.primary.fg,
     transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
     '&:hover': {
       cursor: 'pointer',
-      opacity: 1,
+      background: alpha(theme.palette.primary.fg, 0.4),
     },
   },
   actions: {

@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
       maxWidth: 'unset',
     },
     '& a': {
-      color: theme.palette.secondary.main,
+      color: theme.palette.primary.main,
     },
   },
   content: {

@@ -1,4 +1,4 @@
-import { Box, Container } from '@mui/material';
+import { alpha, Box, Container } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
@@ -27,18 +27,18 @@ const useStyles = makeStyles(theme => ({
   },
   list: {
     gridArea: 'a',
-    borderRight: '2px solid #00000015',
+    borderRight: `2px solid ${alpha(theme.palette.primary.fg, 0.2)}`,
     overflow: 'auto',
     scrollbarWidth: 'thin',
+    colorScheme: theme.palette.mode,
   },
   plan: {
     gridArea: 'b',
     display: 'flex',
     flexDirection: 'column',
   },
-  editSpot: {
+  panel: {
     gridArea: 'c',
-    border: '2px solid #00000015',
     minWidth: '370px',
   },
 }));
@@ -150,7 +150,7 @@ function AdminPage () {
                 />
               )}
             </Box>
-            <Box className={classes.editSpot}>
+            <Box className={classes.panel}>
               {showPanel && (
                 <Panel
                   entity={entity}

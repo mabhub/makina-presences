@@ -11,6 +11,8 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 
+const stripeColor = theme => (theme.palette.mode === 'light' ? '#f8f8f8' : '#363535');
+
 const useStyles = makeStyles(theme => ({
   root: {
     position: 'relative',
@@ -31,7 +33,8 @@ const useStyles = makeStyles(theme => ({
   },
 
   additional: {
-    backgroundColor: theme.palette.primary,
+    backgroundColor: theme.palette.primary.bg,
+    padding: '3px',
     boxShadow: 'none',
     width: 20,
     minWidth: 20,
@@ -46,13 +49,17 @@ const useStyles = makeStyles(theme => ({
     },
   },
   selectedAdditional: {
-    backgroundImage: 'linear-gradient(45deg, #ffffff 20%, #e6e6e6 20%, #e6e6e6 50%, #ffffff 50%, #ffffff 70%, #e6e6e6 70%, #e6e6e6 100%)',
+    backgroundImage: `linear-gradient(45deg, transparent 25%, ${stripeColor(theme)} 25%, ${stripeColor(theme)} 50%, transparent 50%, transparent 75%, ${stripeColor(theme)} 75%, ${stripeColor(theme)} 100%)`,
     backgroundSize: '7.07px 7.07px',
   },
   icon: {
     color: theme.palette.primary.fg,
-    width: '100%',
-    height: '100%',
+    width: '85%',
+    height: '85%',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
   },
   badges: {
     backgroundColor: theme.palette.primary.bg,
@@ -77,6 +84,7 @@ const useStyles = makeStyles(theme => ({
     minHeight: '50px',
     backgroundColor: theme.palette.primary.bg,
     padding: theme.spacing(1.5),
+    color: theme.palette.mode === 'dark' ? 'white' : 'dark',
     borderRadius: '6px',
     textTransform: 'none',
     border: 'unset',
@@ -93,7 +101,7 @@ const useStyles = makeStyles(theme => ({
     maxWidth: '300px',
   },
   fixed: {
-    border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
+    border: `1px solid ${alpha(theme.palette.primary.fg, 0.5)}`,
     outline: 'none',
   },
   mountedFixed: {
@@ -257,7 +265,7 @@ function AdditionalsPopup ({
           title={Titre}
           placement="right"
           enterDelay={100}
-          disableHoverListener
+          // disableHoverListener
         >
           <span>
             <Fab

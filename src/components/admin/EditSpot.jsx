@@ -1,5 +1,5 @@
 import { ContentCopy, Delete, OpenWith } from '@mui/icons-material';
-import { Box, Fab } from '@mui/material';
+import { alpha, Box, Fab } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
@@ -7,6 +7,8 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import createPersistedState from 'use-persisted-state';
 import { CREATED_KEY, DELETED_KEY } from './const';
 import SpotDialog from './SpotDialog';
+
+const stripeColor = theme => (theme.palette.mode === 'light' ? '#f8f8f8' : '#363535');
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -32,6 +34,9 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'clip',
     overflow: 'hidden',
     fontSize: '0.75em',
+    '&:hover ': {
+      background: theme.palette.mode === 'dark' ? '#4f4f4f' : '#dbdbdb',
+    },
   },
   spotMoving: {
     '&:hover': {
@@ -50,18 +55,18 @@ const useStyles = makeStyles(theme => ({
     textAlign: 'center',
   },
   selected: {
-    backgroundImage: 'linear-gradient(45deg, #ffffff 20%, #e6e6e6 20%, #e6e6e6 50%, #ffffff 50%, #ffffff 70%, #e6e6e6 70%, #e6e6e6 100%)',
+    backgroundImage: `linear-gradient(45deg, transparent 25%, ${stripeColor(theme)} 25%, ${stripeColor(theme)} 50%, transparent 50%, transparent 75%, ${stripeColor(theme)} 75%, ${stripeColor(theme)} 100%)`,
     backgroundSize: '7.07px 7.07px',
-    color: 'black',
     fontWeight: 'bold',
   },
   quickActionButton: {
     width: 20,
     height: 20,
     position: 'absolute',
-    border: '1px solid #00000030',
+    border: `1px solid ${alpha(theme.palette.primary.fg, 0.3)}`,
     borderRadius: '100%',
-    background: 'white',
+    background: theme.palette.primary.bg,
+    color: theme.palette.mode === 'dark' ? 'white' : 'black',
     padding: theme.spacing(0.3),
     display: 'grid',
     transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
