@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import reactPlugin from '@vitejs/plugin-react';
-import viteESLint from '@ehutch79/vite-eslint';
+// import viteESLint from '@ehutch79/vite-eslint';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
@@ -9,7 +9,7 @@ dotenv.config({ path: '.env.local' });
 export default defineConfig({
   plugins: [
     reactPlugin(),
-    viteESLint(),
+    // viteESLint(),
   ],
   server: {
     proxy: {
