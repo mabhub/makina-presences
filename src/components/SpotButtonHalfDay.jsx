@@ -57,7 +57,12 @@ const SpotButtonHaldDay = ({ presences, onConflict, disabled, position }) => {
   const classes = useStyles();
   const [ownTri] = useTriState('');
 
-  const [presence, ...rest] = presences;
+  const [presence] = presences;
+
+  const rest = React.useMemo(
+    () => presences?.slice(1) || [],
+    [presences],
+  );
 
   const isConflict = Boolean(rest.length);
   const isOccupied = Boolean(presence);

@@ -218,9 +218,14 @@ const SpotButton = ({
 
   const [fullDays, mornings, afternoons] = getPresence();
 
-  const [presenceFullDay, ...restFullDay] = fullDays;
+  const [presenceFullDay] = fullDays;
   const [presenceMorning, ...restMorning] = mornings;
   const [presenceAfternon, ...restAfternoon] = afternoons;
+
+  const restFullDay = React.useMemo(
+    () => fullDays?.slice(1) || [],
+    [fullDays],
+  );
 
   const isLocked = Boolean(blocked);
   const isConflict = Boolean(restFullDay.length);
