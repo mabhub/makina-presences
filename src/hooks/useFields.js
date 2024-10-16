@@ -1,6 +1,11 @@
 import { useQuery } from 'react-query';
+import keycloak from '../keycloak';
 
-const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+// const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+
+const headers = {
+  Authorization: `Token ${keycloak.tokenParsed.baserow_token[0]}`,
+};
 
 const useFields = tableId => {
   const basePath = `https://api.baserow.io/api/database/fields/table/${tableId}/`;
@@ -12,7 +17,7 @@ const useFields = tableId => {
     async () => {
       const response = await fetch(
         basePath,
-        { headers: { Authorization: `Token ${token}` } },
+        { headers },
       );
 
       const nextData = await response.json();

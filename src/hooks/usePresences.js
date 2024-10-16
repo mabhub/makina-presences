@@ -5,12 +5,13 @@ import createPersistedState from 'use-persisted-state';
 
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
+import keycloak from '../keycloak';
 
-const { VITE_BASEROW_TOKEN: token,
+const {
   VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
 const headers = {
-  Authorization: `Token ${token}`,
+  Authorization: `Token ${keycloak.tokenParsed.baserow_token[0]}`,
   'Content-Type': 'application/json',
 };
 
@@ -43,6 +44,8 @@ const usePresences = place => {
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
+      if (keycloak.isTokenExpired(5)) return keycloak.logout();
+
       const response = await fetch(
         basePath + qs,
         { headers },
@@ -139,6 +142,8 @@ const usePresences = place => {
 
   const setPresence = React.useCallback(
     presence => {
+      if (keycloak.isTokenExpired(5)) return keycloak.logout();
+
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {
         return deleteRow.mutate(presence);
