@@ -185,6 +185,34 @@ export const icons = {
   dry: DryCleaning,
 };
 
+const body = 'body2';
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(remarkGfm)
+  .use(Rehype2react, {
+    createElement: React.createElement,
+    components: {
+      h1: props => <Typography variant="h1" {...props} />,
+      h2: props => <Typography variant="h2" {...props} />,
+      h3: props => <Typography variant="h3" {...props} />,
+      h4: props => <Typography variant="h4" {...props} />,
+      h5: props => <Typography variant="h5" {...props} />,
+      h6: props => <Typography variant="h6" {...props} />,
+      hr: ({ className: cn, ...props }) =>
+        <Divider className={clsx(cn)} {...props} />,
+      p: props => <Typography variant={body} {...props} />,
+      li: props => <Typography variant={body} component="li" {...props} />,
+      a: props => <Link {...props} />,
+      table: props => <Table {...props} />,
+      thead: props => <TableHead {...props} />,
+      tbody: props => <TableBody {...props} />,
+      tr: props => <TableRow {...props} />,
+      td: props => <TableCell {...props} />,
+      th: props => <TableCell component="th" {...props} />,
+    },
+  });
+
 const AdditionalsPopup = ({
   info,
   mounted = false,
@@ -200,39 +228,9 @@ const AdditionalsPopup = ({
   const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon, x, y } = info;
   const trisLeft = tris.length - 3;
 
-  const body = 'body2';
-  const processor = React.useMemo(
-    () => unified()
-      .use(remarkParse)
-      .use(remarkRehype)
-      .use(remarkGfm)
-      .use(Rehype2react, {
-        createElement: React.createElement,
-        components: {
-          h1: props => <Typography variant="h1" {...props} />,
-          h2: props => <Typography variant="h2" {...props} />,
-          h3: props => <Typography variant="h3" {...props} />,
-          h4: props => <Typography variant="h4" {...props} />,
-          h5: props => <Typography variant="h5" {...props} />,
-          h6: props => <Typography variant="h6" {...props} />,
-          hr: ({ className: cn, ...props }) =>
-            <Divider className={clsx(cn, classes.divider)} {...props} />,
-          p: props => <Typography variant={body} {...props} />,
-          li: props => <Typography variant={body} component="li" {...props} />,
-          a: props => <Link {...props} />,
-          table: props => <Table {...props} />,
-          thead: props => <TableHead {...props} />,
-          tbody: props => <TableBody {...props} />,
-          tr: props => <TableRow {...props} />,
-          td: props => <TableCell {...props} />,
-          th: props => <TableCell component="th" {...props} />,
-        },
-      }),
-    [body, classes.divider],
-  );
   const hast = React.useMemo(
     () => processor.processSync(Description).result,
-    [Description, processor],
+    [Description],
   );
 
   const TaskIcon = icons[icon];
