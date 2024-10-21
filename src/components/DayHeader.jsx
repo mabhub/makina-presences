@@ -92,7 +92,14 @@ const DayHeader = ({
   const handleDialogClose = React.useCallback((...args) => {
     const { 0: spotId, [args.length - 1]: periodPref } = args;
     if (spotId) {
-      setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
+      setPresence({
+        day: date,
+        tri,
+        plan: place,
+        planID: mapping[place],
+        spot: spotId,
+        period: periodPref,
+      });
       // === TO ADD AFTER UPGRADING TO REACT 18 ===
       // toast.success(`Inscription au poste ${spotId}`, {
       //   description:
@@ -101,7 +108,7 @@ const DayHeader = ({
     }
     setDialogOpen(false);
     setFastOpen(false);
-  }, [date, place, setPresence, tri]);
+  }, [date, place, setPresence, tri, mapping]);
 
   const isConflict = Boolean(
     presences

@@ -161,7 +161,8 @@ const SpotButton = ({
   );
 
   const { presences, setPresence, deletePresence } = usePresences(mapping[place]);
-  const dayPresences = presences.filter(presence => presence.day === day);
+  const dayPresences = presences
+    .filter(presence => presence.day === day && presence.plan === place);
   const spotPresences = dayPresences
     .reduce((acc, { spot: s, ...presence }) => ({
       ...acc,

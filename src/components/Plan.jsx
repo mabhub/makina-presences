@@ -113,7 +113,7 @@ const Plan = ({ edit }) => {
 
   const planRef = useRef(null);
 
-  const additionals = useAdditionals(place);
+  const { additionals } = useAdditionals(place);
 
   return (
     <>
