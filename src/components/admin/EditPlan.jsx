@@ -110,41 +110,39 @@ const EditPlan = ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entityS
     }
   };
 
-  const keepSpotUpdate = (spot, index) => {
-    const { Identifiant: spotId } = spot;
-    // Is not the last one
-    if (index !== updateStack[placeID].length - 1) return true;
-
-    // Is the last, ID is different from the new update
-    if (spotId !== updatedSpot.Identifiant) return true;
-
-    // Is the last, IDs are the same, and the spot was created last action
-    const isCreated = Object.hasOwn(spot, CREATED_KEY)
-      && updateStack[placeID].findIndex(
-        ({ Identifiant }) => Identifiant === spot.Identifiant,
-      ) === index;
-    if (isCreated) return true;
-
-    // Is the last, IDs are the same, the spot wasn't created last action
-    // and last update isn't position/description related
-    const [diff] = Object.keys(spot).filter(k => spot[k] !== updatedSpot[k]);
-    if (diff !== 'x' && diff !== 'y' && diff !== 'Description') return true;
-
-    return false;
-  };
-
   useEffect(() => {
     if (Object.keys(updatedSpot).length) {
       setUpdateStack({
         ...updateStack,
         [placeID]: [
-          ...updateStack[placeID].filter((spot, index) => keepSpotUpdate(spot, index)),
+          ...updateStack[placeID].filter((spot, index) => {
+            const { Identifiant: spotId } = spot;
+            // Is not the last one
+            if (index !== updateStack[placeID].length - 1) return true;
+
+            // Is the last, ID is different from the new update
+            if (spotId !== updatedSpot.Identifiant) return true;
+
+            // Is the last, IDs are the same, and the spot was created last action
+            const isCreated = Object.hasOwn(spot, CREATED_KEY)
+              && updateStack[placeID].findIndex(
+                ({ Identifiant }) => Identifiant === spot.Identifiant,
+              ) === index;
+            if (isCreated) return true;
+
+            // Is the last, IDs are the same, the spot wasn't created last action
+            // and last update isn't position/description related
+            const [diff] = Object.keys(spot).filter(k => spot[k] !== updatedSpot[k]);
+            if (diff !== 'x' && diff !== 'y' && diff !== 'Description') return true;
+
+            return false;
+          }),
           updatedSpot,
         ],
       });
       setUpdatedSpot({});
     }
-  }, [updatedSpot]);
+  }, [updatedSpot, placeID, setUpdateStack, setUpdatedSpot, updateStack]);
 
   const idSpotUpdateStack = spotUpdateStack.map(({ Identifiant: spotId }) => spotId);
   const spots = useSpots(placeID)
@@ -204,7 +202,11 @@ const EditPlan = ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entityS
     // remove deleted additional
     .filter(additional => {
       if (idAdditionalUpdateStack.includes(additional.id)
-        && Object.hasOwn(additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)], DELETED_KEY)) {
+        && Object.hasOwn(
+          additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)],
+          DELETED_KEY,
+        )
+      ) {
         return false;
       }
       return true;

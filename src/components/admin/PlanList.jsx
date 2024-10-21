@@ -144,52 +144,64 @@ const PlanList = () => {
   const [updateStack, setUpdatedStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
 
-  const uptdateTheStack = stack => plansDB
-    .reduce((acc, curr) => {
-      const { id } = curr;
-      if (!Object.hasOwn(acc, id)) {
-        return {
-          ...acc,
-          [id]: stack[id] ? stack[id] : [],
-        };
-      }
-      return acc;
-    }, {});
-
-  // Is set from "plans" because Name's changes are stored locally
-  const defaultMapping = plans
-    .reduce((acc, curr) => {
-      const { Name: key, id } = curr;
-      if (!Object.hasOwn(acc, key)) {
-        return {
-          ...acc,
-          [key]: id,
-        };
-      }
-      return acc;
-    }, {});
+  const updateTheStack = React.useCallback(
+    stack => plansDB
+      .reduce((acc, curr) => {
+        const { id } = curr;
+        if (!Object.hasOwn(acc, id)) {
+          return {
+            ...acc,
+            [id]: stack[id] ? stack[id] : [],
+          };
+        }
+        return acc;
+      }, {}),
+    [plansDB],
+  );
 
   useEffect(() => {
-    if (plansDB.length > 0) {
+    if (plansDB.length !== plans.length
+      || plansDB.length !== Object.keys(updateStack).length
+      || plansDB.length !== Object.keys(undidStack).length
+      || plansDB.length !== Object.keys(mapping).length
+    ) {
       setPlanUpdate([...plansDB.map((plan, index) => ({
         ...plan,
         ...plans[index],
         plan: plan.plan,
       }))]);
       setUpdatedStack({
-        ...uptdateTheStack(updateStack),
+        ...updateTheStack(updateStack),
       });
       setUndidStack({
-        ...uptdateTheStack(undidStack),
+        ...updateTheStack(undidStack),
+      });
+      setMapping({
+        ...plansDB
+          .reduce((acc, curr) => {
+            const { Name: key, id } = curr;
+            if (!Object.hasOwn(acc, key)) {
+              return {
+                ...acc,
+                [key]: id,
+              };
+            }
+            return acc;
+          }, {}),
       });
     }
-  }, [plansDB]);
-
-  useEffect(() => {
-    if (plans) {
-      setMapping({ ...defaultMapping });
-    }
-  }, [plans]);
+  }, [
+    plansDB,
+    updateStack,
+    undidStack,
+    plans,
+    mapping,
+    setUpdatedStack,
+    setUndidStack,
+    setMapping,
+    setPlanUpdate,
+    updateTheStack,
+  ]);
 
   const [isEdit, setIsEdit] = useState();
   const [dialogOpen, setDialogOpen] = useState();

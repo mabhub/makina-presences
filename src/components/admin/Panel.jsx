@@ -77,7 +77,6 @@ const Panel = ({ entity, onClose, handleUpdate, onSelect }) => {
   const { entity: entityType } = entity;
 
   const [entityInfo, setEntityInfo] = useState(entity);
-  const [previousSpotInfo, setPreviousSpotInfo] = useState(entityInfo);
 
   const [isDuplicating, setIsDuplicating] = useState(false);
 
@@ -92,33 +91,28 @@ const Panel = ({ entity, onClose, handleUpdate, onSelect }) => {
     setEntityInfo({
       ...entity,
     });
-    setPreviousSpotInfo({});
   }, [entity]);
 
   const handleChange = (key, value) => {
-    setPreviousSpotInfo({
-      ...entityInfo,
-    });
-    setEntityInfo({
+    const newEntityInfo = {
       ...entityInfo,
       [key]: value,
-    });
-  };
+    };
 
-  useEffect(() => {
     const diffs = [
       ...new Set([
-        ...Object.keys(previousSpotInfo),
         ...Object.keys(entityInfo),
+        ...Object.keys(newEntityInfo),
       ]),
     ].filter(k =>
-      previousSpotInfo[k] !== entityInfo[k]
-      && previousSpotInfo.Identifiant === entityInfo.Identifiant);
+      entityInfo[k] !== newEntityInfo[k]
+      && entityInfo.Identifiant === newEntityInfo.Identifiant);
 
     if (diffs.length === 1) {
-      handleUpdate(entityInfo, diffs);
+      handleUpdate(newEntityInfo, diffs);
     }
-  }, [entityInfo]);
+    setEntityInfo(newEntityInfo);
+  };
 
   const handleDuplication = newSpot => {
     if (newSpot) {

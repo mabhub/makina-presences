@@ -69,11 +69,24 @@ const AdminPage = () => {
   const [updateStack] = useUpdateStack({});
   const [mapping] = useMapping();
 
+  const defaultMapping = plans
+    .reduce((acc, curr) => {
+      const { Name: key, id } = curr;
+      if (!Object.hasOwn(acc, key)) {
+        return {
+          ...acc,
+          [key]: id,
+        };
+      }
+      return acc;
+    }, {});
+
   const initStacks = () => {
     if (Object.keys(defaultStack).length > 0) {
       localStorage.setItem('updateStack', JSON.stringify({ ...defaultStack }));
       localStorage.setItem('undidStack', JSON.stringify({ ...defaultStack }));
       localStorage.setItem('planUpdate', JSON.stringify([...plans]));
+      localStorage.setItem('mapping', JSON.stringify({ ...defaultMapping }));
     }
   };
 
@@ -90,11 +103,14 @@ const AdminPage = () => {
   }, [place]);
 
   useEffect(() => {
-    if (place && entity && updateStack[mapping[place]].findLast(({ id }) => id === entity.id)) {
+    if (
+      place && entity && mapping
+      && updateStack[mapping[place]].findLast(({ id }) => id === entity.id)
+    ) {
       const lastState = updateStack[mapping[place]].findLast(({ id }) => id === entity.id);
       setShowPanel(!Object.hasOwn(lastState, DELETED_KEY));
     }
-  }, [updateStack]);
+  }, [updateStack, entity, place, mapping]);
 
   const handleClick = entitySelected => {
     if (!entitySelected) {

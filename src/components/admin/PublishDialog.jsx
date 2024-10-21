@@ -56,7 +56,7 @@ const PublishDialog = ({ open, plan, handleClose, isSecondary }) => {
         setAmountOfUpdate(previousValue => previousValue + 1);
       }
     });
-  }, [plans]);
+  }, [plans, amountOfPlanUpdate, plan]);
 
   const resetStack = () => {
     setUpdateStack({
