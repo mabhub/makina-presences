@@ -185,7 +185,7 @@ export const icons = {
   dry: DryCleaning,
 };
 
-function AdditionalsPopup ({
+const AdditionalsPopup = ({
   info,
   mounted = false,
   showPin = true,
@@ -194,7 +194,7 @@ function AdditionalsPopup ({
   cancelMoving,
   popupRef,
   isGhost = false,
-}) {
+}) => {
   const classes = useStyles();
 
   const { Titre, Description, Tache, Fixe, tris = !mounted && ['amz'], icon, x, y } = info;
@@ -375,6 +375,6 @@ function AdditionalsPopup ({
       )}
     </Box>
   );
-}
+};
 
 export default React.memo(AdditionalsPopup);

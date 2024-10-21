@@ -129,7 +129,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function PlanList () {
+const PlanList = () => {
   const classes = useStyles();
   const history = useHistory();
   const { place } = useParams();
@@ -350,6 +350,6 @@ function PlanList () {
       )}
     </>
   );
-}
+};
 
 export default React.memo(PlanList);

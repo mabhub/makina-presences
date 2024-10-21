@@ -47,7 +47,7 @@ const useUndidStack = createPersistedState('undidStack');
 const useUpdateStack = createPersistedState('updateStack');
 const useMapping = createPersistedState('mapping');
 
-function AdminPage () {
+const AdminPage = () => {
   const classes = useStyles();
   const { place } = useParams();
 
@@ -165,6 +165,6 @@ function AdminPage () {
       )}
     </div>
   );
-}
+};
 
 export default React.memo(AdminPage);

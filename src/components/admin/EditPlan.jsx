@@ -63,7 +63,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const usePlanUpdate = createPersistedState('planUpdate');
 const useMapping = createPersistedState('mapping');
 
-function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entitySelected }) {
+const EditPlan = ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entitySelected }) => {
   const classes = useStyles();
   const { place } = useParams();
 
@@ -164,9 +164,9 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
     // remove deleted spot
     .filter(spot => {
       if (idSpotUpdateStack.includes(spot.Identifiant)
-        && Object.hasOwn(
-          spotUpdateStack[idSpotUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY,
-        )) {
+        && Object
+          .hasOwn(spotUpdateStack[idSpotUpdateStack.lastIndexOf(spot.Identifiant)], DELETED_KEY)
+      ) {
         return false;
       }
       return true;
@@ -204,9 +204,7 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
     // remove deleted additional
     .filter(additional => {
       if (idAdditionalUpdateStack.includes(additional.id)
-        && Object.hasOwn(
-          additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)], DELETED_KEY,
-        )) {
+        && Object.hasOwn(additionalUpdateStack[idAdditionalUpdateStack.lastIndexOf(additional.id)], DELETED_KEY)) {
         return false;
       }
       return true;
@@ -288,6 +286,6 @@ function EditPlan ({ handleClick, updatedSpot, setUpdatedSpot, panelOpen, entity
       </Box>
     </>
   );
-}
+};
 
 export default React.memo(EditPlan);

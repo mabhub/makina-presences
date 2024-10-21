@@ -74,7 +74,7 @@ const useMapping = createPersistedState('mapping');
 const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 
-function AdditionalsDialog ({ open, onClose, baseInfo }) {
+const AdditionalsDialog = ({ open, onClose, baseInfo }) => {
   const classes = useStyles();
   const { place } = useParams();
   const [mapping] = useMapping();
@@ -229,6 +229,6 @@ function AdditionalsDialog ({ open, onClose, baseInfo }) {
       </DialogActions>
     </Dialog>
   );
-}
+};
 
 export default React.memo(AdditionalsDialog);

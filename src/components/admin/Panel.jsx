@@ -66,7 +66,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function Panel ({ entity, onClose, handleUpdate, onSelect }) {
+const Panel = ({ entity, onClose, handleUpdate, onSelect }) => {
   const classes = useStyles();
   const [updateStack, setUpdateStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
@@ -306,6 +306,6 @@ function Panel ({ entity, onClose, handleUpdate, onSelect }) {
       )}
     </>
   );
-}
+};
 
 export default React.memo(Panel);

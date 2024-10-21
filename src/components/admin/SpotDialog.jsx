@@ -10,7 +10,7 @@ import { CREATED_KEY, SPOT_ENTITY } from './const';
 const useMapping = createPersistedState('mapping');
 const useUpdateStack = createPersistedState('updateStack');
 
-function SpotDialog ({ open, onClose, initialSpot }) {
+const SpotDialog = ({ open, onClose, initialSpot }) => {
   const { place } = useParams();
   const [mapping] = useMapping();
   const placeID = mapping[place];
@@ -76,6 +76,6 @@ function SpotDialog ({ open, onClose, initialSpot }) {
       </DialogActions>
     </Dialog>
   );
-}
+};
 
 export default React.memo(SpotDialog);

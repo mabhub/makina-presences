@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function SpotForm ({ edit, isDuplicating, isIDValid, spotInfo, handleChange }) {
+const SpotForm = ({ edit, isDuplicating, isIDValid, spotInfo, handleChange }) => {
   const classes = useStyles();
   const fields = useFields(spotsTableId);
   const spotTypes = fields
@@ -139,6 +139,6 @@ function SpotForm ({ edit, isDuplicating, isIDValid, spotInfo, handleChange }) {
       )}
     </List>
   );
-}
+};
 
 export default React.memo(SpotForm);

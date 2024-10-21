@@ -77,7 +77,7 @@ const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 const usePlanUpdate = createPersistedState('planUpdate');
 
-function ActionBar ({ selectEntity }) {
+const ActionBar = ({ selectEntity }) => {
   const classes = useStyles();
   const { place } = useParams();
   const [mapping] = useMapping();
@@ -363,6 +363,6 @@ function ActionBar ({ selectEntity }) {
     </>
 
   );
-}
+};
 
 export default React.memo(ActionBar);

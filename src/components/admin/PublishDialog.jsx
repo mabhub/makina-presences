@@ -30,7 +30,7 @@ const useUpdateStack = createPersistedState('updateStack');
 const useUndidStack = createPersistedState('undidStack');
 const useMapping = createPersistedState('mapping');
 
-function PublishDialog ({ open, plan, handleClose, isSecondary }) {
+const PublishDialog = ({ open, plan, handleClose, isSecondary }) => {
   const classes = useStyles();
   const [updateStack, setUpdateStack] = useUpdateStack();
   const [undidStack, setUndidStack] = useUndidStack();
@@ -173,6 +173,6 @@ function PublishDialog ({ open, plan, handleClose, isSecondary }) {
       </DialogActions>
     </Dialog>
   );
-}
+};
 
 export default React.memo(PublishDialog);
