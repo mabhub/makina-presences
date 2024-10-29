@@ -12,4 +12,7 @@ try {
   console.error('Failed to initialize adapter:', error);
 }
 
-export default keycloak;
+const isSessionExpired = async () =>
+  keycloak.updateToken(-1).then(() => false).catch(() => true);
+
+export default { keycloak, isSessionExpired };

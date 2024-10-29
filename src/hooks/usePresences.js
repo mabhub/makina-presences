@@ -5,10 +5,11 @@ import createPersistedState from 'use-persisted-state';
 
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
-import keycloak from '../keycloak';
+import adapter from '../keycloak';
 
-const {
-  VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
+const { VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
+
+const { keycloak, isSessionExpired } = adapter;
 
 const headers = {
   Authorization: `Token ${keycloak.tokenParsed.baserow_token[0]}`,
@@ -44,7 +45,7 @@ const usePresences = place => {
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
-      if (keycloak.isTokenExpired(5)) return keycloak.logout();
+      if (await isSessionExpired()) return null;
 
       const response = await fetch(
         basePath + qs,
@@ -136,13 +137,15 @@ const usePresences = place => {
   );
 
   const deletePresence = React.useCallback(
-    presence => deleteRow.mutate(presence),
+    async presence => {
+      if (!(await isSessionExpired())) deleteRow.mutate(presence);
+    },
     [deleteRow],
   );
 
   const setPresence = React.useCallback(
-    presence => {
-      if (keycloak.isTokenExpired(5)) return keycloak.logout();
+    async presence => {
+      if (await isSessionExpired()) return null;
 
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {

@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query';
-import keycloak from '../keycloak';
+import adapter from '../keycloak';
 
-// const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+const { keycloak } = adapter;
 
 const headers = {
   Authorization: `Token ${keycloak.tokenParsed.baserow_token[0]}`,
