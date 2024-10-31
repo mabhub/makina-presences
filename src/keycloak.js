@@ -1,4 +1,5 @@
 import Keycloak from 'keycloak-js';
+import { useQuery } from 'react-query';
 
 const keycloak = new Keycloak({
   url: 'http://localhost:8080/',
@@ -18,4 +19,8 @@ const isSessionExpired = async () =>
 const getBaseRowToken = () =>
   keycloak.tokenParsed.baserow_token[0];
 
-export default { keycloak, isSessionExpired, getBaseRowToken };
+export default {
+  keycloak,
+  isSessionExpired,
+  getBaseRowToken,
+};

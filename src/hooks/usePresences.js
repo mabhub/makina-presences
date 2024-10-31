@@ -9,7 +9,7 @@ import adapter from '../keycloak';
 
 const { VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
-const { isSessionExpired, getBaseRowToken } = adapter;
+const { isSessionExpired, getBaseRowToken, keycloak } = adapter;
 
 const headers = {
   Authorization: `Token ${getBaseRowToken()}`,
@@ -45,8 +45,6 @@ const usePresences = place => {
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
-      if (await isSessionExpired()) return null;
-
       const response = await fetch(
         basePath + qs,
         { headers },
@@ -145,7 +143,8 @@ const usePresences = place => {
 
   const setPresence = React.useCallback(
     async presence => {
-      if (await isSessionExpired()) return null;
+      // if (await isSessionExpired()) return null;
+      await keycloak.updateToken(-1);
 
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {
