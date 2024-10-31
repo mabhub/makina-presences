@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query';
 import adapter from '../keycloak';
 
-const { keycloak, isSessionExpired } = adapter;
+const { getBaseRowToken, isSessionExpired } = adapter;
 
 const useTable = tableId => {
   const basePath = `https://api.baserow.io/api/database/rows/table/${tableId}/`;
@@ -19,7 +19,7 @@ const useTable = tableId => {
       if (await isSessionExpired()) return null;
       const response = await fetch(
         basePath + qs,
-        { headers: { Authorization: `Token ${keycloak.tokenParsed.baserow_token[0]}` } },
+        { headers: { Authorization: `Token ${getBaseRowToken()}` } },
       );
 
       const nextData = await response.json();

@@ -15,4 +15,7 @@ try {
 const isSessionExpired = async () =>
   keycloak.updateToken(-1).then(() => false).catch(() => true);
 
-export default { keycloak, isSessionExpired };
+const getBaseRowToken = () =>
+  keycloak.tokenParsed.baserow_token[0];
+
+export default { keycloak, isSessionExpired, getBaseRowToken };

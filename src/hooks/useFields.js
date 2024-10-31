@@ -1,10 +1,10 @@
 import { useQuery } from 'react-query';
 import adapter from '../keycloak';
 
-const { keycloak } = adapter;
+const { getBaseRowToken } = adapter;
 
 const headers = {
-  Authorization: `Token ${keycloak.tokenParsed.baserow_token[0]}`,
+  Authorization: `Token ${getBaseRowToken()}`,
 };
 
 const useFields = tableId => {
