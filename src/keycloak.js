@@ -1,5 +1,5 @@
 import Keycloak from 'keycloak-js';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
 const keycloak = new Keycloak({
   url: 'http://localhost:8080/',

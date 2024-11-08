@@ -136,7 +136,8 @@ const usePresences = place => {
 
   const deletePresence = React.useCallback(
     async presence => {
-      if (!(await isSessionExpired())) deleteRow.mutate(presence);
+      // if (!(await isSessionExpired())) deleteRow.mutate(presence);
+      deleteRow.mutate(presence);
     },
     [deleteRow],
   );
@@ -144,7 +145,7 @@ const usePresences = place => {
   const setPresence = React.useCallback(
     async presence => {
       // if (await isSessionExpired()) return null;
-      await keycloak.updateToken(-1);
+      // await keycloak.updateToken(-1);
 
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {
