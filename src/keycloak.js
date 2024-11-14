@@ -7,8 +7,11 @@ const keycloak = new Keycloak({
   clientId: 'presences',
 });
 
+let user;
+
 try {
   await keycloak.init({ onLoad: 'login-required' });
+  user = await keycloak.loadUserInfo();
 } catch (error) {
   console.error('Failed to initialize adapter:', error);
 }
@@ -21,6 +24,7 @@ const getBaseRowToken = () =>
 
 export default {
   keycloak,
+  user,
   isSessionExpired,
   getBaseRowToken,
 };

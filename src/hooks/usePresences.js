@@ -9,7 +9,7 @@ import adapter from '../keycloak';
 
 const { VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
-const { isSessionExpired, getBaseRowToken, keycloak } = adapter;
+const { getBaseRowToken } = adapter;
 
 const headers = {
   Authorization: `Token ${getBaseRowToken()}`,
