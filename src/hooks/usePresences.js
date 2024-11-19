@@ -9,7 +9,7 @@ import adapter from '../keycloak';
 
 const { VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
-const { getBaseRowToken } = adapter;
+const { getBaseRowToken, updateToken } = adapter;
 
 const headers = {
   Authorization: `Token ${getBaseRowToken()}`,
@@ -45,6 +45,7 @@ const usePresences = place => {
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
+      await updateToken();
       const response = await fetch(
         basePath + qs,
         { headers },
@@ -136,7 +137,7 @@ const usePresences = place => {
 
   const deletePresence = React.useCallback(
     async presence => {
-      // if (!(await isSessionExpired())) deleteRow.mutate(presence);
+      await updateToken();
       deleteRow.mutate(presence);
     },
     [deleteRow],
@@ -144,8 +145,7 @@ const usePresences = place => {
 
   const setPresence = React.useCallback(
     async presence => {
-      // if (await isSessionExpired()) return null;
-      // await keycloak.updateToken(-1);
+      await updateToken();
 
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {

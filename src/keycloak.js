@@ -1,5 +1,4 @@
 import Keycloak from 'keycloak-js';
-import { useMutation, useQuery } from 'react-query';
 
 const keycloak = new Keycloak({
   url: 'http://localhost:8080/',
@@ -16,15 +15,16 @@ try {
   console.error('Failed to initialize adapter:', error);
 }
 
-const isSessionExpired = async () =>
-  keycloak.updateToken(-1).then(() => false).catch(() => true);
-
 const getBaseRowToken = () =>
   keycloak.tokenParsed.baserow_token[0];
+
+const updateToken = async () => {
+  await keycloak.updateToken(5);
+};
 
 export default {
   keycloak,
   user,
-  isSessionExpired,
   getBaseRowToken,
+  updateToken,
 };
