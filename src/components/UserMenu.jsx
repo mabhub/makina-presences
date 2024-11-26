@@ -5,12 +5,10 @@ import { ArrowDropDown, Logout, Person } from '@mui/icons-material';
 import { alpha, Box, Button, IconButton, Menu, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
+import { useAuth } from 'react-oidc-context';
 import PreferencesDisplay from './PreferencesDisplay';
 import PreferencesFavorites from './PreferencesFavorites';
 import PreferencesTri from './PreferencesTri';
-import adapter from '../keycloak';
-
-const { keycloak } = adapter;
 
 const useTriState = createPersistedState('tri');
 
@@ -43,6 +41,8 @@ const useStyles = makeStyles(theme => {
 const UserMenu = () => {
   const [tri] = useTriState();
 
+  const auth = useAuth();
+
   const classes = useStyles();
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -52,6 +52,10 @@ const UserMenu = () => {
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    auth.signoutRedirect();
   };
 
   return (
@@ -98,7 +102,7 @@ const UserMenu = () => {
             endIcon={<Logout />}
             className={classes.btn}
             disableElevation
-            onClick={() => keycloak.logout()}
+            onClick={handleLogout}
           >
             Se déconnecter
           </Button>

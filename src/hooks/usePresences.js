@@ -3,23 +3,23 @@ import React from 'react';
 
 import createPersistedState from 'use-persisted-state';
 
+import { useAuth } from 'react-oidc-context';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
-import adapter from '../keycloak';
 
 const { VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
-
-const { getBaseRowToken, updateToken } = adapter;
-
-const headers = {
-  Authorization: `Token ${getBaseRowToken()}`,
-  'Content-Type': 'application/json',
-};
 
 const useWeekPrefs = createPersistedState('weekPref');
 
 const usePresences = place => {
   const [weekPref] = useWeekPrefs();
+
+  const { user: { profile: { baserow_token: [token] } = {} } = {} } = useAuth();
+
+  const headers = {
+    Authorization: `Token ${token}`,
+    'Content-Type': 'application/json',
+  };
 
   let timespan = 14;
   if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
@@ -45,7 +45,6 @@ const usePresences = place => {
   const { data: { results: presences = [] } = {} } = useQuery(
     queryKey,
     async () => {
-      await updateToken();
       const response = await fetch(
         basePath + qs,
         { headers },
@@ -137,7 +136,6 @@ const usePresences = place => {
 
   const deletePresence = React.useCallback(
     async presence => {
-      await updateToken();
       deleteRow.mutate(presence);
     },
     [deleteRow],
@@ -145,8 +143,6 @@ const usePresences = place => {
 
   const setPresence = React.useCallback(
     async presence => {
-      await updateToken();
-
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {
         return deleteRow.mutate(presence);

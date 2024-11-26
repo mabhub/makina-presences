@@ -1,10 +1,10 @@
+import { useAuth } from 'react-oidc-context';
 import { useQuery } from 'react-query';
-import adapter from '../keycloak';
-
-const { getBaseRowToken, updateToken } = adapter;
 
 const useTable = tableId => {
   const basePath = `https://api.baserow.io/api/database/rows/table/${tableId}/`;
+
+  const { user: { profile: { baserow_token: [token] } = {} } = {} } = useAuth();
 
   const queryKey = [tableId];
   const qs = [
@@ -16,10 +16,9 @@ const useTable = tableId => {
   const { data: { results = [] } = {} } = useQuery(
     queryKey,
     async () => {
-      await updateToken();
       const response = await fetch(
         basePath + qs,
-        { headers: { Authorization: `Token ${getBaseRowToken()}` } },
+        { headers: { Authorization: `Token ${token}` } },
       );
 
       const nextData = await response.json();

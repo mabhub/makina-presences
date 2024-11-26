@@ -9,7 +9,6 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import createPersistedState from 'use-persisted-state';
 
-import { useEffect } from 'react';
 import PresenceForm from './PresenceForm';
 
 import usePlans from '../hooks/usePlans';
@@ -20,7 +19,6 @@ import PresenceCalendar from './PresenceCalendar';
 import UserMenu from './UserMenu';
 
 import { name, repository, version } from '../../package.json';
-import adapter from '../keycloak';
 
 const { VITE_PROJECT_VERSION = version } = import.meta.env;
 
@@ -146,22 +144,14 @@ const selectedDraftStyle = {
   },
 };
 
-const { user } = adapter;
-
 const PresencePage = () => {
+  const [tri] = useTriState('');
   const classes = useStyles();
-  const [tri, setTri] = useTriState('');
   const plans = usePlans();
   const { place, day } = useParams();
   const history = useHistory();
 
   const isTriValid = tri?.length >= 3;
-
-  useEffect(() => {
-    if (tri !== user.preferred_username) {
-      setTri(user.preferred_username);
-    }
-  }, [tri, setTri]);
 
   const [useMaxWidth] = useMaxWidthState();
 
@@ -188,7 +178,7 @@ const PresencePage = () => {
         visibleToasts={7}
       /> */}
 
-      {(!place) && (
+      { (!place) && (
         <PresenceForm />
       )}
 

@@ -1,14 +1,14 @@
+import { useAuth } from 'react-oidc-context';
 import { useQuery } from 'react-query';
-import adapter from '../keycloak';
-
-const { getBaseRowToken } = adapter;
-
-const headers = {
-  Authorization: `Token ${getBaseRowToken()}`,
-};
 
 const useFields = tableId => {
   const basePath = `https://api.baserow.io/api/database/fields/table/${tableId}/`;
+
+  const { user: { profile: { baserow_token: [token] } = {} } = {} } = useAuth();
+
+  const headers = {
+    Authorization: `Token ${token}`,
+  };
 
   const queryKey = [tableId];
 
