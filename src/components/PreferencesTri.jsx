@@ -3,6 +3,7 @@ import createPersistedState from 'use-persisted-state';
 
 import { Done, Edit } from '@mui/icons-material';
 import { Box, Divider, IconButton, TextField } from '@mui/material';
+import { cleanTri } from '../helpers';
 
 const useTriState = createPersistedState('tri');
 
@@ -12,7 +13,7 @@ const PreferencesTri = () => {
   const [textValue, setTextValue] = React.useState(tri);
 
   const handleSubmit = () => {
-    if (!disableInput) setTri(textValue);
+    if (!disableInput) setTri(cleanTri(textValue));
     setDisableInput(!disableInput);
   };
 
