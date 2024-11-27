@@ -113,6 +113,8 @@ const SpotDialog = ({
     enableFavorite && defaultFavoriteSpot && displayFavorite ? defaultFavoriteSpot.Identifiant : ''
   ));
 
+  const isSelectedValueReserved = Object.keys(spotPresences).includes(selectedValue);
+
   const addDefaultSelect = () => {
     if (favoriteSpots.filter(({ Identifiant: spot }) => !spotPresences[spot]).length >= 1
         && displayFavorite
@@ -167,11 +169,15 @@ const SpotDialog = ({
 
   useEffect(() => {
     if (defaultFavoriteSpot && enableFavorite) {
-      setSelectedValue(defaultFavoriteSpot.Identifiant);
-    } else {
-      setSelectedValue('');
+      return setSelectedValue(defaultFavoriteSpot.Identifiant);
     }
-  }, [defaultFavoriteSpot, enableFavorite, periodPref]);
+
+    if (isSelectedValueReserved) {
+      return setSelectedValue('');
+    }
+
+    return null;
+  }, [defaultFavoriteSpot, enableFavorite, periodPref, isSelectedValueReserved]);
 
   const handleKeyDown = event => {
     if (event.keyCode === 27) {
