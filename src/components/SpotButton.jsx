@@ -213,6 +213,7 @@ const SpotButton = ({
     const afternoonPresences = spotIdPresences.filter(p => p.period === AFTERNOON_PERIOD);
     const fullDayPresences = spotIdPresences.filter(p => !Object.hasOwn(p, 'period')
     || p.period === ''
+    || p.period === null
     || p.period === FULLDAY_PERIOD);
 
     return [fullDayPresences, morningPresences, afternoonPresences];
@@ -225,6 +226,8 @@ const SpotButton = ({
     if (spoIdtPresences[2].some(({ tri }) => tri === ownTri)) return AFTERNOON_PERIOD;
     return undefined;
   };
+
+  const triPeriod = currentTriPeriod();
 
   const [fullDays, mornings, afternoons] = getPresence();
 
@@ -271,13 +274,13 @@ const SpotButton = ({
   const [anchor, setAnchor] = useState(null);
 
   const unsubscribe = () => {
-    removePresence(currentTriPeriod());
+    removePresence(triPeriod);
   };
 
   const handleClick = p => {
     if (edit) { return null; }
 
-    if ((!isOccupied && !isLocked) || (currentTriPeriod())) {
+    if ((!isOccupied && !isLocked) || (triPeriod)) {
       const [firstId, ...extraneous] = dayPresences
         ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points
         .filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
@@ -318,7 +321,7 @@ const SpotButton = ({
     { item: 'Matinée uniquement', action: morningOnly, disabled: mornings.length > 0 },
     { item: 'Après-midi uniquement', action: afternoonOnly, disabled: afternoons.length > 0 },
     { item: 'separator', separator: true },
-    { item: 'Se désinscrire', action: unsubscribe, disabled: Boolean(!currentTriPeriod()) },
+    { item: 'Se désinscrire', action: unsubscribe, disabled: Boolean(!triPeriod) },
   ];
 
   const title = 'Réserver pour :';
@@ -352,19 +355,19 @@ const SpotButton = ({
             [classes.spot]: true,
             [classes.fullDayAvailable]: mornings.length === 0 && afternoons.length === 0,
             [classes.occupied]: isOccupied && !isOwnSpot,
-            [classes.fullDay]: currentTriPeriod() === FULLDAY_PERIOD,
-            [classes.fullDayPending]: currentTriPeriod() === FULLDAY_PERIOD
+            [classes.fullDay]: triPeriod === FULLDAY_PERIOD,
+            [classes.fullDayPending]: triPeriod === FULLDAY_PERIOD
               && presenceFullDay?.fake,
-            [classes.morning]: currentTriPeriod() === MORNING_PERIOD
+            [classes.morning]: triPeriod === MORNING_PERIOD
              && !mornings.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
-            [classes.afternoon]: currentTriPeriod() === AFTERNOON_PERIOD
+            [classes.afternoon]: triPeriod === AFTERNOON_PERIOD
               && !afternoons.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
             [classes.locked]: isLocked,
             [`hl-${presenceFullDay?.tri}`]: presenceFullDay?.tri,
             [classes.morningAvailable]: mornings.length === 0
-              && currentTriPeriod() !== AFTERNOON_PERIOD,
+              && triPeriod !== AFTERNOON_PERIOD,
             [classes.afternoonAvailable]: afternoons.length === 0
-              && currentTriPeriod() !== MORNING_PERIOD,
+              && triPeriod !== MORNING_PERIOD,
           })}
           disabled={isPast}
           component={canClick ? 'div' : 'button'}
@@ -378,7 +381,7 @@ const SpotButton = ({
           onMouseDown={edit && handleMouseDown(spot)}
           onDragEnd={edit && handleDragEnd}
           onClick={event => {
-            if (isCumulative && currentTriPeriod()) return unsubscribe();
+            if (isCumulative && triPeriod) return unsubscribe();
             if (mornings.length === 1 && mornings[0].tri !== ownTri) {
               return afternoonOnly();
             }
@@ -387,7 +390,7 @@ const SpotButton = ({
             }
             if (afternoons.some(({ tri }) => sameLowC(tri, ownTri))
               || mornings.some(({ tri }) => sameLowC(tri, ownTri))) {
-              return handleClick(currentTriPeriod());
+              return handleClick(triPeriod);
             }
             return fullDay();
           }}
