@@ -280,7 +280,7 @@ const SpotButton = ({
   const handleClick = p => {
     if (edit) { return null; }
 
-    if ((!isOccupied && !isLocked) || (triPeriod)) {
+    if ((!isOccupied && !isLocked) || triPeriod) {
       const [firstId, ...extraneous] = dayPresences
         ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points
         .filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
@@ -321,7 +321,7 @@ const SpotButton = ({
     { item: 'Matinée uniquement', action: morningOnly, disabled: mornings.length > 0 },
     { item: 'Après-midi uniquement', action: afternoonOnly, disabled: afternoons.length > 0 },
     { item: 'separator', separator: true },
-    { item: 'Se désinscrire', action: unsubscribe, disabled: Boolean(!triPeriod) },
+    { item: 'Se désinscrire', action: unsubscribe, disabled: !triPeriod },
   ];
 
   const title = 'Réserver pour :';
