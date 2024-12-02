@@ -9,6 +9,8 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import createPersistedState from 'use-persisted-state';
 
+import { useEffect, useState } from 'react';
+import { useAuth } from 'react-oidc-context';
 import PresenceForm from './PresenceForm';
 
 import usePlans from '../hooks/usePlans';
@@ -145,11 +147,20 @@ const selectedDraftStyle = {
 };
 
 const PresencePage = () => {
-  const [tri] = useTriState('');
+  const auth = useAuth();
+  const [tri, setTri] = useTriState('');
+  const [firstLog, setFirstLog] = useState(true);
   const classes = useStyles();
   const plans = usePlans();
   const { place, day } = useParams();
   const history = useHistory();
+
+  useEffect(() => {
+    if (firstLog) {
+      setTri(auth.user.profile.preferred_username);
+      setFirstLog(false);
+    }
+  }, [tri, auth, setTri, firstLog, setFirstLog]);
 
   const isTriValid = tri?.length >= 3;
 

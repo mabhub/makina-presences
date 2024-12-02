@@ -51,12 +51,7 @@ const PresenceForm = ({ className, ...props }) => {
   const plans = usePlans();
   const history = useHistory();
 
-  const [agencyPref] = useAgencyPref();
   const [agency, setAgency] = useState();
-
-  if (agencyPref && agencyPref !== NO_AGENCYPREF_LABEL) {
-    history.push(`/${agencyPref}`);
-  }
 
   const handlePlaceChange = (event, newPlace) => setAgency(newPlace);
 
