@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite';
 import reactPlugin from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 // import viteESLint from '@ehutch79/vite-eslint';
 import dotenv from 'dotenv';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 dotenv.config({ path: '.env.local' });
 
@@ -10,6 +11,7 @@ export default defineConfig({
   plugins: [
     reactPlugin(),
     // viteESLint(),
+    nodePolyfills({ include: ['url'] }),
   ],
   server: {
     proxy: {
