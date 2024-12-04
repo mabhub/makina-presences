@@ -1,3 +1,4 @@
+import { Box, LinearProgress, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 
@@ -28,7 +29,36 @@ const ProtectedApp = ({ children }) => {
 
   return (
     auth.isLoading || !auth.isAuthenticated
-      ? <h1>Loading ...</h1>
+      ? (
+        <Box
+          sx={{
+            width: '100vw',
+            height: '100dvh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            gap: '20px',
+          }}
+        >
+          <Box sx={{ maxWidth: '300px', width: '100%' }}>
+            <Box
+              sx={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Typography variant="body2"> <strong>Chargement ...</strong> </Typography>
+              <img src="/presences.svg" height="100%" alt="presences icones" />
+            </Box>
+            <LinearProgress />
+          </Box>
+        </Box>
+      )
       : children
   );
 };

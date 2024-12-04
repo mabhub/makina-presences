@@ -35,10 +35,10 @@ const queryClient = new QueryClient();
 ReactDOM.render(
   <React.StrictMode>
     <AuthProvider {...oidcConfig} onSigninCallback={onSigninCallback}>
-      <ProtectedApp>
-        <QueryClientProvider client={queryClient}>
-          <StyledEngineProvider injectFirst>
-            <DarkThemeProvider>
+      <DarkThemeProvider>
+        <ProtectedApp>
+          <QueryClientProvider client={queryClient}>
+            <StyledEngineProvider injectFirst>
               <CssBaseline />
               <Router>
                 <Switch>
@@ -57,10 +57,10 @@ ReactDOM.render(
                   <Route path="*">Error 404</Route>
                 </Switch>
               </Router>
-            </DarkThemeProvider>
-          </StyledEngineProvider>
-        </QueryClientProvider>
-      </ProtectedApp>
+            </StyledEngineProvider>
+          </QueryClientProvider>
+        </ProtectedApp>
+      </DarkThemeProvider>
     </AuthProvider>
   </React.StrictMode>,
   document.getElementById('root'),
