@@ -18,6 +18,7 @@ import useSpots from '../hooks/useSpots';
 import ContextualMenu from './ContextualMenu';
 import SpotButtonHalfDay from './SpotButtonHalfDay';
 import SpotDescription from './SpotDescription';
+import ParkingDialog from './ParkingDialog';
 
 const useTriState = createPersistedState('tri');
 
@@ -170,6 +171,8 @@ const SpotButton = ({
       [s]: [...(acc[s] || []), presence],
     }), {});
 
+  const [parkingPopup, setParkingPopup] = useState(false);
+
   const queryClient = useQueryClient();
   const [movingSpot, setMovingSpot] = React.useState();
   const snap = (v, a = 5) => Math.round(v / a) * a;
@@ -201,7 +204,6 @@ const SpotButton = ({
 
     queryClient.invalidateQueries([spotsTableId]);
   };
-
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
   const { Bloqué: blocked, Identifiant: spotId, x, y, Type, Description, Cumul } = spot;
@@ -273,8 +275,26 @@ const SpotButton = ({
   const [contextualMenu, setContextualMenu] = useState(false);
   const [anchor, setAnchor] = useState(null);
 
+  const ownOtherPresence = dayPresences
+    .filter(({ tri }) => sameLowC(tri, ownTri))
+    .filter(({ spot: id }) => id !== spotId);
   const unsubscribe = () => {
+    const cumulativeSpotId = cumulativeSpots.map(({ Identifiant }) => Identifiant);
+    if (cumulativeSpotId.some(id => ownOtherPresence
+      .map(({ spot: spotIdentifiant }) => spotIdentifiant)
+      .includes(id))
+      && !cumulativeSpotId.includes(spotId)
+    ) {
+      setParkingPopup(true);
+    }
     removePresence(triPeriod);
+  };
+
+  const handleParkingPopup = value => {
+    if (value) {
+      ownOtherPresence.forEach(p => deletePresence(p));
+    }
+    setParkingPopup(false);
   };
 
   const handleClick = p => {
@@ -444,6 +464,12 @@ const SpotButton = ({
           title={title}
           items={contextualMenuItems}
           onClose={setContextualMenu}
+        />
+      )}
+      {parkingPopup && (
+        <ParkingDialog
+          open={parkingPopup}
+          onClose={handleParkingPopup}
         />
       )}
     </>
