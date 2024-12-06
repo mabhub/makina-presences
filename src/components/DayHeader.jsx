@@ -90,7 +90,7 @@ const DayHeader = ({
   const dateObj = dayjs(date);
 
   const handleDialogClose = React.useCallback((...args) => {
-    const { 0: spotId, [args.length - 1]: periodPref } = args;
+    const { 0: spotId, [args.length - 2]: parkingSlot, [args.length - 1]: periodPref } = args;
     if (spotId) {
       setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
       // === TO ADD AFTER UPGRADING TO REACT 18 ===
@@ -98,6 +98,9 @@ const DayHeader = ({
       //   description:
       //  `${Days[(dateObj.day()) % 7]} ${dateObj.date().toString()} ${Months[dateObj.month()]}`,
       // });
+    }
+    if (parkingSlot) {
+      setPresence({ day: date, tri, plan: place, spot: parkingSlot, period: periodPref });
     }
     setDialogOpen(false);
     setFastOpen(false);
