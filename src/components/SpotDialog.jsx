@@ -216,6 +216,8 @@ const SpotDialog = ({
     .map(({ Identifiant: spotIdentifiant }) => spotIdentifiant)
     .find(spotId => !Object.keys(spotPresences).includes(spotId));
 
+  const [isFastOpen] = useState(fastOpen && selectedValue);
+
   const handleOk = React.useCallback(
     () => {
       onClose(
@@ -229,10 +231,10 @@ const SpotDialog = ({
   );
 
   useEffect(() => {
-    if (fastOpen && selectedValue) {
+    if (isFastOpen) {
       handleOk();
     }
-  }, [fastOpen, handleOk, selectedValue]);
+  }, [handleOk, isFastOpen]);
 
   return (
     <Dialog

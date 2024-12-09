@@ -25,6 +25,7 @@ import { sameLowC } from '../helpers';
 
 import DayHeader from './DayHeader';
 import Moment from './Moment';
+import useSpots from '../hooks/useSpots';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -103,6 +104,8 @@ const PresenceCalendar = () => {
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
   const history = useHistory();
 
+  const cumulativeSpot = useSpots(place).filter(({ Cumul }) => Cumul);
+
   let timespan = 14;
   if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
 
@@ -165,6 +168,8 @@ const PresenceCalendar = () => {
 
         const todayPresences = presences.filter(({ day: d }) => (d === isoDate));
         const currentTodayPresences = todayPresences
+          .filter(({ spot }) => !cumulativeSpot
+            .map(({ Identifiant }) => Identifiant).includes(spot))
           .find(({ tri: t }) => sameLowC(t, tri));
 
         const isToday = isoDate === today.format('YYYY-MM-DD');
@@ -215,6 +220,7 @@ const PresenceCalendar = () => {
                   isPast={isPast}
                   isClosed={!displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}
                   persons={todayPresences.filter(({ spot: m }) => m).length}
+                  parkingSpots={cumulativeSpot}
                 />
                 <Collapse in={displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}>
                   <CardContent className={classes.cardContent}>
