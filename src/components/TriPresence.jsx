@@ -6,6 +6,7 @@ import { Avatar, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
+import { LocalParking } from '@mui/icons-material';
 import { AFTERNOON_PERIOD, MORNING_PERIOD } from './SpotButton';
 import { sameLowC } from '../helpers';
 
@@ -22,7 +23,7 @@ const useStyle = makeStyles({
   },
 });
 
-const TriPresence = ({ tri, alt, className, period, ...props }) => {
+const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
   const classes = useStyle();
   const [ownTri] = useTriState();
   const [hl, setHl] = React.useState(false);
@@ -42,6 +43,13 @@ const TriPresence = ({ tri, alt, className, period, ...props }) => {
       return (
         <Avatar className={classes.avatar}>
           <img src="/morning.svg" size="16x16" alt="morning icon" className={classes.svg} />
+        </Avatar>
+      );
+    }
+    if (isParking) {
+      return (
+        <Avatar className={classes.avatar}>
+          <LocalParking sx={{ height: '80%' }} />
         </Avatar>
       );
     }
