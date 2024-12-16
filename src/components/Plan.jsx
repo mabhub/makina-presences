@@ -1,13 +1,16 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import createPersistedState from 'use-persisted-state';
 
-import { Alert, AlertTitle, Box, Snackbar } from '@mui/material';
+import { Alert, AlertTitle, Box, Snackbar, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
+import { sameLowC } from '../helpers';
 import useAdditionals from '../hooks/useAdditionals';
 import usePlans from '../hooks/usePlans';
+import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
@@ -74,8 +77,11 @@ export const createSpot = async e => {
 
 const Children = ({ children }) => children;
 
+const useTriState = createPersistedState('tri');
+
 const Plan = ({ edit }) => {
   const classes = useStyles();
+  const [tri] = useTriState();
 
   const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
@@ -92,21 +98,59 @@ const Plan = ({ edit }) => {
     showSnackBar: false,
     currentTri: '',
     currentSpot: '',
+    conflict: false,
     isClosed: false,
   });
   const snackBarPosition = {
     vertical: 'top',
-    horizontal: 'left',
+    horizontal: 'right',
   };
 
-  const handleConflict = (value, tri, spot) => {
+  const handleConflict = (value, t, spot) => {
     if (!snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
-      setSnackBarInfo({
+      setSnackBarInfo(previous => ({
+        ...previous,
         showSnackBar: value,
-        currentTri: tri,
+        currentTri: t,
         currentSpot: spot,
-      });
+        conflict: true,
+      }));
     }
+  };
+
+  const { presences } = usePresences(place);
+  const ownPresences = presences
+    .filter(({ tri: t }) => sameLowC(tri, t))
+    .reduce((acc, { day: d, ...presence }) => ({
+      ...acc,
+      [d]: [...(acc[d] || []), presence],
+    }), {});
+
+  const isCumulativeSpot = React.useCallback(
+    spot => spots
+      .filter(({ Cumul }) => Cumul)
+      .some(({ Identifiant }) => Identifiant === spot),
+    [spots],
+  );
+
+  const onlyParkingDay = Object.values(ownPresences)
+    .filter(dayPresences => dayPresences.every(({ spot }) => isCumulativeSpot(spot)));
+  useEffect(() => {
+    if (onlyParkingDay.length && !snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
+      setSnackBarInfo(previous => ({
+        ...previous,
+        showSnackBar: true,
+        parking: true,
+      }));
+    }
+  }, [ownPresences, isCumulativeSpot, snackBarInfo, onlyParkingDay]);
+
+  const handleSnackbarClose = () => {
+    setSnackBarInfo({
+      ...snackBarInfo,
+      showSnackBar: false,
+      isClosed: true,
+    });
   };
 
   const planRef = useRef(null);
@@ -161,25 +205,40 @@ const Plan = ({ edit }) => {
       <Snackbar
         open={snackBarInfo.showSnackBar}
         anchorOrigin={snackBarPosition}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
       >
         <Alert
-          severity="error"
-          onClose={() => (setSnackBarInfo({
-            ...snackBarInfo,
-            showSnackBar: !snackBarInfo.showSnackBar,
-            isClosed: true,
-          }))}
+          severity={snackBarInfo.conflict ? 'error' : 'warning'}
         >
           <AlertTitle><strong>Attention</strong></AlertTitle>
-          Vous êtes inscris sur le même poste que
-          <TriPresence
-            tri={snackBarInfo.currentTri}
-            alt
-            className={classes.tri}
-          />
-          (<strong>{snackBarInfo.currentSpot}</strong>)
-          <br />
-          Discutez-en avec lui ou changez de poste.
+          <Box
+            sx={{
+              display: 'grid',
+              gap: theme => (theme.spacing(1.5)),
+            }}
+          >
+            {snackBarInfo.conflict && (
+            <Box>
+              Vous êtes inscris sur le même poste que
+              <TriPresence
+                tri={snackBarInfo.currentTri}
+                alt
+                className={classes.tri}
+              />
+              (<strong>{snackBarInfo.currentSpot}</strong>)
+              <br />
+              Discutez-en avec lui ou changez de poste.
+            </Box>
+            )}
+            {snackBarInfo.parking && (
+              <Box className={classes.sectionParking}>
+                <Typography variant="body2">
+                  Il y a des journées ou vous êtes uniquement inscris sur une place de parking.
+                </Typography>
+              </Box>
+            )}
+          </Box>
         </Alert>
       </Snackbar>
     </>

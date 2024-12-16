@@ -67,13 +67,6 @@ const useStyles = makeStyles(theme => ({
       opacity: ({ showParking }) => (showParking ? '0.5' : '0'),
     },
   },
-  lowVisisble: {
-    // opacity: theme.palette.mode === 'light' ? '0.2' : '0.4',
-    // transition: theme.transitions.create('all'),
-    // '&:hover': {
-    //   opacity: theme.palette.mode === 'light' ? '0.54' : '1',
-    // },
-  },
   pulsation: {
     animation: '$pulsate 800ms infinite',
   },
@@ -94,12 +87,12 @@ const useStyles = makeStyles(theme => ({
     },
   },
   badgeParking: {
-    color: theme.palette.error.main,
+    color: theme.palette.warning.main,
     position: 'absolute',
-    top: '0%',
-    left: '0%',
-    width: '1rem',
-    height: '1rem',
+    top: '-2%',
+    left: '-2%',
+    width: '1.1rem',
+    height: '1.1rem',
     zIndex: '2',
   },
 }));
@@ -121,7 +114,7 @@ const DayHeader = ({
   const isPresent = Boolean(presence?.spot);
   const [dialogOpen, setDialogOpen] = React.useState();
   const [fastOpen, setFastOpen] = React.useState(false);
-  const [showParking, setShowParking] = React.useState(false);
+  const [showParking, setShowParking] = React.useState(true);
   const classes = useStyles(({ showParking }));
   const dateObj = dayjs(date);
   const { day = dayjs().format('YYYY-MM-DD') } = useParams();
@@ -152,7 +145,7 @@ const DayHeader = ({
   const handlePresence = event => {
     event.stopPropagation();
     if (isPresent) {
-      setShowParking(false);
+      if (!isParkingPresent) setShowParking(false);
       // Delete presence
       return setPresence({ ...presence, spot: null });
     }
@@ -237,7 +230,6 @@ const DayHeader = ({
 
   return (
     <>
-
       <CardHeader
         subheader={(
           <>
@@ -293,9 +285,7 @@ const DayHeader = ({
                   <img
                     alt="parking button"
                     src={getParkingButtonSrc()}
-                    className={clsx({
-                      [classes.svg]: true,
-                    })}
+                    className={classes.svg}
                   />
                 </IconButton>
               </span>
