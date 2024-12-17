@@ -36,9 +36,9 @@ const useStyles = makeStyles(theme => ({
     '& .MuiChip-label': {
       padding: theme.spacing(0, 0.65, 0, 0.75),
     },
-    '& .MuiChip-deleteIcon': {
-      marginRight: theme.spacing(0.2),
-    },
+    // '& .MuiChip-deleteIcon': {
+    //   marginRight: theme.spacing(0.2),
+    // },
   },
 }));
 

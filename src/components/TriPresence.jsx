@@ -12,16 +12,25 @@ import { sameLowC } from '../helpers';
 
 const useTriState = createPersistedState('tri');
 
-const useStyle = makeStyles({
+const useStyle = makeStyles(theme => ({
   avatar: {
     '&.MuiAvatar-root': {
       transform: 'scale(0.8)',
     },
   },
-  svg: {
-    height: '50px',
+  morning: {
+    transform: 'scale(0.7)',
+    '&.MuiChip-avatar': {
+      margin: '0',
+      backgroundColor: 'unset',
+      marginRight: theme.spacing(-1),
+    },
   },
-});
+  afternoon: {
+    height: '100%',
+    transform: 'scale(0.6)',
+  },
+}));
 
 const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
   const classes = useStyle();
@@ -32,18 +41,9 @@ const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
   const theme = useTheme();
 
   const avatarIcon = () => {
-    if (period === AFTERNOON_PERIOD) {
-      return (
-        <Avatar className={classes.avatar}>
-          <img src="/afternoon.svg" size="16x16" alt="afternoon icon" className={classes.svg} />
-        </Avatar>
-      );
-    }
     if (period === MORNING_PERIOD) {
       return (
-        <Avatar className={classes.avatar}>
-          <img src="/morning.svg" size="16x16" alt="morning icon" className={classes.svg} />
-        </Avatar>
+        <img src="/morning.svg" alt="morning icon" className={classes.morning} />
       );
     }
     if (isParking) {
@@ -62,6 +62,18 @@ const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
         size="small"
         label={tri}
         avatar={avatarIcon()}
+        deleteIcon={period === AFTERNOON_PERIOD
+          ? (
+            <img
+              src="/afternoon.svg"
+              alt="afternoon icon"
+              className={classes.afternoon}
+            />
+          )
+          : undefined}
+        onDelete={period === AFTERNOON_PERIOD
+          ? () => {}
+          : undefined}
         color={isOwnTri ? color : undefined}
         className={clsx(`hl-${tri}`, className)}
         onMouseEnter={() => setHl(true)}
@@ -75,6 +87,9 @@ const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
           .hl-${tri} {
             background-color: ${theme.palette.secondary.main};
             color:  ${theme.palette.secondary.contrastText};
+          }
+          .hl-${tri} img {
+            filter: invert(100%)
           }
           `}
         </style>
