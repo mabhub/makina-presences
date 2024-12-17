@@ -59,14 +59,14 @@ const useStyles = makeStyles(theme => ({
   },
 
   morningAvailable: {
-    '&:hover *[class^="makeStyles-top"]': {
+    '&:hover *[class^="makeStyles-left"]': {
       background: alpha(theme.palette.primary.fg, 0.5),
       transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
       opacity: 0.5,
     },
   },
   afternoonAvailable: {
-    '&:hover *[class^="makeStyles-bottom"]': {
+    '&:hover *[class^="makeStyles-right"]': {
       background: alpha(theme.palette.primary.fg, 0.5),
       transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
       opacity: 0.5,
@@ -74,13 +74,13 @@ const useStyles = makeStyles(theme => ({
   },
 
   morning: {
-    '&:hover *[class^="makeStyles-top"]': {
+    '&:hover *[class^="makeStyles-left"]': {
       backgroundColor: alpha(theme.palette.primary.main, 0.25),
       transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
     },
   },
   afternoon: {
-    '&:hover *[class^="makeStyles-bottom"]': {
+    '&:hover *[class^="makeStyles-right"]': {
       backgroundColor: alpha(theme.palette.primary.main, 0.25),
       transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
     },
@@ -414,19 +414,24 @@ const SpotButton = ({
               || spotId)
             : (
               <Grid container>
-                {['top', 'bottom'].map((position, i) => (
+                {['left', 'right'].map((position, i) => (
                   <React.Fragment key={position}>
                     <SpotButtonHalfDay
-                      presences={position === 'top' ? mornings : afternoons}
+                      presences={position === 'left' ? mornings : afternoons}
                       onConflict={handleConflict}
                       disabled={isPast}
                       position={position}
+                      isShared={Boolean(mornings.length) && Boolean(afternoons.length)}
+                      borderColor={Type?.color?.replace('-', '')}
                     />
                     {i === 0 && (
                       <Divider
                         className={classes.divider}
                         sx={{
                           borderColor: Type?.color?.replace('-', ''),
+                          transform: 'rotate(90deg)',
+                          position: 'absolute',
+                          top: '49%',
                         }}
                       />
                     )}

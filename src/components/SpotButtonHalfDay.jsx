@@ -1,4 +1,4 @@
-import { alpha, Box, lighten } from '@mui/material';
+import { alpha, Box, lighten, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
@@ -8,23 +8,21 @@ import { sameLowC } from '../helpers';
 const useTriState = createPersistedState('tri');
 
 const useStyles = makeStyles(theme => ({
-  top: {
-    top: 0,
+  left: {
+    left: 0,
   },
-  bottom: {
-    bottom: 0,
+  right: {
+    right: 0,
   },
 
   base: {
     position: 'absolute',
-    width: '100%',
-    height: '50%',
-    color: theme.palette.primary.fg,
+    top: '0',
+    width: '50%',
+    height: '100%',
     border: 'none',
     textTransform: 'none',
     whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
     fontSize: '0.75em',
     padding: theme.spacing(0),
     display: 'flex',
@@ -51,11 +49,71 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.fg,
     opacity: 0.6,
   },
+  badgeTri: {
+    width: 'fit-content',
+    padding: '0 2px',
+    textAlign: 'center',
+    color: theme.palette.primary.fg,
+    background: theme.palette.primary.bg,
+    zIndex: '2',
+    borderRadius: '6px',
+    margin: '0 auto',
+    lineHeight: '1.1em',
+    position: 'relative',
+    '&:before': {
+      content: "''",
+      position: 'absolute',
+      top: '-1px',
+      height: 'calc(100% + 2px)',
+      background: 'inherit',
+      zIndex: '-1',
+      border: `1px solid ${alpha(theme.palette.primary.fg, 0.4)}`,
+    },
+  },
+  badgeLeft: {
+    '&:before': {
+      borderTopLeftRadius: 'inherit',
+      borderBottomLeftRadius: 'inherit',
+      borderRightColor: 'transparent',
+      right: 'calc(50% + 1px)',
+      width: '50%',
+    },
+  },
+  badgeRight: {
+    '&:before': {
+      borderTopRightRadius: 'inherit',
+      borderBottomRightRadius: 'inherit',
+      borderLeftColor: 'transparent',
+      left: 'calc(50%)',
+      width: 'calc(50% + 1px)',
+    },
+  },
+  badgePending: {
+    background: theme.palette.secondary.main,
+    color: theme.palette.primary.bg,
+    border: theme.palette.secondary.main,
+  },
+  badgeShare: {
+    alignSelf: 'center',
+  },
 }));
 
-const SpotButtonHaldDay = ({ presences, onConflict, disabled, position }) => {
+const SpotButtonHalfDay = ({
+  presences,
+  onConflict,
+  disabled,
+  position,
+  isShared,
+  borderColor,
+}) => {
   const classes = useStyles();
   const [ownTri] = useTriState('');
+
+  // const [openTootltip, setOpen] = useState(isHover);
+
+  // useEffect(() => {
+  //   setOpen(isHover);
+  // }, [isHover]);
 
   const [presence] = presences;
 
@@ -77,26 +135,68 @@ const SpotButtonHaldDay = ({ presences, onConflict, disabled, position }) => {
     }
   }, [isConflict, onConflict, ownTri, presences, rest]);
 
+  const triPresence = (!isConflict && presence?.tri)
+  || (isConflict && (presences
+    .some(({ tri }) => sameLowC(ownTri, tri))
+    ? presences.find(({ tri }) => sameLowC(ownTri, tri)).tri
+    : presence.tri));
+
   return (
-    <Box
-      className={clsx({
-        [classes.top]: position === 'top',
-        [classes.bottom]: position === 'bottom',
-        [classes.base]: true,
-        [classes.ownSpot]: isOwnSpot,
-        [classes.ownSpotPending]: isOwnSpot && presence?.fake,
-        [classes.occupied]: isOccupied,
-        [classes.disabled]: disabled,
-        [`hl-${presence?.tri}`]: presence?.tri && !disabled,
-      })}
-    >
-      {(!isConflict && presence?.tri)
-        || (isConflict && (presences
-          .some(({ tri }) => sameLowC(ownTri, tri))
-          ? presences.find(({ tri }) => sameLowC(ownTri, tri)).tri
-          : presence.tri))}
-    </Box>
+    <>
+      {presence?.tri && !isShared && (
+        <Typography
+          variant="caption"
+          className={clsx({
+            [classes.badgeTri]: true,
+            [classes.badgeLeft]: position === 'left',
+            [classes.badgeRight]: position === 'right',
+            [classes.badgePending]: presence?.fake,
+            [`hl-${presence?.tri}`]: presence?.tri && !disabled,
+          })}
+          sx={{
+            border: `1px solid ${borderColor}`,
+          }}
+        >
+          {triPresence}
+        </Typography>
+      )}
+      <Box
+        className={clsx({
+          [classes.left]: position === 'left',
+          [classes.right]: position === 'right',
+          [classes.base]: true,
+          [classes.ownSpot]: isOwnSpot,
+          [classes.ownSpotPending]: isOwnSpot && presence?.fake,
+          [classes.occupied]: isOccupied && !isOwnSpot,
+          [classes.disabled]: disabled,
+          [`hl-${presence?.tri}`]: presence?.tri && !disabled,
+        })}
+      >
+        {isShared && (
+        // <Tooltip
+        //   title={triPresence}
+        //   open={openTootltip}
+        //   PopperProps={{
+        //     modifiers: [
+        //       {
+        //         name: 'offset',
+        //         options: {
+        //           offset: position === 'left'
+        //             ? [-10, -45]
+        //             : [10, -45],
+        //         },
+        //       },
+        //     ],
+        //   }}
+        // >
+        <Typography variant="caption" className={classes.badgeShare} title="test">
+          {`${Array.from(triPresence)[0]}.`}
+        </Typography>
+        // </Tooltip>
+        )}
+      </Box>
+    </>
   );
 };
 
-export default React.memo(SpotButtonHaldDay);
+export default React.memo(SpotButtonHalfDay);
