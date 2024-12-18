@@ -44,6 +44,14 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.secondary.main,
   },
 
+  suggestUnsubscribe: {
+    backgroundColor: alpha(theme.palette.primary.main, 0.5),
+  },
+
+  suggestOtherHalf: {
+    background: alpha(theme.palette.primary.fg, 0.2),
+  },
+
   disabled: {
     backgroundColor: 'transparent',
     color: theme.palette.primary.fg,
@@ -104,6 +112,8 @@ const SpotButtonHalfDay = ({
   disabled,
   position,
   isShared,
+  isHover,
+  suggestOtherHalf,
   borderColor,
 }) => {
   const classes = useStyles();
@@ -167,6 +177,8 @@ const SpotButtonHalfDay = ({
           [classes.base]: true,
           [classes.ownSpot]: isOwnSpot,
           [classes.ownSpotPending]: isOwnSpot && presence?.fake,
+          [classes.suggestUnsubscribe]: isOwnSpot && isHover && !('fake' in presence),
+          [classes.suggestOtherHalf]: isHover && suggestOtherHalf,
           [classes.occupied]: isOccupied && !isOwnSpot,
           [classes.disabled]: disabled,
           [`hl-${presence?.tri}`]: presence?.tri && !disabled,

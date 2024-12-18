@@ -45,9 +45,6 @@ const useStyles = makeStyles(theme => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     fontSize: '0.75em',
-    '&:hover': {
-      background: 'unset',
-    },
   },
 
   fullDayAvailable: {
@@ -55,34 +52,6 @@ const useStyles = makeStyles(theme => ({
 
     '&:hover ': {
       background: alpha(theme.palette.primary.fg, 0.5),
-    },
-  },
-
-  morningAvailable: {
-    '&:hover *[class^="makeStyles-left"]': {
-      background: alpha(theme.palette.primary.fg, 0.5),
-      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
-      opacity: 0.5,
-    },
-  },
-  afternoonAvailable: {
-    '&:hover *[class^="makeStyles-right"]': {
-      background: alpha(theme.palette.primary.fg, 0.5),
-      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
-      opacity: 0.5,
-    },
-  },
-
-  morning: {
-    '&:hover *[class^="makeStyles-left"]': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.25),
-      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
-    },
-  },
-  afternoon: {
-    '&:hover *[class^="makeStyles-right"]': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.25),
-      transition: 'all 250ms cubic-bezier(0.4, 0, 0.2, 1)',
     },
   },
 
@@ -327,6 +296,8 @@ const SpotButton = ({
 
   const tooltip = <SpotDescription md={Description} spot={spot} />;
 
+  const [isHover, setIsHover] = useState(false);
+
   return (
     <>
       {(isConflict || Boolean(afternoons.length > 1) || Boolean(mornings.length > 1)) && (
@@ -357,16 +328,8 @@ const SpotButton = ({
             [classes.fullDay]: triPeriod === FULLDAY_PERIOD,
             [classes.fullDayPending]: triPeriod === FULLDAY_PERIOD
               && presenceFullDay?.fake,
-            [classes.morning]: triPeriod === MORNING_PERIOD
-             && !mornings.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
-            [classes.afternoon]: triPeriod === AFTERNOON_PERIOD
-              && !afternoons.find(({ tri }) => sameLowC(tri, ownTri))?.fake,
             [classes.locked]: isLocked,
             [`hl-${presenceFullDay?.tri}`]: presenceFullDay?.tri,
-            [classes.morningAvailable]: mornings.length === 0
-              && triPeriod !== AFTERNOON_PERIOD,
-            [classes.afternoonAvailable]: afternoons.length === 0
-              && triPeriod !== MORNING_PERIOD,
           })}
           disabled={isPast}
           component={canClick ? 'div' : 'button'}
@@ -379,6 +342,8 @@ const SpotButton = ({
           draggable={Boolean(edit)}
           onMouseDown={edit && handleMouseDown(spot)}
           onDragEnd={edit && handleDragEnd}
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
           onClick={event => {
             if (isCumulative && triPeriod) return unsubscribe();
             if (mornings.length === 1 && mornings[0].tri !== ownTri) {
@@ -422,6 +387,12 @@ const SpotButton = ({
                       disabled={isPast}
                       position={position}
                       isShared={Boolean(mornings.length) && Boolean(afternoons.length)}
+                      isHover={isHover}
+                      suggestOtherHalf={
+                        position === 'left'
+                          ? mornings.length === 0 && triPeriod !== AFTERNOON_PERIOD
+                          : afternoons.length === 0 && triPeriod !== MORNING_PERIOD
+                      }
                       borderColor={Type?.color?.replace('-', '')}
                     />
                     {i === 0 && (
