@@ -84,8 +84,8 @@ const useStyles = makeStyles(theme => ({
       borderTopRightRadius: 'inherit',
       borderBottomRightRadius: 'inherit',
       borderLeftColor: 'transparent',
-      left: 'calc(50%)',
       width: 'calc(50% + 1px)',
+      left: '50%',
     },
   },
   badgePending: {
