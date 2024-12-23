@@ -1,34 +1,33 @@
-import React from 'react';
 import clsx from 'clsx';
+import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { Avatar, Chip } from '@mui/material';
+import { alpha, Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { LocalParking } from '@mui/icons-material';
-import { AFTERNOON_PERIOD, MORNING_PERIOD } from './SpotButton';
 import { sameLowC } from '../helpers';
+import { AFTERNOON_PERIOD, MORNING_PERIOD } from './SpotButton';
 
 const useTriState = createPersistedState('tri');
 
 const useStyle = makeStyles(theme => ({
-  avatar: {
-    '&.MuiAvatar-root': {
-      transform: 'scale(0.8)',
-    },
+  chip: {
+    transition: theme.transitions.create('background-color'),
+    padding: theme.spacing(0, 0.8),
+    borderRadius: theme.spacing(2),
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
   },
-  morning: {
-    transform: 'scale(0.7)',
-    '&.MuiChip-avatar': {
-      margin: '0',
-      backgroundColor: 'unset',
-      marginRight: theme.spacing(-1),
-    },
-  },
-  afternoon: {
-    height: '100%',
-    transform: 'scale(0.6)',
+  icon: {
+    height: '70%',
+    width: 'auto',
+    background: alpha(theme.palette.primary.fg, 0.4),
+    borderRadius: '50%',
+    padding: theme.spacing(0.1),
+    color: 'black',
   },
 }));
 
@@ -36,21 +35,25 @@ const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
   const classes = useStyle();
   const [ownTri] = useTriState();
   const [hl, setHl] = React.useState(false);
-  const color = alt ? 'secondary' : 'primary';
   const isOwnTri = sameLowC(ownTri, tri);
   const theme = useTheme();
+  const color = alt ? theme.palette.secondary.main : theme.palette.primary.main;
+  const textColor = theme.palette.mode === 'dark' ? theme.palette.primary.fg : '#000';
 
   const avatarIcon = () => {
     if (period === MORNING_PERIOD) {
       return (
-        <img src="/morning.svg" alt="morning icon" className={classes.morning} />
+        <img src="/morning.svg" alt="morning icon" className={classes.icon} />
+      );
+    }
+    if (period === AFTERNOON_PERIOD) {
+      return (
+        <img src="/afternoon.svg" alt="afternoon icon" className={classes.icon} />
       );
     }
     if (isParking) {
       return (
-        <Avatar className={classes.avatar}>
-          <LocalParking sx={{ height: '80%' }} />
-        </Avatar>
+        <LocalParking className={classes.icon} />
       );
     }
     return null;
@@ -58,28 +61,29 @@ const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
 
   return (
     <>
-      <Chip
-        size="small"
-        label={tri}
-        avatar={avatarIcon()}
-        deleteIcon={period === AFTERNOON_PERIOD
-          ? (
-            <img
-              src="/afternoon.svg"
-              alt="afternoon icon"
-              className={classes.afternoon}
-            />
-          )
-          : undefined}
-        onDelete={period === AFTERNOON_PERIOD
-          ? () => {}
-          : undefined}
-        color={isOwnTri ? color : undefined}
-        className={clsx(`hl-${tri}`, className)}
+      <Box
+        className={clsx(classes.chip, `hl-${tri}`, className)}
         onMouseEnter={() => setHl(true)}
         onMouseLeave={() => setHl(false)}
+        sx={{
+          color: isOwnTri
+            ? theme.palette.primary.contrastText
+            : textColor,
+          backgroundColor: isOwnTri
+            ? color
+            : alpha(theme.palette.primary.fg, 0.2),
+        }}
         {...props}
-      />
+      >
+        {avatarIcon()}
+        <Typography
+          sx={{
+            fontSize: '0.8125rem',
+          }}
+        >
+          {tri}
+        </Typography>
+      </Box>
 
       {hl && !isOwnTri && (
         <style>
@@ -88,8 +92,8 @@ const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
             background-color: ${theme.palette.secondary.main};
             color:  ${theme.palette.secondary.contrastText};
           }
-          .hl-${tri} img {
-            filter: invert(100%)
+          .hl-${tri} img, .hl-${tri} svg{
+            background: ${theme.palette.mode === 'light' ? alpha(theme.palette.primary.bg, 0.8) : ''};
           }
           `}
         </style>
