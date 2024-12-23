@@ -119,12 +119,6 @@ const SpotButtonHalfDay = ({
   const classes = useStyles();
   const [ownTri] = useTriState('');
 
-  // const [openTootltip, setOpen] = useState(isHover);
-
-  // useEffect(() => {
-  //   setOpen(isHover);
-  // }, [isHover]);
-
   const [presence] = presences;
 
   const rest = React.useMemo(
@@ -185,26 +179,9 @@ const SpotButtonHalfDay = ({
         })}
       >
         {isShared && (
-        // <Tooltip
-        //   title={triPresence}
-        //   open={openTootltip}
-        //   PopperProps={{
-        //     modifiers: [
-        //       {
-        //         name: 'offset',
-        //         options: {
-        //           offset: position === 'left'
-        //             ? [-10, -45]
-        //             : [10, -45],
-        //         },
-        //       },
-        //     ],
-        //   }}
-        // >
-        <Typography variant="caption" className={classes.badgeShare} title="test">
-          {`${Array.from(triPresence)[0]}.`}
-        </Typography>
-        // </Tooltip>
+          <Typography variant="caption" className={classes.badgeShare} title="share">
+            {`${Array.from(triPresence)[0]}`}
+          </Typography>
         )}
       </Box>
     </>
