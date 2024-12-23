@@ -12,6 +12,8 @@ import TriPresence from './TriPresence';
 const useStyles = makeStyles(theme => ({
   moment: {
     color: theme.palette.grey[500],
+    display: 'flex',
+    flexWrap: 'wrap',
   },
   matin: {
     background: alpha(theme.palette.primary.main, 0.15),
@@ -33,12 +35,6 @@ const useStyles = makeStyles(theme => ({
   tri: {
     margin: theme.spacing(0.25),
     height: theme.spacing(2.5),
-    '& .MuiChip-label': {
-      padding: theme.spacing(0, 0.65, 0, 0.75),
-    },
-    '& .MuiChip-deleteIcon': {
-      marginRight: theme.spacing(0.2),
-    },
   },
 }));
 
@@ -79,13 +75,14 @@ const Moment = ({
     >
       {deduplicate(presences, 'tri')
         .sort(({ tri: a }, { tri: b }) => (a.localeCompare(b)))
-        .map(({ id, tri: t, fake, period }) => (
+        .map(({ id, spot, tri: t, fake, period }) => (
           <TriPresence
             key={id}
             tri={t}
             alt={fake}
             className={classes.tri}
             period={period}
+            isParking={isCumulativeSpot(spot)}
           />
         ))}
     </Grid>

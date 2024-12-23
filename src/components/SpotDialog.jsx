@@ -12,8 +12,11 @@ import {
   InputLabel,
   List,
   ListItem,
+  ListItemText,
   MenuItem,
   Select,
+  Stack,
+  Switch,
   Tab,
   Tabs,
   Typography,
@@ -23,11 +26,11 @@ import { useTheme } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { baseFlags, isEnable } from '../feature_flag_service';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from './SpotButton';
-import { baseFlags, isEnable } from '../feature_flag_service';
 
 const useStyles = makeStyles(theme => ({
   buttonGroup: {
@@ -57,10 +60,20 @@ const useStyles = makeStyles(theme => ({
   options: {
     paddingLeft: theme.spacing(0),
   },
+  parkingText: {
+    marginRight: theme.spacing(10),
+  },
+  parkingFull: {
+    color: theme.palette.error.main,
+    border: `1px solid ${theme.palette.error.main}`,
+    padding: `${theme.spacing(0.5)} ${theme.spacing(2)}`,
+    borderRadius: theme.spacing(0.5),
+    textTransform: 'uppercase',
+  },
 }));
 const useFavoritesState = createPersistedState('favorites');
 
-const { FF_FAVORITE, FF_HALFDAY } = baseFlags;
+const { FF_FAVORITE, FF_HALFDAY, FF_PARKING } = baseFlags;
 
 const SpotDialog = ({
   open,
@@ -77,6 +90,7 @@ const SpotDialog = ({
 
   const enableFavorite = isEnable(FF_FAVORITE);
   const enableHalfDay = isEnable(FF_HALFDAY);
+  const enableParking = isEnable(FF_PARKING);
 
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
 
@@ -105,6 +119,7 @@ const SpotDialog = ({
     .sort(
       ({ Identifiant: a }, { Identifiant: b }) => favoriteName.indexOf(a) - favoriteName.indexOf(b),
     );
+  const cumulativeSpot = spots.filter(({ Cumul }) => Cumul);
 
   const defaultFavoriteSpot = favoriteSpots
     .find(({ Identifiant: spot }) => !spotPresences[spot] && displayFavorite);
@@ -150,13 +165,6 @@ const SpotDialog = ({
     onClose();
   };
 
-  const handleOk = React.useCallback(
-    () => {
-      onClose(selectedValue, selectedPlace, periodPref);
-    },
-    [onClose, periodPref, selectedPlace, selectedValue],
-  );
-
   const handleChange = event => {
     setSelectedValue(event.target.value);
   };
@@ -185,11 +193,49 @@ const SpotDialog = ({
     }
   };
 
+  const noParkingAvailable = cumulativeSpot
+    .map(({ Identifiant }) => Identifiant)
+    .every(id => presences
+      .filter(({ day: d }) => (d === isoDate))
+      .map(({ spot }) => spot).includes(id));
+
+  const [parkingWanted, setParkingWanted] = useState(false);
+
+  const handleParkingChange = () => {
+    if (!noParkingAvailable) {
+      setParkingWanted(!parkingWanted);
+    }
+  };
+
   useEffect(() => {
-    if (fastOpen && selectedValue) {
+    if (noParkingAvailable) {
+      setParkingWanted(false);
+    }
+  }, [noParkingAvailable, setParkingWanted]);
+
+  const parkingSpotAvailable = cumulativeSpot
+    .map(({ Identifiant: spotIdentifiant }) => spotIdentifiant)
+    .find(spotId => !Object.keys(spotPresences).includes(spotId));
+
+  const [isFastOpen] = useState(fastOpen && selectedValue);
+
+  const handleOk = React.useCallback(
+    () => {
+      onClose(
+        selectedValue,
+        selectedPlace,
+        parkingWanted ? parkingSpotAvailable : undefined,
+        periodPref,
+      );
+    },
+    [onClose, periodPref, selectedPlace, selectedValue, parkingSpotAvailable, parkingWanted],
+  );
+
+  useEffect(() => {
+    if (isFastOpen) {
       handleOk();
     }
-  }, [fastOpen, handleOk, selectedValue]);
+  }, [handleOk, isFastOpen]);
 
   return (
     <Dialog
@@ -260,6 +306,33 @@ const SpotDialog = ({
           </Select>
         </FormControl>
 
+        {displayFavorite && enableParking && (
+          <ListItem
+            disablePadding={!noParkingAvailable}
+            disableGutters
+          >
+            <ListItemText
+              secondary="Avec parking"
+              className={classes.parkingText}
+            />
+            {noParkingAvailable
+              ? <Typography className={classes.parkingFull}>Complet</Typography>
+              : (
+                <Stack direction="row" sx={{ alignItems: 'center' }}>
+                  <Typography sx={{ opacity: parkingWanted ? '0.3' : '1' }}>Non</Typography>
+                  <Switch
+                    checked={parkingWanted}
+                    onChange={() => handleParkingChange()}
+                    onKeyPress={e => { if (e.key === 'Enter') { handleParkingChange(); } }}
+                    disabled={noParkingAvailable}
+                  />
+                  <Typography sx={{ opacity: parkingWanted ? '1' : '0.3' }}> Oui </Typography>
+                </Stack>
+              )}
+
+          </ListItem>
+        )}
+
         {displayFavorite && enableHalfDay && (
           <>
             <Divider
@@ -272,7 +345,6 @@ const SpotDialog = ({
               <Typography variant="subtitle2" className={classes.optionsTitle}>Options</Typography>
             </Divider>
             <List
-              dense
               disablePadding
               className={classes.options}
             >
