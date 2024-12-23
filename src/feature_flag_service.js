@@ -9,6 +9,7 @@ export const baseFlags = {
   FF_FAVORITE: 'favorite',
   FF_HALFDAY: 'halfDay',
   FF_COMPLEMENTARY: 'complementaryInformation',
+  FF_PARKING: 'parking',
 };
 
 const getFeatureFlags = () => {

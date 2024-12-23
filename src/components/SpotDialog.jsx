@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
 }));
 const useFavoritesState = createPersistedState('favorites');
 
-const { FF_FAVORITE, FF_HALFDAY } = baseFlags;
+const { FF_FAVORITE, FF_HALFDAY, FF_PARKING } = baseFlags;
 
 const SpotDialog = ({
   open,
@@ -90,6 +90,7 @@ const SpotDialog = ({
 
   const enableFavorite = isEnable(FF_FAVORITE);
   const enableHalfDay = isEnable(FF_HALFDAY);
+  const enableParking = isEnable(FF_PARKING);
 
   const [periodPref, setPeriodPref] = useState(FULLDAY_PERIOD);
 
@@ -305,7 +306,7 @@ const SpotDialog = ({
           </Select>
         </FormControl>
 
-        {displayFavorite && (
+        {displayFavorite && enableParking && (
           <ListItem
             disablePadding={!noParkingAvailable}
             disableGutters
