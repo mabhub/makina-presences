@@ -13,6 +13,7 @@ import { sameLowC } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import { Days, Months } from '../settings';
 import SpotDialog from './SpotDialog';
+import { baseFlags, isEnable } from '../feature_flag_service';
 
 const useStyles = makeStyles(theme => ({
   cardHeader: {
@@ -97,6 +98,8 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const { FF_PARKING } = baseFlags;
+
 const DayHeader = ({
   date,
   isHoliday,
@@ -119,6 +122,8 @@ const DayHeader = ({
   const dateObj = dayjs(date);
   const { day = dayjs().format('YYYY-MM-DD') } = useParams();
 
+  const enableParking = isEnable(FF_PARKING);
+
   const parkingPresences = presences
     .filter(({ spot }) => parkingSpots.map(({ Identifiant }) => Identifiant).includes(spot));
   const isParkingPending = parkingPresences
@@ -129,6 +134,12 @@ const DayHeader = ({
   const parkingAvailable = parkingSpots
     .map(({ Identifiant: spotIdentifiant }) => spotIdentifiant)
     .filter(id => !presences.map(({ spot }) => spot).includes(id));
+  const isParkingFull = parkingSpots
+    .map(({ Identifiant: spotIdentifiant }) => spotIdentifiant)
+    .filter(id => !presences
+      .filter(({ tri: t }) => !sameLowC(t, tri))
+      .map(({ spot }) => spot)
+      .includes(id)).length === 0;
 
   useEffect(() => {
     if ((presences && isParkingPresent) || (isPresent && date === day)) {
@@ -220,7 +231,7 @@ const DayHeader = ({
   };
 
   const getParkingButtonTooltip = () => {
-    if (!parkingAvailable.length) return 'Parking complet';
+    if (isParkingFull) return 'Parking complet';
     if (isParkingPending) return 'En cours d\'inscription ...';
     if (isParkingPresent) return 'Se désinscrire du parking';
     return 'S\'inscrire au parking';
@@ -262,34 +273,36 @@ const DayHeader = ({
             }}
           >
 
-            <Tooltip
-              title={getParkingButtonTooltip()}
-              enterNextDelay={tooltipEnterDelay}
-              enterDelay={tooltipEnterDelay}
-            >
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={handleParking}
-                  className={clsx({
-                    [classes.parkingButton]: true,
-                    [classes.pulsation]: isParkingPending,
-                  })}
-                  onMouseEnter={() => handleHoverParking(true)}
-                  onMouseLeave={() => handleHoverParking(false)}
-                  disabled={!parkingAvailable.length || !showParking}
-                >
-                  {isParkingPresent && !isPresent && (
+            {enableParking && (
+              <Tooltip
+                title={getParkingButtonTooltip()}
+                enterNextDelay={tooltipEnterDelay}
+                enterDelay={tooltipEnterDelay}
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleParking}
+                    className={clsx({
+                      [classes.parkingButton]: true,
+                      [classes.pulsation]: isParkingPending,
+                    })}
+                    onMouseEnter={() => handleHoverParking(true)}
+                    onMouseLeave={() => handleHoverParking(false)}
+                    disabled={isParkingFull || !showParking}
+                  >
+                    {isParkingPresent && !isPresent && (
                     <Warning className={classes.badgeParking} />
-                  )}
-                  <img
-                    alt="parking button"
-                    src={getParkingButtonSrc()}
-                    className={classes.svg}
-                  />
-                </IconButton>
-              </span>
-            </Tooltip>
+                    )}
+                    <img
+                      alt="parking button"
+                      src={getParkingButtonSrc()}
+                      className={classes.svg}
+                    />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
             <Tooltip
               title={!isPresent ? 'S\'inscrire à un poste' : 'Se désinscrire du poste'}
               enterNextDelay={tooltipEnterDelay}
