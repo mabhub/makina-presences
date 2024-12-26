@@ -1,0 +1,50 @@
+:root {
+    --vp-c-brand-1: #50AF55;
+    --vp-c-brand-2: #4acf51;
+    --vp-button-brand-bg: var(--vp-c-brand-1);
+}
+
+img {
+    margin: 0 auto;
+}
+
+
+
+/* === UI feature list === */
+
+.title-dot {
+    display: flex; 
+    gap: 10px; 
+    align-items: center;
+}
+.dot {
+    background: #D0DD2A; 
+    width: 30px; 
+    height: 30px; 
+    border-radius: 100%; 
+    font-weight: bold; 
+    color: black;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+
+/* === Download icon for BaseRow === */
+
+
+.table_title {
+    display: flex;
+    gap: 7px;
+}
+.link {
+    display: flex;
+    gap: 2px;
+}
+.link > img {
+    height: 15px;
+    color: var(--vp-c-brand-1);
+}
+.link:hover > img {
+    filter: contrast(150%);
+}

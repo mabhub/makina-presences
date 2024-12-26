@@ -34,7 +34,7 @@ const TriPresence = ({ tri, alt, className, period, ...props }) => {
     if (period === AFTERNOON_PERIOD) {
       return (
         <Avatar className={classes.avatar}>
-          <img src="/public/afternoon.svg" size="16x16" alt="afternoon icon" className={classes.svg} />
+          <img src="/afternoon.svg" size="16x16" alt="afternoon icon" className={classes.svg} />
         </Avatar>
       );
     }
