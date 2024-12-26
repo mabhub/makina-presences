@@ -1,9 +1,10 @@
+import { useAuth } from 'react-oidc-context';
 import { useQuery } from 'react-query';
-
-const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
 const useTable = tableId => {
   const basePath = `https://api.baserow.io/api/database/rows/table/${tableId}/`;
+
+  const { user: { profile: { baserow_token: [token] } = {} } = {} } = useAuth();
 
   const queryKey = [tableId];
   const qs = [

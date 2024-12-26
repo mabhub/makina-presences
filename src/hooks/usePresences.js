@@ -3,21 +3,23 @@ import React from 'react';
 
 import createPersistedState from 'use-persisted-state';
 
+import { useAuth } from 'react-oidc-context';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { cleanTri } from '../helpers';
 
-const { VITE_BASEROW_TOKEN: token,
-  VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
-
-const headers = {
-  Authorization: `Token ${token}`,
-  'Content-Type': 'application/json',
-};
+const { VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
 
 const useWeekPrefs = createPersistedState('weekPref');
 
 const usePresences = place => {
   const [weekPref] = useWeekPrefs();
+
+  const { user: { profile: { baserow_token: [token] } = {} } = {} } = useAuth();
+
+  const headers = {
+    Authorization: `Token ${token}`,
+    'Content-Type': 'application/json',
+  };
 
   let timespan = 14;
   if ([1, 2, 3].includes(parseInt(weekPref, 10))) timespan = parseInt(weekPref, 10) * 7;
@@ -133,12 +135,14 @@ const usePresences = place => {
   );
 
   const deletePresence = React.useCallback(
-    presence => deleteRow.mutate(presence),
+    async presence => {
+      deleteRow.mutate(presence);
+    },
     [deleteRow],
   );
 
   const setPresence = React.useCallback(
-    presence => {
+    async presence => {
       const { id, day, tri, plan, spot, period } = presence;
       if (id && !spot) {
         return deleteRow.mutate(presence);

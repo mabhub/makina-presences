@@ -1,24 +1,18 @@
 import clsx from 'clsx';
-import React from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import {
   Button,
   Container,
-  FormControl,
   Grid,
-  Input,
-  InputLabel,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import createPersistedState from 'use-persisted-state';
 
-import { cleanTri } from '../helpers';
 import usePlans from '../hooks/usePlans';
-import { NO_AGENCYPREF_LABEL } from './PreferencesFavorites';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -44,9 +38,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const useTriState = createPersistedState('tri');
-const useAgencyPref = createPersistedState('agency');
-
 const draftPlaceSx = {
   position: 'absolute',
   visibility: 'hidden',
@@ -60,25 +51,11 @@ const PresenceForm = ({ className, ...props }) => {
   const plans = usePlans();
   const history = useHistory();
 
-  const [tri, setTri] = useTriState('');
-  const [inputValue, setInputValue] = React.useState(tri);
-  const [agencyPref] = useAgencyPref();
-  const { place } = useParams();
+  const [agency, setAgency] = useState();
 
-  if (agencyPref && agencyPref !== NO_AGENCYPREF_LABEL && !place) {
-    history.push(`/${agencyPref}`);
-  }
+  const handlePlaceChange = (event, newPlace) => setAgency(newPlace);
 
-  const handleTriChange = event => setInputValue(event.target.value.substr(0, 255));
-  const handlePlaceChange = (event, newPlace) => history.push(`/${newPlace || place}`);
-
-  const handleSubmit = () => setTri(cleanTri(inputValue));
-
-  const handleKeyPress = event => {
-    if (event.charCode === 13) {
-      handleSubmit();
-    }
-  };
+  const handleSubmit = () => history.push(`/${agency}`);
 
   return (
     <Container className={clsx(className, classes.root)}>
@@ -96,8 +73,7 @@ const PresenceForm = ({ className, ...props }) => {
             </Typography>
 
             <Typography variant="subtitle2">
-              Merci de <strong>choisir une agence</strong> et
-              d'indiquer <strong>un trigramme</strong>.
+              Merci de <strong>choisir une agence</strong>.
             </Typography>
           </Grid>
 
@@ -109,7 +85,6 @@ const PresenceForm = ({ className, ...props }) => {
               padding: 1,
               textAlign: {
                 xs: 'center',
-                sm: 'right',
               },
             }}
           >
@@ -118,7 +93,7 @@ const PresenceForm = ({ className, ...props }) => {
               className={classes.placeButtons}
               onChange={handlePlaceChange}
               exclusive
-              value={place}
+              value={agency}
             >
               {plans
                 .filter(({ Brouillon }) => !Brouillon)
@@ -134,39 +109,11 @@ const PresenceForm = ({ className, ...props }) => {
             </ToggleButtonGroup>
           </Grid>
 
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            className={classes.formWrapper}
-            sx={{
-              padding: 1,
-              textAlign: {
-                xs: 'center',
-                sm: 'left',
-              },
-            }}
-          >
-            <FormControl>
-              <InputLabel htmlFor="tri">Trigramme</InputLabel>
-              <Input
-                id="tri"
-                inputProps={{
-                  autoCapitalize: 'off',
-                  autoCorrect: 'off',
-                }}
-                value={inputValue}
-                onChange={handleTriChange}
-                onKeyPress={handleKeyPress}
-              />
-            </FormControl>
-          </Grid>
-
           <Grid item xs={12} className={classes.submit}>
             <Button
               variant="contained"
               color="secondary"
-              disabled={!(place && inputValue?.length > 2 && inputValue?.length < 10)}
+              disabled={!agency}
               onClick={handleSubmit}
             >
               Valider

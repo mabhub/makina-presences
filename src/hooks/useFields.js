@@ -1,9 +1,14 @@
+import { useAuth } from 'react-oidc-context';
 import { useQuery } from 'react-query';
-
-const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
 const useFields = tableId => {
   const basePath = `https://api.baserow.io/api/database/fields/table/${tableId}/`;
+
+  const { user: { profile: { baserow_token: [token] } = {} } = {} } = useAuth();
+
+  const headers = {
+    Authorization: `Token ${token}`,
+  };
 
   const queryKey = [tableId];
 
@@ -12,7 +17,7 @@ const useFields = tableId => {
     async () => {
       const response = await fetch(
         basePath,
-        { headers: { Authorization: `Token ${token}` } },
+        { headers },
       );
 
       const nextData = await response.json();

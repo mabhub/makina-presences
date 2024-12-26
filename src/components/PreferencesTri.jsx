@@ -12,13 +12,15 @@ const PreferencesTri = () => {
   const [disableInput, setDisableInput] = React.useState(true);
   const [textValue, setTextValue] = React.useState(tri);
 
+  const isTriValid = textValue?.length >= 3;
+
   const handleSubmit = () => {
-    if (!disableInput) setTri(cleanTri(textValue));
+    if (!disableInput && isTriValid) setTri(cleanTri(textValue));
     setDisableInput(!disableInput);
   };
 
   const handleKeyPress = event => {
-    if (event.charCode === 13) {
+    if (event.charCode === 13 && isTriValid) {
       handleSubmit();
     }
   };
@@ -44,12 +46,13 @@ const PreferencesTri = () => {
         <IconButton
           sx={{ ml: 1 }}
           onClick={handleSubmit}
+          disabled={!isTriValid}
         >
           {disableInput
             ? <Edit color="primary" />
             : (
               <Done
-                color="primary"
+                color={isTriValid ? 'primary' : ''}
               />
             )}
         </IconButton>

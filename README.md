@@ -25,6 +25,19 @@ VITE_TABLE_ID_PLANS=
 VITE_TABLE_ID_ADDITIONALS=
 ```
 
+- **Start Docker**
+
+Create the docker image
+```
+docker build -t presences .
+```
+
+Start the container
+```
+docker compose up
+```
+
+
 - **Start the projet**
 
 Run the following command at the root of your project to start your local app, then click the given link to access the website.
