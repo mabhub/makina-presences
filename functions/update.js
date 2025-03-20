@@ -135,8 +135,8 @@ exports.handler = async () => {
           containers: [`calendar:Default:${uid}`],
           eventQuery: {
             query: 'TTO || TTR',
-            dateMin: { precision: 'Date', iso8601: '2024-01-01' },
-            dateMax: { precision: 'Date', iso8601: '2024-12-31' },
+            dateMin: { precision: 'Date', iso8601: '2025-01-01' },
+            dateMax: { precision: 'Date', iso8601: '2025-12-31' },
             size: 100,
           },
         }),
