@@ -74,7 +74,9 @@ const DayHeader = ({
     event.stopPropagation();
     if (isPresent) {
       // Delete presence
-      return setPresence({ ...presence, spot: null });
+      return presences
+        .filter(({ tri: triPresence }) => triPresence === tri)
+        .map(p => setPresence({ ...p, spot: null }));
     }
     // May create presence
     if (event.ctrlKey) {

@@ -6,3 +6,6 @@
 # Local Netlify folder
 .netlify
 .env
+
+docs/.vitepress/cache
+docs/.vitepress/dist
