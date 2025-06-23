@@ -2,6 +2,14 @@ import { useQuery } from 'react-query';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
+/**
+ * React hook to fetch all rows from a given Baserow table.
+ * Uses react-query for caching and polling.
+ *
+ * @function
+ * @param {string|number} tableId - The Baserow table ID.
+ * @returns {Array<Object>} Array of row objects from the table.
+ */
 const useTable = tableId => {
   const basePath = `https://api.baserow.io/api/database/rows/table/${tableId}/`;
 
