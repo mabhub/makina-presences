@@ -16,6 +16,22 @@ const headers = {
 
 const useWeekPrefs = createPersistedState('weekPref');
 
+/**
+ * React hook to manage presences for a given place.
+ * Provides CRUD operations and fetches presences for a time span based on user preferences.
+ *
+ * @function
+ * @param {string} place - The name of the place to fetch and manage presences.
+ * @returns {Object} An object containing:
+ *   - presences: Array of presence objects.
+ *   - setPresence: Function to create/update/delete a presence.
+ *   - createPresence: Function to create a presence.
+ *   - deletePresence: Function to delete a presence.
+ *   - createRow, updateRow, deleteRow: Internal mutation hooks.
+ * @example
+ * const { presences, setPresence } = usePresences('Toulouse');
+ * setPresence({ day: '2024-06-01', tri: 'ABC', plan: 'Toulouse', spot: 'A1' });
+ */
 const usePresences = place => {
   const [weekPref] = useWeekPrefs();
 

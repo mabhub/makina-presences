@@ -1,7 +1,23 @@
+/**
+ * Normalize a string: lowercase and trim.
+ * @param {string} [str=''] - The string to normalize.
+ * @returns {string} Normalized string.
+ */
 export const nrmlStr = (str = '') => str.toLocaleLowerCase().trim();
 
+/**
+ * Compare two strings, case-insensitive and trimmed.
+ * @param {string} a - First string.
+ * @param {string} b - Second string.
+ * @returns {boolean} True if equal after normalization.
+ */
 export const sameLowC = (a, b) => (nrmlStr(a) === nrmlStr(b));
 
+/**
+ * Clean a trigram: normalize if <= 3 chars, else trim only.
+ * @param {string} str - The trigram string.
+ * @returns {string} Cleaned trigram.
+ */
 export const cleanTri = str => (str.length <= 3 ? nrmlStr(str) : str.trim());
 
 /**

@@ -1,12 +1,20 @@
 import { useQuery } from 'react-query';
 
-const { VITE_ARCHIVE_ROOT } = import.meta.env;
-
+/**
+ * React hook to fetch and cache the list of backup files from the archive root.
+ * Uses react-query for caching and network robustness.
+ *
+ * @function
+ * @returns {Array<string>} Array of backup filenames (empty array if not loaded).
+ * @example
+ * const backups = useBackups();
+ * // backups = ['2024-06-01.csv', '2024-06-01.tgz', ...]
+ */
 const useBackups = () => {
   const { data } = useQuery(
     'backups',
     async () => {
-      const response = await fetch(`${VITE_ARCHIVE_ROOT}/liste.json`);
+      const response = await fetch(`${import.meta.env.VITE_ARCHIVE_ROOT}/liste.json`);
       return response.json();
     },
     {
