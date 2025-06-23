@@ -8,6 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import useSpots from '../hooks/useSpots';
 import TriPresence from './TriPresence';
+import { deduplicate } from '../helpers';
 
 const useStyles = makeStyles(theme => ({
   moment: {
@@ -51,29 +52,13 @@ const Moment = ({
     [cumulativeSpots],
   );
 
-  const deduplicate = (collection, key) =>
-    collection
-      .sort(({ spot: a }, { spot: b }) => !isCumulativeSpot(b) - !isCumulativeSpot(a))
-      .reduce((acc, curr) => {
-        const { values = new Set(), store = [] } = acc;
-
-        if (values.has(curr[key])) {
-          return acc;
-        }
-
-        return {
-          values: new Set([...values, curr[key]]),
-          store: [...store, curr],
-        };
-      }, {}).store || [];
-
   return (
     <Grid
       item
       xs={12}
       className={classes.moment}
     >
-      {deduplicate(presences, 'tri')
+      {deduplicate(presences, 'tri', (a, b) => !isCumulativeSpot(b.spot) - !isCumulativeSpot(a.spot))
         .sort(({ tri: a }, { tri: b }) => (a.localeCompare(b)))
         .map(({ id, spot, tri: t, fake, period }) => (
           <TriPresence

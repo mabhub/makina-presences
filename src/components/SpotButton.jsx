@@ -12,7 +12,7 @@ import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
-import { sameLowC } from '../helpers';
+import { sameLowC, snap } from '../helpers';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import ContextualMenu from './ContextualMenu';
@@ -141,7 +141,6 @@ const SpotButton = ({
 
   const queryClient = useQueryClient();
   const [movingSpot, setMovingSpot] = React.useState();
-  const snap = (v, a = 5) => Math.round(v / a) * a;
   const handleMouseDown = s => ({ screenX, screenY }) => {
     if (!edit) { return null; }
     return setMovingSpot({ spot: s, from: [screenX, screenY] });
