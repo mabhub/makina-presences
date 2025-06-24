@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-
 import {
   nrmlStr,
   sameLowC,
@@ -29,14 +28,22 @@ describe('sameLowC', () => {
   it('should return false for different strings', () => {
     expect(sameLowC('foo', 'bar')).toBe(false);
   });
+  it('should handle empty strings', () => {
+    expect(sameLowC('', '')).toBe(true);
+  });
 });
 
 describe('cleanTri', () => {
-  it('should normalize if length <= 3', () => {
+  it('should normalize if trimmed length <= 3', () => {
     expect(cleanTri('  AbC ')).toBe('abc');
+    expect(cleanTri('  X  ')).toBe('x');
   });
-  it('should trim only if length > 3', () => {
+  it('should trim only if trimmed length > 3', () => {
     expect(cleanTri('  AbCdEf ')).toBe('AbCdEf');
+    expect(cleanTri('   test   ')).toBe('test');
+  });
+  it('should handle empty string', () => {
+    expect(cleanTri('')).toBe('');
   });
 });
 
@@ -64,6 +71,9 @@ describe('deduplicate', () => {
   it('should return empty array for empty input', () => {
     expect(deduplicate([], 'id')).toEqual([]);
   });
+  it('should handle array with one element', () => {
+    expect(deduplicate([{ id: 1 }], 'id')).toEqual([{ id: 1 }]);
+  });
 });
 
 describe('findDuplicates', () => {
@@ -76,6 +86,12 @@ describe('findDuplicates', () => {
   it('should handle empty array', () => {
     expect(findDuplicates([])).toEqual([]);
   });
+  it('should handle array with one element', () => {
+    expect(findDuplicates([1])).toEqual([]);
+  });
+  it('should handle array with all duplicates', () => {
+    expect(findDuplicates([1, 1, 1, 1])).toEqual([1, 1, 1]);
+  });
 });
 
 describe('snap', () => {
@@ -86,6 +102,13 @@ describe('snap', () => {
   it('should snap value to custom multiple', () => {
     expect(snap(22, 10)).toBe(20);
     expect(snap(27, 10)).toBe(30);
+  });
+  it('should handle zero', () => {
+    expect(snap(0)).toBe(0);
+  });
+  it('should handle negative values', () => {
+    expect(snap(-12)).toBe(-10);
+    expect(snap(-13)).toBe(-15);
   });
 });
 
