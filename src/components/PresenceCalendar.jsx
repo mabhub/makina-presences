@@ -21,7 +21,7 @@ import createPersistedState from 'use-persisted-state';
 import useHolidays from '../hooks/useHolidays';
 import usePresences from '../hooks/usePresences';
 
-import { sameLowC } from '../helpers';
+import { sameLowC, displayCard } from '../helpers';
 
 import DayHeader from './DayHeader';
 import Moment from './Moment';
@@ -114,13 +114,6 @@ const PresenceCalendar = () => {
   const { presences } = usePresences(place);
   const holidays = useHolidays();
 
-  const displayCard = (isPast, isHoliday, isoDate, dayIsFavorite) => {
-    if (isoDate === day || isHoliday) return true;
-    if (dayIsFavorite && (!isPast || showPastDays || showPastDays === undefined)) return true;
-    if (!dayIsFavorite && (showPastDays || showPastDays === undefined) && isPast) return true;
-    return false;
-  };
-
   const dayGrid = [...Array(timespan).keys()].map(index => {
     const date = today.day(index);
     const isoDate = date.format('YYYY-MM-DD');
@@ -175,6 +168,14 @@ const PresenceCalendar = () => {
         const isToday = isoDate === today.format('YYYY-MM-DD');
 
         const newWeek = Boolean(weekDayIndex === 1);
+        const showCard = displayCard(
+          isPast,
+          isHoliday,
+          isoDate,
+          dayIsFavorite,
+          day,
+          showPastDays,
+        );
         return (
           <Box
             key={isoDate}
@@ -218,11 +219,11 @@ const PresenceCalendar = () => {
                   isHoliday={isHoliday}
                   highlight={day === isoDate}
                   isPast={isPast}
-                  isClosed={!displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}
+                  isClosed={!showCard}
                   persons={todayPresences.filter(({ spot: m }) => m).length}
                   parkingSpots={cumulativeSpot}
                 />
-                <Collapse in={displayCard(isPast, isHoliday, isoDate, dayIsFavorite)}>
+                <Collapse in={showCard}>
                   <CardContent className={classes.cardContent}>
                     <Grid container>
                       {isHoliday && (

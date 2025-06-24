@@ -61,3 +61,30 @@ export const findDuplicates = arr => {
  * @returns {number} Snapped value.
  */
 export const snap = (value, multiple = 5) => Math.round(value / multiple) * multiple;
+
+/**
+ * Determine if a day card should be displayed in the calendar.
+ * @function
+ * @param {boolean} isPast - True if the day is in the past.
+ * @param {boolean} isHoliday - True if the day is a holiday.
+ * @param {string} isoDate - ISO date string (YYYY-MM-DD).
+ * @param {boolean} dayIsFavorite - True if the day is a favorite.
+ * @param {string} selectedDay - The currently selected day (ISO format).
+ * @param {boolean} showPastDays - User preference to show past days.
+ * @returns {boolean} True if the card should be displayed.
+ * @example
+ * displayCard(true, false, '2024-06-01', true, '2024-06-01', true);
+ */
+export const displayCard = (
+  isPast,
+  isHoliday,
+  isoDate,
+  dayIsFavorite,
+  selectedDay,
+  showPastDays,
+) => {
+  if (isoDate === selectedDay || isHoliday) return true;
+  if (dayIsFavorite && (!isPast || showPastDays || showPastDays === undefined)) return true;
+  if (!dayIsFavorite && (showPastDays || showPastDays === undefined) && isPast) return true;
+  return false;
+};

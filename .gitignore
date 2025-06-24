@@ -2,6 +2,7 @@
 /dist
 /dist-ssr
 *.local
+/coverage
 
 # Local Netlify folder
 .netlify
