@@ -14,9 +14,10 @@ export const nrmlStr = (str = '') => str.toLocaleLowerCase().trim();
 export const sameLowC = (a, b) => (nrmlStr(a) === nrmlStr(b));
 
 /**
- * Clean a trigram: normalize if <= 3 chars, else trim only.
+ * Clean a trigram: normalize if trimmed length <= 3, else trim only.
  * @param {string} str - The trigram string.
  * @returns {string} Cleaned trigram.
+ * @note The normalization is applied only if the trimmed string length is <= 3.
  */
 export const cleanTri = str => (str.trim().length <= 3 ? nrmlStr(str) : str.trim());
 
@@ -63,28 +64,43 @@ export const findDuplicates = arr => {
 export const snap = (value, multiple = 5) => Math.round(value / multiple) * multiple;
 
 /**
- * Determine if a day card should be displayed in the calendar.
- * @function
- * @param {boolean} isPast - True if the day is in the past.
- * @param {boolean} isHoliday - True if the day is a holiday.
- * @param {string} isoDate - ISO date string (YYYY-MM-DD).
- * @param {boolean} dayIsFavorite - True if the day is a favorite.
- * @param {string} selectedDay - The currently selected day (ISO format).
- * @param {boolean} showPastDays - User preference to show past days.
+ * Determines if a day card should be displayed in the calendar.
+ *
+ * Business rules:
+ * - Always show if the day is selected or is a holiday.
+ * - Show if it's a favorite day and either not in the past or user wants to see past days.
+ * - Show if not favorite, in the past, and user wants to see past days.
+ * - Otherwise, do not show.
+ *
+ * @param {Object} params - Parameters object.
+ * @param {boolean} [params.isPast=false] - True if the day is in the past.
+ * @param {boolean} [params.isHoliday=false] - True if the day is a holiday.
+ * @param {string} params.isoDate - ISO date string (YYYY-MM-DD).
+ * @param {boolean} [params.dayIsFavorite=false] - True if the day is a favorite.
+ * @param {string} params.selectedDay - The currently selected day (ISO format).
+ * @param {boolean} [params.showPastDays=true] - User preference to show past days.
  * @returns {boolean} True if the card should be displayed.
- * @example
- * displayCard(true, false, '2024-06-01', true, '2024-06-01', true);
  */
-export const displayCard = (
-  isPast,
-  isHoliday,
+export const displayCard = ({
+  isPast = false,
+  isHoliday = false,
   isoDate,
-  dayIsFavorite,
+  dayIsFavorite = false,
   selectedDay,
-  showPastDays,
-) => {
-  if (isoDate === selectedDay || isHoliday) return true;
-  if (dayIsFavorite && (!isPast || showPastDays || showPastDays === undefined)) return true;
-  if (!dayIsFavorite && (showPastDays || showPastDays === undefined) && isPast) return true;
+  showPastDays = true,
+}) => {
+  // Show if the day is selected
+  if (isoDate === selectedDay) return true;
+
+  // Show if it's a holiday
+  if (isHoliday) return true;
+
+  // Show if it's a favorite day and either not in the past or user wants to see past days
+  if (dayIsFavorite && (!isPast || showPastDays)) return true;
+
+  // Show if not favorite, but in the past and user wants to see past days
+  if (!dayIsFavorite && isPast && showPastDays) return true;
+
+  // Otherwise, do not show
   return false;
 };

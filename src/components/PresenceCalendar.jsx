@@ -168,14 +168,14 @@ const PresenceCalendar = () => {
         const isToday = isoDate === today.format('YYYY-MM-DD');
 
         const newWeek = Boolean(weekDayIndex === 1);
-        const showCard = displayCard(
+        const showCard = displayCard({
           isPast,
           isHoliday,
           isoDate,
           dayIsFavorite,
-          day,
+          selectedDay: day,
           showPastDays,
-        );
+        });
         return (
           <Box
             key={isoDate}

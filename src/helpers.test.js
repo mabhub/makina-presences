@@ -91,31 +91,103 @@ describe('snap', () => {
 
 describe('displayCard', () => {
   it('should return true if isoDate equals selectedDay', () => {
-    expect(displayCard(false, false, '2024-06-01', false, '2024-06-01', false)).toBe(true);
+    expect(displayCard({
+      isPast: false,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-01',
+      showPastDays: false,
+    })).toBe(true);
   });
   it('should return true if isHoliday', () => {
-    expect(displayCard(false, true, '2024-06-01', false, '2024-06-02', false)).toBe(true);
+    expect(displayCard({
+      isPast: false,
+      isHoliday: true,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: false,
+    })).toBe(true);
   });
   it('should return true if dayIsFavorite and not isPast', () => {
-    expect(displayCard(false, false, '2024-06-01', true, '2024-06-02', false)).toBe(true);
+    expect(displayCard({
+      isPast: false,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: true,
+      selectedDay: '2024-06-02',
+      showPastDays: false,
+    })).toBe(true);
   });
   it('should return true if dayIsFavorite and showPastDays', () => {
-    expect(displayCard(true, false, '2024-06-01', true, '2024-06-02', true)).toBe(true);
+    expect(displayCard({
+      isPast: true,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: true,
+      selectedDay: '2024-06-02',
+      showPastDays: true,
+    })).toBe(true);
   });
   it('should return true if not dayIsFavorite, showPastDays, and isPast', () => {
-    expect(displayCard(true, false, '2024-06-01', false, '2024-06-02', true)).toBe(true);
+    expect(displayCard({
+      isPast: true,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: true,
+    })).toBe(true);
   });
   it('should return false otherwise', () => {
-    expect(displayCard(true, false, '2024-06-01', false, '2024-06-02', false)).toBe(false);
+    expect(displayCard({
+      isPast: true,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: false,
+    })).toBe(false);
   });
   it('should return false when isPast is false, isHoliday is false, dayIsFavorite is false, showPastDays is false, isoDate !== selectedDay', () => {
-    expect(displayCard(false, false, '2024-06-01', false, '2024-06-02', false)).toBe(false);
+    expect(displayCard({
+      isPast: false,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: false,
+    })).toBe(false);
   });
   it('should return true when not dayIsFavorite, showPastDays is undefined, isPast is true', () => {
-    expect(displayCard(true, false, '2024-06-01', false, '2024-06-02', undefined)).toBe(true);
+    expect(displayCard({
+      isPast: true,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: undefined,
+    })).toBe(true);
   });
   it('should return false when not dayIsFavorite, showPastDays is undefined, isPast is false', () => {
-    // This covers the last branch where showPastDays is undefined and isPast is false
-    expect(displayCard(false, false, '2024-06-01', false, '2024-06-02', undefined)).toBe(false);
+    expect(displayCard({
+      isPast: false,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: undefined,
+    })).toBe(false);
+  });
+  it('should return false when not dayIsFavorite, showPastDays is false, isPast is false', () => {
+    expect(displayCard({
+      isPast: false,
+      isHoliday: false,
+      isoDate: '2024-06-01',
+      dayIsFavorite: false,
+      selectedDay: '2024-06-02',
+      showPastDays: false,
+    })).toBe(false);
   });
 });
