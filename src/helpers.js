@@ -18,7 +18,7 @@ export const sameLowC = (a, b) => (nrmlStr(a) === nrmlStr(b));
  * @param {string} str - The trigram string.
  * @returns {string} Cleaned trigram.
  */
-export const cleanTri = str => (str.length <= 3 ? nrmlStr(str) : str.trim());
+export const cleanTri = str => (str.trim().length <= 3 ? nrmlStr(str) : str.trim());
 
 /**
  * Remove duplicates from an array of objects based on a key.
