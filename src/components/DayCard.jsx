@@ -9,9 +9,14 @@ import {
   Divider,
   Grid,
 } from '@mui/material';
-import { sameLowC, displayCard } from '../helpers';
+import { displayCard } from '../helpers';
 import DayHeader from './DayHeader';
 import Moment from './Moment';
+import HolidayBanner from './HolidayBanner';
+import NoPresenceMessage from './NoPresenceMessage';
+import useFavoriteDay from '../hooks/useFavoriteDay';
+import useTodayPresences from '../hooks/useTodayPresences';
+import useCurrentUserPresence from '../hooks/useCurrentUserPresence';
 
 /**
  * DayCard component: displays a single day in the calendar.
@@ -55,25 +60,15 @@ const DayCard = ({
   classes,
   days,
 }) => {
-  // Technical: skip rendering for Saturday (6) and Sunday (0)
-  if (weekDayIndex === 6 || weekDayIndex === 0) {
-    return <React.Fragment key={isoDate} />;
-  }
-
   const dayLabel = days[weekDayIndex];
-  const dayIsFavorite = dayPrefs.some(d => d === dayLabel);
+  const dayIsFavorite = useFavoriteDay(dayLabel, dayPrefs);
 
   const holiday = holidays[isoDate];
   const isHoliday = Boolean(holiday);
 
-  // Technical: filter presences for the current day
-  const todayPresences = presences.filter(({ day: d }) => d === isoDate);
-
-  // Technical: find the current user's presence (not cumulative)
-  const currentTodayPresences = todayPresences
-    .filter(({ spot }) => !cumulativeSpot
-      .map(({ Identifiant }) => Identifiant).includes(spot))
-    .find(({ tri: t }) => sameLowC(t, tri));
+  // Use custom hooks for presences logic
+  const todayPresences = useTodayPresences(isoDate, presences);
+  const currentTodayPresences = useCurrentUserPresence(todayPresences, tri, cumulativeSpot);
 
   const isToday = isoDate === today.format('YYYY-MM-DD');
   const newWeek = Boolean(weekDayIndex === 1);
@@ -87,6 +82,11 @@ const DayCard = ({
     selectedDay: day,
     showPastDays,
   });
+
+  // Technical: skip rendering for Saturday (6) and Sunday (0)
+  if (weekDayIndex === 6 || weekDayIndex === 0) {
+    return <React.Fragment key={isoDate} />;
+  }
 
   return (
     <Box
@@ -139,17 +139,11 @@ const DayCard = ({
             <CardContent className={classes.cardContent}>
               <Grid container>
                 {isHoliday && (
-                  <Grid item xs={12} className={classes.holiday}>
-                    Jour férié<br />
-                    ({holiday})
-                  </Grid>
+                  <HolidayBanner holiday={holiday} classes={classes} />
                 )}
                 {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
-                  <Grid item sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
-                    Aucune personne présente
-                  </Grid>
+                  <NoPresenceMessage classes={classes} />
                 )}
-
                 {!isHoliday && (
                   <Moment
                     momentPresences={todayPresences.filter(({ spot: m }) => m)}
