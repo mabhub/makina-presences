@@ -1,16 +1,7 @@
-import clsx from 'clsx';
 import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Collapse,
-  Divider,
-  Grid,
-} from '@mui/material';
+import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
@@ -21,11 +12,8 @@ import createPersistedState from 'use-persisted-state';
 import useHolidays from '../hooks/useHolidays';
 import usePresences from '../hooks/usePresences';
 
-import { sameLowC, displayCard } from '../helpers';
-
-import DayHeader from './DayHeader';
-import Moment from './Moment';
 import useSpots from '../hooks/useSpots';
+import DayCard from './DayCard';
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -132,126 +120,25 @@ const PresenceCalendar = () => {
 
   return (
     <Box spacing={2} className={classes.root}>
-      {dayGrid.map(({
-        isoDate,
-        weekIndex,
-        weekDayIndex,
-        isPast,
-      }, index) => {
-        /**
-        * saturday,
-        * last day of (sunday started) week
-        */
-        if (weekDayIndex === 6) {
-          return <React.Fragment key={isoDate} />;
-        }
-
-        /**
-        * sunday
-        */
-        if (weekDayIndex === 0) {
-          return <React.Fragment key={isoDate} />;
-        }
-
-        const dayLabel = days[weekDayIndex];
-        const dayIsFavorite = dayPrefs.some(d => d === dayLabel);
-
-        const holiday = holidays[isoDate];
-        const isHoliday = Boolean(holiday);
-
-        const todayPresences = presences.filter(({ day: d }) => (d === isoDate));
-        const currentTodayPresences = todayPresences
-          .filter(({ spot }) => !cumulativeSpot
-            .map(({ Identifiant }) => Identifiant).includes(spot))
-          .find(({ tri: t }) => sameLowC(t, tri));
-
-        const isToday = isoDate === today.format('YYYY-MM-DD');
-
-        const newWeek = Boolean(weekDayIndex === 1);
-        const showCard = displayCard({
-          isPast,
-          isHoliday,
-          isoDate,
-          dayIsFavorite,
-          selectedDay: day,
-          showPastDays,
-        });
-        return (
-          <Box
-            key={isoDate}
-            className={clsx(
-              classes.dayBox,
-              { [classes.newWeek]: newWeek },
-            )}
-          >
-            {newWeek && (
-              <Divider
-                className={clsx({
-                  [classes.weekSeparator]: true,
-                  [classes.firstWeek]: index === 1,
-                })}
-                textAlign="right"
-              >
-                <span className={classes.weekTextSeparator}>{`Semaine ${weekIndex}`}</span>
-              </Divider>
-            )}
-
-            <Card
-              className={clsx({
-                [classes.dayCard]: true,
-                [classes.todayCard]: isToday,
-                [classes.past]: isPast,
-                [classes.holidayCard]: isHoliday,
-              })}
-              elevation={0}
-            >
-              <CardActionArea
-                onClick={() => history.push(`/${place}/${isoDate}`)}
-                disableRipple
-                component="div"
-              >
-                <DayHeader
-                  date={isoDate}
-                  presence={currentTodayPresences}
-                  presences={todayPresences}
-                  tri={tri}
-                  place={place}
-                  isHoliday={isHoliday}
-                  highlight={day === isoDate}
-                  isPast={isPast}
-                  isClosed={!showCard}
-                  persons={todayPresences.filter(({ spot: m }) => m).length}
-                  parkingSpots={cumulativeSpot}
-                />
-                <Collapse in={showCard}>
-                  <CardContent className={classes.cardContent}>
-                    <Grid container>
-                      {isHoliday && (
-                        <Grid item xs={12} className={classes.holiday}>
-                          Jour férié<br />
-                          ({holiday})
-                        </Grid>
-                      )}
-                      {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
-                        <Grid item sx={{ textAlign: 'center', width: '100%', opacity: '.5' }}>
-                          Aucune personne présente
-                        </Grid>
-                      )}
-
-                      {!isHoliday && (
-                        <Moment
-                          momentPresences={todayPresences.filter(({ spot: m }) => m)}
-                          userPresence={currentTodayPresences}
-                        />
-                      )}
-                    </Grid>
-                  </CardContent>
-                </Collapse>
-              </CardActionArea>
-            </Card>
-          </Box>
-        );
-      })}
+      {dayGrid.map((dayProps, index) => (
+        <DayCard
+          key={dayProps.isoDate}
+          {...dayProps}
+          index={index}
+          dayPrefs={dayPrefs}
+          tri={tri}
+          cumulativeSpot={cumulativeSpot}
+          holidays={holidays}
+          presences={presences}
+          day={day}
+          showPastDays={showPastDays}
+          today={today}
+          history={history}
+          place={place}
+          classes={classes}
+          days={days}
+        />
+      ))}
     </Box>
   );
 };
