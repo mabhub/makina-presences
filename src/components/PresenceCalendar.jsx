@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 /**
- * Renders the main presence calendar grid.
+ * PresenceCalendar component: Renders the main presence calendar grid.
  * Computes the number of days to display based on user preferences,
  * generates the day grid, and delegates the rendering of each day to DayCard.
  *

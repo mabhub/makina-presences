@@ -90,7 +90,7 @@ const useDayPrefs = createPersistedState('dayPrefs');
 const usePastDays = createPersistedState('pastDays');
 
 /**
- * Renders a single day in the presence calendar.
+ * DayCard component: Renders a single day in the presence calendar.
  *
  * @param {Object} props - Component props.
  * @param {string} props.isoDate - ISO date string (YYYY-MM-DD) for the day.
