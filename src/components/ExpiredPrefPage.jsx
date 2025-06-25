@@ -94,8 +94,8 @@ const ExpiredPrefPage = () => {
 
         <Typography variant="body2" className={classes.text}>
           {/* eslint-disable-next-line max-len, no-trailing-spaces */}
-          Le format enregistré de certaines de vos préférences<strong className={classes.prefExpired}>({expiredPref.length})</strong> ne sont 
-          plus à jour, essayez de les supprimer puis de les saisir à nouveaux.
+          Le format enregistré de certaines de vos préférences<strong className={classes.prefExpired}>({expiredPref.length})</strong> ne sont
+          plus à jour, essayez de les supprimer puis de les saisir à nouveau.
         </Typography>
       </CardContent>
       <CardActions
