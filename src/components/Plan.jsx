@@ -7,7 +7,7 @@ import createPersistedState from 'use-persisted-state';
 import { Alert, AlertTitle, Box, Snackbar, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
-import { sameLowC } from '../helpers';
+import { sameLowC, isCumulativeSpot } from '../helpers';
 import useAdditionals from '../hooks/useAdditionals';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
@@ -17,8 +17,6 @@ import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
 
 const { FF_COMPLEMENTARY } = baseFlags;
-
-const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -58,42 +56,41 @@ const transformWrapperProps = {
   velocityAnimation: { disabled: true },
 };
 
-export const createSpot = async e => {
-  const { VITE_BASEROW_TOKEN: token } = import.meta.env;
-  const rect = e.target.getBoundingClientRect();
-  await fetch(
-    `https://api.baserow.io/api/database/rows/table/${spotsTableId}/?user_field_names=true`,
-    {
-      method: 'POST',
-      headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        Identifiant: 'PX',
-        x: Math.round((e.clientX - rect.left) / 5) * 5,
-        y: Math.round((e.clientY - rect.top) / 5) * 5,
-      }),
-    },
-  );
-};
-
 const Children = ({ children }) => children;
 
 const useTriState = createPersistedState('tri');
 
+/**
+ * Plan component: displays the interactive plan with spots and additionals.
+ * - Handles zoom/pan (read-only) or drag (edit mode).
+ * - Shows a snackbar for conflicts or parking-only days.
+ * - Delegates spot rendering to SpotButton and SpotAdditionals.
+ *
+ * @param {Object} props
+ * @param {boolean} props.edit - If true, enables edit mode (drag only).
+ * @returns {JSX.Element}
+ */
 const Plan = ({ edit }) => {
   const classes = useStyles();
   const [tri] = useTriState();
 
+  // Feature flag for complementary spots
   const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
+  // Data hooks
   const plans = usePlans();
   const { place } = useParams();
 
   const spots = useSpots(place);
   const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
+  const additionals = useAdditionals(place);
+  const { presences } = usePresences(place);
 
+  // Choose wrapper/component depending on edit mode
   const DragWrapper = edit ? Children : TransformWrapper;
   const DragComponent = edit ? Children : TransformComponent;
 
+  // State for snackbar info
   const [snackBarInfo, setSnackBarInfo] = useState({
     showSnackBar: false,
     currentTri: '',
@@ -106,6 +103,42 @@ const Plan = ({ edit }) => {
     horizontal: 'right',
   };
 
+  // Utility: check if a spot is cumulative (parking)
+  const isCumulativeSpotCb = React.useCallback(
+    spot => isCumulativeSpot(spot, spots),
+    [spots],
+  );
+
+  // Compute own presences by day
+  const ownPresences = React.useMemo(() => (
+    presences
+      .filter(({ tri: t }) => sameLowC(tri, t))
+      .reduce((acc, { day: d, ...presence }) => ({
+        ...acc,
+        [d]: [...(acc[d] || []), presence],
+      }), {})
+  ), [presences, tri]);
+
+  // Detect days where user is only on parking spots
+  const onlyParkingDay = React.useMemo(
+    () =>
+      Object.values(ownPresences)
+        .filter(dayPresences => dayPresences.every(({ spot }) => isCumulativeSpotCb(spot))),
+    [ownPresences, isCumulativeSpotCb],
+  );
+
+  // Show snackbar if only parking or conflict
+  useEffect(() => {
+    if (onlyParkingDay.length && !snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
+      setSnackBarInfo(previous => ({
+        ...previous,
+        showSnackBar: true,
+        parking: true,
+      }));
+    }
+  }, [onlyParkingDay, snackBarInfo.showSnackBar, snackBarInfo.isClosed]);
+
+  // Handle conflict notification
   const handleConflict = (value, t, spot) => {
     if (!snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
       setSnackBarInfo(previous => ({
@@ -118,33 +151,7 @@ const Plan = ({ edit }) => {
     }
   };
 
-  const { presences } = usePresences(place);
-  const ownPresences = presences
-    .filter(({ tri: t }) => sameLowC(tri, t))
-    .reduce((acc, { day: d, ...presence }) => ({
-      ...acc,
-      [d]: [...(acc[d] || []), presence],
-    }), {});
-
-  const isCumulativeSpot = React.useCallback(
-    spot => spots
-      .filter(({ Cumul }) => Cumul)
-      .some(({ Identifiant }) => Identifiant === spot),
-    [spots],
-  );
-
-  const onlyParkingDay = Object.values(ownPresences)
-    .filter(dayPresences => dayPresences.every(({ spot }) => isCumulativeSpot(spot)));
-  useEffect(() => {
-    if (onlyParkingDay.length && !snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
-      setSnackBarInfo(previous => ({
-        ...previous,
-        showSnackBar: true,
-        parking: true,
-      }));
-    }
-  }, [ownPresences, isCumulativeSpot, snackBarInfo, onlyParkingDay]);
-
+  // Handle snackbar close
   const handleSnackbarClose = () => {
     setSnackBarInfo({
       ...snackBarInfo,
@@ -153,9 +160,8 @@ const Plan = ({ edit }) => {
     });
   };
 
+  // Ref for plan zoom/pan
   const planRef = useRef(null);
-
-  const additionals = useAdditionals(place);
 
   return (
     <>
@@ -171,18 +177,22 @@ const Plan = ({ edit }) => {
             className={classes.planWrapper}
             id="box"
           >
+            {/* Plan image */}
             {plan?.url && (
-            <img
-              src={plan.url}
-              alt=""
-              className={classes.plan}
-              id={place}
-              onLoad={() => {
-                planRef.current.zoomToElement(place);
-              }}
-            />
+              <img
+                src={plan.url}
+                alt=""
+                className={classes.plan}
+                id={place}
+                onLoad={() => {
+                  if (planRef.current?.zoomToElement) {
+                    planRef.current.zoomToElement(place);
+                  }
+                }}
+              />
             )}
 
+            {/* Spots */}
             {spots.map(spot => (
               <SpotButton
                 key={spot.Identifiant}
@@ -191,17 +201,18 @@ const Plan = ({ edit }) => {
               />
             ))}
 
-            {enableComplementary && additionals
-              .map(additional => (
-                <SpotAdditionals
-                  key={additional.Titre}
-                  additional={additional}
-                  plan={planRef}
-                />
-              ))}
+            {/* Additionals (complementary spots) */}
+            {enableComplementary && additionals.map(additional => (
+              <SpotAdditionals
+                key={additional.Titre}
+                additional={additional}
+                plan={planRef}
+              />
+            ))}
           </Box>
         </DragComponent>
       </DragWrapper>
+      {/* Snackbar for conflicts or parking-only days */}
       <Snackbar
         open={snackBarInfo.showSnackBar}
         anchorOrigin={snackBarPosition}
@@ -219,22 +230,22 @@ const Plan = ({ edit }) => {
             }}
           >
             {snackBarInfo.conflict && (
-            <Box>
-              Vous êtes inscris sur le même poste que
-              <TriPresence
-                tri={snackBarInfo.currentTri}
-                alt
-                className={classes.tri}
-              />
-              (<strong>{snackBarInfo.currentSpot}</strong>)
-              <br />
-              Discutez-en avec lui ou changez de poste.
-            </Box>
+              <Box>
+                Vous êtes inscris sur le même poste que
+                <TriPresence
+                  tri={snackBarInfo.currentTri}
+                  alt
+                  className={classes.tri}
+                />
+                (<strong>{snackBarInfo.currentSpot}</strong>)
+                <br />
+                Discutez-en avec lui ou changez de poste.
+              </Box>
             )}
             {snackBarInfo.parking && (
               <Box className={classes.sectionParking}>
                 <Typography variant="body2">
-                  Il y a des journées ou vous êtes uniquement inscris sur une place de parking.
+                  Il y a des journées où vous êtes uniquement inscrit sur une place de parking.
                 </Typography>
               </Box>
             )}

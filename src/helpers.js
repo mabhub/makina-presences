@@ -64,6 +64,19 @@ export const findDuplicates = arr => {
 export const snap = (value, multiple = 5) => Math.round(value / multiple) * multiple;
 
 /**
+ * Compute the number of days to display in the calendar based on user preference.
+ * @param {string|number} pref - User preference (should be 1, 2, 3 or any other value).
+ * @returns {number} Number of days to display.
+ */
+export const getTimespan = pref => {
+  const prefNum = parseInt(pref, 10);
+  if ([1, 2, 3].includes(prefNum)) {
+    return prefNum * 7;
+  }
+  return 14;
+};
+
+/**
  * Determines if a day card should be displayed in the calendar.
  *
  * Business rules:
@@ -103,4 +116,55 @@ export const displayCard = ({
 
   // Otherwise, do not show
   return false;
+};
+
+/**
+ * Checks if a spot is cumulative (parking).
+ * @param {string} spotId - The spot identifier to check.
+ * @param {Array<Object>} spots - The array of all spots.
+ * @returns {boolean} True if the spot is cumulative.
+ */
+export const isCumulativeSpot = (spotId, spots) =>
+  spots.filter(({ Cumul }) => Cumul).some(({ Identifiant }) => Identifiant === spotId);
+
+/**
+ * Creates a new spot at the given event position.
+ *
+ * This function sends a POST request to the Baserow API to create a new spot
+ * at the coordinates of the mouse event. The coordinates are snapped to a 5px grid.
+ *
+ * @param {MouseEvent} e - The mouse event (typically from a click on the plan).
+ * @param {Object} options - Options object.
+ * @param {string} options.spotsTableId - Table ID for spots (from env).
+ * @param {string} options.token - API token (from env).
+ * @returns {Promise<void>} Resolves when the spot is created.
+ * @throws {Error} If the API call fails or the response is not OK.
+ */
+export const createSpot = async (e, {
+  spotsTableId = import.meta.env.VITE_TABLE_ID_SPOTS,
+  token,
+}) => {
+  try {
+    const rect = e.target.getBoundingClientRect();
+    const response = await fetch(
+      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/?user_field_names=true`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Identifiant: 'PX',
+          x: Math.round((e.clientX - rect.left) / 5) * 5,
+          y: Math.round((e.clientY - rect.top) / 5) * 5,
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to create spot: ${response.status}`);
+    }
+  } catch (err) {
+    // Log technical error for dev/ops
+    // eslint-disable-next-line no-console
+    console.error('createSpot error:', err);
+    throw err;
+  }
 };

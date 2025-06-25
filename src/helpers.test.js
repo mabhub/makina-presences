@@ -1,4 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+} from 'vitest';
+
 import {
   nrmlStr,
   sameLowC,
@@ -7,6 +15,9 @@ import {
   findDuplicates,
   snap,
   displayCard,
+  getTimespan,
+  isCumulativeSpot,
+  createSpot,
 } from './helpers';
 
 describe('nrmlStr', () => {
@@ -212,5 +223,139 @@ describe('displayCard', () => {
       selectedDay: '2024-06-02',
       showPastDays: false,
     })).toBe(false);
+  });
+});
+
+describe('getTimespan', () => {
+  it('should return 7 for pref 1', () => {
+    expect(getTimespan(1)).toBe(7);
+    expect(getTimespan('1')).toBe(7);
+  });
+  it('should return 14 for pref 2', () => {
+    expect(getTimespan(2)).toBe(14);
+    expect(getTimespan('2')).toBe(14);
+  });
+  it('should return 21 for pref 3', () => {
+    expect(getTimespan(3)).toBe(21);
+    expect(getTimespan('3')).toBe(21);
+  });
+  it('should return 14 for any other value', () => {
+    expect(getTimespan('foo')).toBe(14);
+    expect(getTimespan(undefined)).toBe(14);
+    expect(getTimespan(null)).toBe(14);
+    expect(getTimespan(0)).toBe(14);
+    expect(getTimespan(4)).toBe(14);
+  });
+});
+
+describe('isCumulativeSpot', () => {
+  // Test: should return true if spot is cumulative
+  it('should return true if spot is cumulative', () => {
+    const spots = [
+      { Identifiant: 'A1', Cumul: true },
+      { Identifiant: 'B2', Cumul: false },
+    ];
+    expect(isCumulativeSpot('A1', spots)).toBe(true);
+  });
+
+  // Test: should return false if spot is not cumulative
+  it('should return false if spot is not cumulative', () => {
+    const spots = [
+      { Identifiant: 'A1', Cumul: true },
+      { Identifiant: 'B2', Cumul: false },
+    ];
+    expect(isCumulativeSpot('B2', spots)).toBe(false);
+  });
+
+  // Test: should return false if spot is not found
+  it('should return false if spot is not found', () => {
+    const spots = [
+      { Identifiant: 'A1', Cumul: true },
+      { Identifiant: 'B2', Cumul: false },
+    ];
+    expect(isCumulativeSpot('C3', spots)).toBe(false);
+  });
+
+  // Test: should return false for empty spots array
+  it('should return false for empty spots array', () => {
+    expect(isCumulativeSpot('A1', [])).toBe(false);
+  });
+});
+
+describe('createSpot', () => {
+  // Mock fetch and MouseEvent for API call
+  beforeEach(() => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      }));
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  // Test: should call fetch with correct parameters and resolve
+  it('should call fetch and resolve when API returns ok', async () => {
+    // Mock event and bounding rect
+    const mockRect = { left: 10, top: 20 };
+    const mockEvent = {
+      clientX: 35,
+      clientY: 45,
+      target: {
+        getBoundingClientRect: () => mockRect,
+      },
+    };
+    const options = { spotsTableId: '123', token: 'abc' };
+    await expect(createSpot(mockEvent, options)).resolves.toBeUndefined();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    // Check that fetch is called with correct URL and body
+    const fetchCall = global.fetch.mock.calls[0];
+    expect(fetchCall[0]).toContain('/table/123/');
+    const body = JSON.parse(fetchCall[1].body);
+    expect(body.x).toBe(25); // (35-10)/5*5 = 25
+    expect(body.y).toBe(25); // (45-20)/5*5 = 25
+    expect(body.Identifiant).toBe('PX');
+  });
+
+  // Test: should throw error if response is not ok
+  it('should throw error if response is not ok', async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({}),
+      }));
+    const mockRect = { left: 0, top: 0 };
+    const mockEvent = {
+      clientX: 10,
+      clientY: 10,
+      target: {
+        getBoundingClientRect: () => mockRect,
+      },
+    };
+    const options = { spotsTableId: '123', token: 'abc' };
+    await expect(createSpot(mockEvent, options)).rejects.toThrow('Failed to create spot: 500');
+  });
+
+  // Test: should throw and log error if fetch throws
+  it('should throw and log error if fetch throws', async () => {
+    const error = new Error('Network error');
+    global.fetch = vi.fn(() => Promise.reject(error));
+    const mockRect = { left: 0, top: 0 };
+    const mockEvent = {
+      clientX: 10,
+      clientY: 10,
+      target: {
+        getBoundingClientRect: () => mockRect,
+      },
+    };
+    const options = { spotsTableId: '123', token: 'abc' };
+    // Mock console.error to suppress output in test
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await expect(createSpot(mockEvent, options)).rejects.toThrow('Network error');
+    expect(consoleSpy).toHaveBeenCalledWith('createSpot error:', error);
+    consoleSpy.mockRestore();
   });
 });
