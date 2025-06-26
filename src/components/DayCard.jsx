@@ -12,7 +12,7 @@ import {
 import makeStyles from '@mui/styles/makeStyles';
 import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { displayCard } from '../helpers';
 import DayHeader from './DayHeader';
 import Moment from './Moment';
@@ -111,7 +111,7 @@ const DayCard = ({
   const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
   const [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const cumulativeSpot = useSpots(place).filter(({ Cumul }) => Cumul);
   const today = dayjs(dayjs().format('YYYY-MM-DD'));
@@ -177,7 +177,7 @@ const DayCard = ({
         elevation={0}
       >
         <CardActionArea
-          onClick={() => history.push(`/${place}/${isoDate}`)}
+          onClick={() => navigate(`/${place}/${isoDate}`)}
           disableRipple
           component="div"
         >

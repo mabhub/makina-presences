@@ -1,4 +1,4 @@
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { GitHub } from '@mui/icons-material';
 import { Box, Container, Grid, Link, Tab, Tabs } from '@mui/material';
@@ -149,7 +149,7 @@ const PresencePage = () => {
   const [tri] = useTriState('');
   const plans = usePlans();
   const { place, day } = useParams();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const isTriValid = tri?.length >= 3;
 
@@ -158,7 +158,7 @@ const PresencePage = () => {
   const handlePlaceChange = (event, newPlace) => {
     const path = ['', newPlace || place];
     if (day) { path.push(day); }
-    history.push(path.join('/'));
+    navigate(path.join('/'));
   };
 
   const getDraftTabStyle = placeName => {
