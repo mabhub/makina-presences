@@ -3,7 +3,7 @@ import React from 'react';
 
 import createPersistedState from 'use-persisted-state';
 
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cleanTri } from '../helpers';
 
 const { VITE_BASEROW_TOKEN: token,
@@ -56,9 +56,9 @@ const usePresences = place => {
     'size=200',
   ].join('&');
 
-  const { data: { results: presences = [] } = {} } = useQuery(
+  const { data: { results: presences = [] } = {} } = useQuery({
     queryKey,
-    async () => {
+    queryFn: async () => {
       const response = await fetch(
         basePath + qs,
         { headers },
@@ -86,13 +86,17 @@ const usePresences = place => {
 
       return nextData;
     },
-    { staleTime: 60000, refetchInterval: 60000, retryDelay: 10000 },
-  );
+    staleTime: 60000,
+    refetchInterval: 60000,
+    retry: 3,
+    retryDelay: 10000,
+  });
 
-  const createRow = useMutation(record => fetch(
-    `${basePath}?user_field_names=true`,
-    { headers, method: 'POST', body: JSON.stringify(record) },
-  ), {
+  const createRow = useMutation({
+    mutationFn: record => fetch(
+      `${basePath}?user_field_names=true`,
+      { headers, method: 'POST', body: JSON.stringify(record) },
+    ),
     onMutate: async record => {
       queryClient.setQueryData(queryKey, previous => ({
         results: [
@@ -102,14 +106,15 @@ const usePresences = place => {
       }));
     },
     onSettled: () => {
-      queryClient.invalidateQueries(queryKey);
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
-  const updateRow = useMutation(record => fetch(
-    `${basePath}${record.id}/?user_field_names=true`,
-    { headers, method: 'PATCH', body: JSON.stringify(record) },
-  ), {
+  const updateRow = useMutation({
+    mutationFn: record => fetch(
+      `${basePath}${record.id}/?user_field_names=true`,
+      { headers, method: 'PATCH', body: JSON.stringify(record) },
+    ),
     onMutate: async record => {
       queryClient.setQueryData(queryKey, ({ results = [] }) => ({
         results: results.map(result => (
@@ -119,19 +124,20 @@ const usePresences = place => {
         )),
       }));
     },
-    onSettled: () => queryClient.invalidateQueries(queryKey),
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
-  const deleteRow = useMutation(record => fetch(
-    `${basePath}${record.id}/`,
-    { headers, method: 'DELETE' },
-  ), {
+  const deleteRow = useMutation({
+    mutationFn: record => fetch(
+      `${basePath}${record.id}/`,
+      { headers, method: 'DELETE' },
+    ),
     onMutate: async record => {
       queryClient.setQueryData(queryKey, ({ results = [] }) => ({
         results: results.filter(result => (result.id !== record.id)),
       }));
     },
-    onSettled: () => queryClient.invalidateQueries(queryKey),
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 
   const createPresence = React.useCallback(

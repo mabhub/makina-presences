@@ -1,10 +1,10 @@
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
 /**
  * React hook to fetch the list of fields for a given Baserow table.
- * Uses react-query for caching and polling.
+ * Uses TanStack Query (formerly react-query) for caching and polling.
  *
  * @function
  * @param {string|number} tableId - The Baserow table ID.
@@ -15,9 +15,9 @@ const useFields = tableId => {
 
   const queryKey = [tableId];
 
-  const { data = [] } = useQuery(
+  const { data = [] } = useQuery({
     queryKey,
-    async () => {
+    queryFn: async () => {
       const response = await fetch(
         basePath,
         { headers: { Authorization: `Token ${token}` } },
@@ -27,8 +27,11 @@ const useFields = tableId => {
 
       return nextData;
     },
-    { staleTime: 60000, refetchInterval: 60000, retryDelay: 10000 },
-  );
+    staleTime: 60000,
+    refetchInterval: 60000,
+    retry: 3,
+    retryDelay: 10000,
+  });
 
   return data;
 };
