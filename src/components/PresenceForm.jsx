@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import {
   Button,
@@ -58,7 +58,7 @@ const draftPlaceSx = {
 const PresenceForm = ({ className, ...props }) => {
   const classes = useStyles();
   const plans = usePlans();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [tri, setTri] = useTriState('');
   const [inputValue, setInputValue] = React.useState(tri);
@@ -66,11 +66,11 @@ const PresenceForm = ({ className, ...props }) => {
   const { place } = useParams();
 
   if (agencyPref && agencyPref !== NO_AGENCYPREF_LABEL && !place) {
-    history.push(`/${agencyPref}`);
+    navigate(`/${agencyPref}`);
   }
 
   const handleTriChange = event => setInputValue(event.target.value.substr(0, 255));
-  const handlePlaceChange = (event, newPlace) => history.push(`/${newPlace || place}`);
+  const handlePlaceChange = (event, newPlace) => navigate(`/${newPlace || place}`);
 
   const handleSubmit = () => setTri(cleanTri(inputValue));
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
 import {
   StyledEngineProvider,
@@ -35,12 +35,14 @@ root.render(
             ? <ExpiredPrefPage />
             : (
               <Router>
-                <Switch>
-                  <Route path="/tt"><TTCount /></Route>
-                  <Route path="/archives"><ArchivePage /></Route>
-                  <Route path={['/', '/:place', '/:place/:day']} exact><PresencePage /></Route>
-                  <Route path="*">Error 404</Route>
-                </Switch>
+                <Routes>
+                  <Route path="/tt" element={<TTCount />} />
+                  <Route path="/archives" element={<ArchivePage />} />
+                  <Route path="/" element={<PresencePage />} />
+                  <Route path="/:place" element={<PresencePage />} />
+                  <Route path="/:place/:day" element={<PresencePage />} />
+                  <Route path="*" element={<div>Error 404</div>} />
+                </Routes>
               </Router>
             )}
         </DarkThemeProvider>

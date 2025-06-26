@@ -5,7 +5,7 @@ import { Add, Computer, ErrorOutline, RemoveCircleOutline, Room } from '@mui/ico
 import { Chip, Divider, FormControl, IconButton, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tooltip, Typography } from '@mui/material';
 
 import { makeStyles } from '@mui/styles';
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import { useParams } from 'react-router-dom';
 import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
 import SpotDialog from './SpotDialog';

@@ -5,7 +5,7 @@ import { alpha } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import { useParams } from 'react-router-dom';
 import useSpots from '../hooks/useSpots';
 import TriPresence from './TriPresence';
 import { deduplicate } from '../helpers';
