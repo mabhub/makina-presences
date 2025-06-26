@@ -1,10 +1,10 @@
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
 /**
  * React hook to fetch all rows from a given Baserow table.
- * Uses react-query for caching and polling.
+ * Uses TanStack Query (formerly react-query) for caching and polling.
  *
  * @function
  * @param {string|number} tableId - The Baserow table ID.
@@ -20,9 +20,9 @@ const useTable = tableId => {
     'size=200',
   ].join('&');
 
-  const { data: { results = [] } = {} } = useQuery(
+  const { data: { results = [] } = {} } = useQuery({
     queryKey,
-    async () => {
+    queryFn: async () => {
       const response = await fetch(
         basePath + qs,
         { headers: { Authorization: `Token ${token}` } },
@@ -32,8 +32,11 @@ const useTable = tableId => {
 
       return nextData;
     },
-    { staleTime: 60000, refetchInterval: 60000, retryDelay: 10000 },
-  );
+    staleTime: 60000,
+    refetchInterval: 60000,
+    retry: 3,
+    retryDelay: 10000,
+  });
 
   return results;
 };

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useIsFetching, useIsMutating } from 'react-query';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
 import { LinearProgress } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';

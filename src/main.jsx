@@ -8,7 +8,7 @@ import {
 } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ArchivePage from './components/ArchivePage';
 import PresencePage from './components/PresencePage';
