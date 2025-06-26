@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 
@@ -21,7 +21,11 @@ const queryClient = new QueryClient();
 
 const arePrefsExpired = expiredPref.length;
 
-ReactDOM.render(
+// Modern React 18+ root API (required for React 19)
+const container = document.getElementById('root');
+const root = createRoot(container);
+
+root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <StyledEngineProvider injectFirst>
@@ -43,5 +47,4 @@ ReactDOM.render(
       </StyledEngineProvider>
     </QueryClientProvider>
   </React.StrictMode>,
-  document.getElementById('root'),
 );
