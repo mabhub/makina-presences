@@ -80,6 +80,7 @@ const useStyles = makeStyles(theme => {
     userMenu: {
       flex: '0 0 auto',
       textAlign: 'right',
+      marginLeft: 'auto',
     },
     calendar: {
       gridArea: 'b',

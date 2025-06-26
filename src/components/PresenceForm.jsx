@@ -24,6 +24,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     height: '100vh',
+    justifyContent: 'center',
   },
 
   title: {
@@ -89,7 +90,7 @@ const PresenceForm = ({ className, ...props }) => {
         {...props}
       >
 
-        <Grid item container justifyContent="center" alignItems="flex-end">
+        <Grid item container direction="column" justifyContent="center" alignItems="center">
           <Grid item xs={12} className={classes.title}>
             <Typography variant="h3" component="h1">
               Makina Présences
@@ -101,76 +102,78 @@ const PresenceForm = ({ className, ...props }) => {
             </Typography>
           </Grid>
 
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            sx={{
-              padding: 1,
-              textAlign: {
-                xs: 'center',
-                sm: 'right',
-              },
-            }}
-          >
-            <ToggleButtonGroup
-              size="small"
-              className={classes.placeButtons}
-              onChange={handlePlaceChange}
-              exclusive
-              value={place}
+          <Grid item container xs={12} justifyContent="center" alignItems="center">
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              sx={{
+                padding: 1,
+                textAlign: {
+                  xs: 'center',
+                  sm: 'right',
+                },
+              }}
             >
-              {plans
-                .filter(({ Brouillon }) => !Brouillon)
-                .map(({ Name, Brouillon }) => (
-                  <ToggleButton
-                    key={Name}
-                    value={Name}
-                    sx={Brouillon ? draftPlaceSx : {}}
-                  >
-                    {Name}
-                  </ToggleButton>
-                ))}
-            </ToggleButtonGroup>
-          </Grid>
+              <ToggleButtonGroup
+                size="small"
+                className={classes.placeButtons}
+                onChange={handlePlaceChange}
+                exclusive
+                value={place}
+              >
+                {plans
+                  .filter(({ Brouillon }) => !Brouillon)
+                  .map(({ Name, Brouillon }) => (
+                    <ToggleButton
+                      key={Name}
+                      value={Name}
+                      sx={Brouillon ? draftPlaceSx : {}}
+                    >
+                      {Name}
+                    </ToggleButton>
+                  ))}
+              </ToggleButtonGroup>
+            </Grid>
 
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            className={classes.formWrapper}
-            sx={{
-              padding: 1,
-              textAlign: {
-                xs: 'center',
-                sm: 'left',
-              },
-            }}
-          >
-            <FormControl>
-              <InputLabel htmlFor="tri">Trigramme</InputLabel>
-              <Input
-                id="tri"
-                inputProps={{
-                  autoCapitalize: 'off',
-                  autoCorrect: 'off',
-                }}
-                value={inputValue}
-                onChange={handleTriChange}
-                onKeyPress={handleKeyPress}
-              />
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} className={classes.submit}>
-            <Button
-              variant="contained"
-              color="secondary"
-              disabled={!(place && inputValue?.length > 2 && inputValue?.length < 10)}
-              onClick={handleSubmit}
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              className={classes.formWrapper}
+              sx={{
+                padding: 1,
+                textAlign: {
+                  xs: 'center',
+                  sm: 'left',
+                },
+              }}
             >
-              Valider
-            </Button>
+              <FormControl>
+                <InputLabel htmlFor="tri">Trigramme</InputLabel>
+                <Input
+                  id="tri"
+                  inputProps={{
+                    autoCapitalize: 'off',
+                    autoCorrect: 'off',
+                  }}
+                  value={inputValue}
+                  onChange={handleTriChange}
+                  onKeyPress={handleKeyPress}
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} className={classes.submit}>
+              <Button
+                variant="contained"
+                color="secondary"
+                disabled={!(place && inputValue?.length > 2 && inputValue?.length < 10)}
+                onClick={handleSubmit}
+              >
+                Valider
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

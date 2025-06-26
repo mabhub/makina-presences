@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useMediaQuery } from '@mui/material';
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as StylesThemeProvider } from '@mui/styles';
 import { grey } from '@mui/material/colors';
 
 import createPersistedState from 'use-persisted-state';
@@ -13,7 +14,7 @@ const validateTheme = themePrefs => (['light', 'dark'].includes(themePrefs) ? th
 const DarkThemeProvider = ({ children }) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const [themePrefs] = useThemePrefs('system');
-  const [mode, setMode] = useState();
+  const [mode, setMode] = useState('light'); // Default to light mode
 
   useEffect(() => {
     if (themePrefs === 'system') {
@@ -24,8 +25,10 @@ const DarkThemeProvider = ({ children }) => {
   }, [themePrefs, prefersDarkMode]);
 
   const theme = React.useMemo(
-    () =>
-      responsiveFontSizes(
+    () => {
+      if (!mode) return null; // Prevent theme creation if mode is undefined
+
+      return responsiveFontSizes(
         createTheme({
           palette: {
             mode,
@@ -42,11 +45,21 @@ const DarkThemeProvider = ({ children }) => {
             },
           },
         }),
-      ),
+      );
+    },
     [mode],
   );
 
-  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+  // Don't render children until theme is ready
+  if (!theme) return null;
+
+  return (
+    <ThemeProvider theme={theme}>
+      <StylesThemeProvider theme={theme}>
+        {children}
+      </StylesThemeProvider>
+    </ThemeProvider>
+  );
 };
 
 export default DarkThemeProvider;

@@ -7,7 +7,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 
-import AdapterDayjs from '@mui/lab/AdapterDayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import {
   Card,
@@ -20,8 +20,8 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 
-import Calendar from '@mui/lab/CalendarPicker';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 import {
   Archive as ArchiveIcon,
@@ -72,10 +72,10 @@ const ArchivePage = () => {
         <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
           <Grid item xs={12} sm={6} md={4} lg={3}>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs} locale={fr}>
-              <Calendar
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={fr}>
+              <DateCalendar
                 disableFuture
-                date={selectedDate}
+                value={selectedDate}
                 onChange={day => setSelectedDate(dayjs(day))}
                 shouldDisableDate={day => availableDates.every(date => !dayjs(day).isSame(date, 'day'))}
               />
