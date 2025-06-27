@@ -75,7 +75,7 @@ const ExpiredPrefPage = () => {
     } else {
       expiredPref.forEach(p => localStorage.removeItem(Object.keys(p)[0]));
     }
-    window.location = window.location.href;
+    window.location.reload();
   };
 
   return (
