@@ -1,5 +1,7 @@
 export default {
   test: {
-    environment: 'jsdom', // ou 'happy-dom'
+    environment: 'jsdom',
+    setupFiles: ['./src/setupTests.js'],
+    globals: true,
   },
 };

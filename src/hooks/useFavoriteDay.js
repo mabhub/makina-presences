@@ -7,6 +7,6 @@ import { useMemo } from 'react';
  * @returns {boolean} True if the day is a favorite.
  */
 const useFavoriteDay = (dayLabel, dayPrefs) =>
-  useMemo(() => dayPrefs.some(d => d === dayLabel), [dayLabel, dayPrefs]);
+  useMemo(() => dayPrefs?.some(d => d === dayLabel) ?? false, [dayLabel, dayPrefs]);
 
 export default useFavoriteDay;
