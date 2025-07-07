@@ -222,7 +222,7 @@ const SpotButton = ({
     if (isConflict && restFullDay.some(({ tri }) => sameLowC(ownTri, tri))) {
       handleConflict(
         isConflict,
-        fullDays.find(({ tri: t }) => ownTri !== t).tri,
+        fullDays.find(({ tri: t }) => ownTri !== t)?.tri,
       );
     }
   }, [fullDays, handleConflict, isConflict, ownTri, restFullDay]);
