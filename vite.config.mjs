@@ -9,7 +9,13 @@ dotenv.config({ path: '.env.local' });
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    reactPlugin(),
+    reactPlugin({
+      babel: {
+        plugins: [
+          'react-component-data-attribute',
+        ],
+      },
+    }),
     // viteESLint(),
     nodePolyfills({ include: ['url'] }),
   ],
