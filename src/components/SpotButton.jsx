@@ -2,10 +2,9 @@ import clsx from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
 
-import { Fab, Tooltip } from '@mui/material';
+import { Fab } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC } from '../helpers';
 import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/periods';
@@ -15,6 +14,7 @@ import ContextualMenu from './ContextualMenu';
 import SpotDescription from './SpotDescription';
 import SpotButtonBadges from './SpotButton/SpotButtonBadges';
 import SpotButtonContent from './SpotButton/SpotButtonContent';
+import CustomTooltip from './SpotButton/CustomTooltip';
 
 const { FF_HALFDAY } = baseFlags;
 
@@ -88,14 +88,6 @@ const useStyles = makeStyles(theme => ({
   },
 
 }));
-
-const CustomTooltip = withStyles(theme => ({
-  tooltip: {
-    backgroundColor: theme.palette.background.default,
-    color: theme.palette.getContrastText(theme.palette.background.default),
-    boxShadow: theme.shadows[2],
-  },
-}))(Tooltip);
 
 const SpotButton = ({
   edit,
