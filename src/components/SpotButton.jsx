@@ -1,10 +1,6 @@
 import clsx from 'clsx';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
-
-import createPersistedState from 'use-persisted-state';
+import React from 'react';
 
 import { ErrorOutline } from '@mui/icons-material';
 import { Divider, Fab, Grid, Tooltip } from '@mui/material';
@@ -12,22 +8,15 @@ import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
-import { sameLowC, snap } from '../helpers';
-import usePresences from '../hooks/usePresences';
-import useSpots from '../hooks/useSpots';
+import { sameLowC } from '../helpers';
+import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/periods';
+import useSpotPresenceLogic from '../hooks/useSpotPresenceLogic';
+import useSpotInteractions from '../hooks/useSpotInteractions';
 import ContextualMenu from './ContextualMenu';
 import SpotButtonHalfDay from './SpotButtonHalfDay';
 import SpotDescription from './SpotDescription';
 
-const useTriState = createPersistedState('tri');
-
-const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
-
 const { FF_HALFDAY } = baseFlags;
-
-export const FULLDAY_PERIOD = 'fullday';
-export const MORNING_PERIOD = 'morning';
-export const AFTERNOON_PERIOD = 'afternoon';
 
 const useStyles = makeStyles(theme => ({
   spot: {
@@ -53,11 +42,6 @@ const useStyles = makeStyles(theme => ({
     '&:hover ': {
       background: alpha(theme.palette.primary.fg, 0.5),
     },
-  },
-
-  divider: {
-    width: '100%',
-    zIndex: 1,
   },
 
   locked: {
@@ -119,156 +103,47 @@ const SpotButton = ({
   onConflict = () => {},
 }) => {
   const classes = useStyles();
-  const [ownTri] = useTriState('');
-  const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
   const enableHalfDay = isEnable(FF_HALFDAY);
 
-  const spots = useSpots(place);
-  const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
-  const isCumulativeSpot = React.useCallback(
-    identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),
-    [cumulativeSpots],
-  );
+  // Use presence logic hook
+  const {
+    fullDays,
+    mornings,
+    afternoons,
+    presenceFullDay,
+    triPeriod,
+    isLocked,
+    isConflict,
+    isOccupied,
+    isOwnSpot,
+    isCumulative,
+    canClick,
+    handleClick,
+    handleConflict,
+    unsubscribe,
+    contextualMenuItems,
+    ownTri,
+    day,
+  } = useSpotPresenceLogic(spot, onConflict);
 
-  const { presences, setPresence, deletePresence } = usePresences(place);
-  const dayPresences = presences.filter(presence => presence.day === day);
-  const spotPresences = dayPresences
-    .reduce((acc, { spot: s, ...presence }) => ({
-      ...acc,
-      [s]: [...(acc[s] || []), presence],
-    }), {});
+  // Use interactions hook
+  const {
+    handleMouseDown,
+    handleDragEnd,
+    handleMouseEnter,
+    handleMouseLeave,
+    isHover,
+    contextualMenu,
+    anchor,
+    openContextualMenu,
+    closeContextualMenu,
+  } = useSpotInteractions(spot, edit);
 
-  const queryClient = useQueryClient();
-  const [movingSpot, setMovingSpot] = React.useState();
-  const handleMouseDown = s => ({ screenX, screenY }) => {
-    if (!edit) { return null; }
-    return setMovingSpot({ spot: s, from: [screenX, screenY] });
-  };
-  const handleDragEnd = async ({ screenX: x2, screenY: y2 }) => {
-    if (!movingSpot || !edit) { return; }
-
-    const { s, from: [x1, y1] = [] } = movingSpot;
-    const deltas = { x: x2 - x1, y: y2 - y1 };
-
-    setMovingSpot();
-
-    const { VITE_BASEROW_TOKEN: token } = import.meta.env;
-
-    await fetch(
-      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
-      {
-        method: 'PATCH',
-        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          x: snap(deltas.x + Number(s.x)),
-          y: snap(deltas.y + Number(s.y)),
-        }),
-      },
-    );
-
-    queryClient.invalidateQueries([spotsTableId]);
-  };
+  const { Identifiant: spotId, x, y, Type, Description } = spot;
   const isPast = dayjs(day).hour(24).isBefore(dayjs().hour(0));
 
-  const { Bloqué: blocked, Identifiant: spotId, x, y, Type, Description, Cumul } = spot;
-
-  const getPresence = () => {
-    const spotIdPresences = spotPresences[spotId] || [];
-
-    const morningPresences = spotIdPresences.filter(p => p.period === MORNING_PERIOD);
-    const afternoonPresences = spotIdPresences.filter(p => p.period === AFTERNOON_PERIOD);
-    const fullDayPresences = spotIdPresences.filter(p => !Object.hasOwn(p, 'period')
-    || p.period === ''
-    || p.period === null
-    || p.period === FULLDAY_PERIOD);
-
-    return [fullDayPresences, morningPresences, afternoonPresences];
-  };
-
-  const currentTriPeriod = () => {
-    const spoIdtPresences = getPresence();
-    if (spoIdtPresences[0].some(({ tri }) => tri === ownTri)) return FULLDAY_PERIOD;
-    if (spoIdtPresences[1].some(({ tri }) => tri === ownTri)) return MORNING_PERIOD;
-    if (spoIdtPresences[2].some(({ tri }) => tri === ownTri)) return AFTERNOON_PERIOD;
-    return undefined;
-  };
-
-  const triPeriod = currentTriPeriod();
-
-  const [fullDays, mornings, afternoons] = getPresence();
-
-  const [presenceFullDay] = fullDays;
-
-  const restFullDay = React.useMemo(
-    () => fullDays?.slice(1) || [],
-    [fullDays],
-  );
-
-  const isLocked = Boolean(blocked);
-  const isConflict = Boolean(restFullDay.length);
-  const isOccupied = Boolean(presenceFullDay || (mornings.length === 1 && afternoons.length === 1));
-  const isOwnSpot = spotPresences[spotId]?.some(({ tri }) => sameLowC(tri, ownTri));
-  const isCumulative = Boolean(Cumul);
-
-  const canClick = Boolean(!isLocked && (!isOccupied || isOwnSpot));
-
-  const handleConflict = React.useCallback(
-    (value, tri) => onConflict(value, tri, spotId),
-    [onConflict, spotId],
-  );
-
-  useEffect(() => {
-    if (isConflict && restFullDay.some(({ tri }) => sameLowC(ownTri, tri))) {
-      handleConflict(
-        isConflict,
-        fullDays.find(({ tri: t }) => ownTri !== t)?.tri,
-      );
-    }
-  }, [fullDays, handleConflict, isConflict, ownTri, restFullDay]);
-
-  const getCurrentPresence = precensePeriod => precensePeriod.find(
-    ({ tri }) => sameLowC(tri, ownTri),
-  );
-
-  const removePresence = period => {
-    if (period === FULLDAY_PERIOD) deletePresence(getCurrentPresence(fullDays));
-    if (period === MORNING_PERIOD) deletePresence(getCurrentPresence(mornings));
-    if (period === AFTERNOON_PERIOD) deletePresence(getCurrentPresence(afternoons));
-  };
-
-  const [contextualMenu, setContextualMenu] = useState(false);
-  const [anchor, setAnchor] = useState(null);
-
-  const unsubscribe = () => {
-    removePresence(triPeriod);
-  };
-
-  const handleClick = p => {
-    if (edit) { return null; }
-
-    if ((!isOccupied && !isLocked) || triPeriod) {
-      const [firstId, ...extraneous] = dayPresences
-        ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points
-        .filter(({ spot: s }) => !isCumulativeSpot(s)) // Keep only non cumulative
-        .filter(() => !isCumulative)
-        .map(({ id }) => id) || [];
-
-      setPresence({ id: firstId, day, tri: ownTri, spot: spotId, plan: place, period: p });
-      extraneous.forEach(i => deletePresence({ id: i }));
-    }
-
-    const [previousPeriod = FULLDAY_PERIOD] = dayPresences
-      .filter(({ spot: s }) => !isCumulativeSpot(s))
-      .filter(({ tri: t }) => sameLowC(t, ownTri))
-      .map(({ period }) => period);
-    if (isOwnSpot && previousPeriod === p) {
-      return unsubscribe();
-    }
-
-    return null;
-  };
-
+  // Presence actions
   const fullDay = () => {
     handleClick(FULLDAY_PERIOD);
   };
@@ -279,23 +154,9 @@ const SpotButton = ({
     handleClick(AFTERNOON_PERIOD);
   };
 
-  const contextualMenuItems = [
-    { item: 'Journée entière',
-      action: fullDay,
-      disabled: mornings.filter(({ tri: t }) => !sameLowC(t, ownTri)).length > 0
-        || afternoons.filter(({ tri: t }) => !sameLowC(t, ownTri)).length > 0
-        || fullDays.filter(({ tri: t }) => sameLowC(t, ownTri)).length === 1 },
-    { item: 'Matinée uniquement', action: morningOnly, disabled: mornings.length > 0 },
-    { item: 'Après-midi uniquement', action: afternoonOnly, disabled: afternoons.length > 0 },
-    { item: 'separator', separator: true },
-    { item: 'Se désinscrire', action: unsubscribe, disabled: !triPeriod },
-  ];
-
+  // UI
   const title = 'Réserver pour :';
-
   const tooltip = <SpotDescription md={Description} spot={spot} />;
-
-  const [isHover, setIsHover] = useState(false);
 
   return (
     <>
@@ -341,8 +202,8 @@ const SpotButton = ({
           draggable={Boolean(edit)}
           onMouseDown={edit && handleMouseDown(spot)}
           onDragEnd={edit && handleDragEnd}
-          onMouseEnter={() => setIsHover(true)}
-          onMouseLeave={() => setIsHover(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           onClick={event => {
             if (isCumulative && triPeriod) return unsubscribe();
             if (mornings.length === 1 && mornings[0].tri !== ownTri) {
@@ -363,8 +224,7 @@ const SpotButton = ({
 
             if (event.ctrlKey) return afternoonOnly();
 
-            setContextualMenu(true);
-            setAnchor(event.target);
+            openContextualMenu(event.target);
             return null;
           }}
         >
@@ -378,7 +238,7 @@ const SpotButton = ({
               || spotId)
             : (
               <Grid container>
-                {['left', 'right'].map((position, i) => (
+                {['left', 'right'].map((position, index) => (
                   <React.Fragment key={position}>
                     <SpotButtonHalfDay
                       presences={position === 'left' ? mornings : afternoons}
@@ -394,14 +254,16 @@ const SpotButton = ({
                       }
                       borderColor={Type?.color?.replace('-', '')}
                     />
-                    {i === 0 && (
+                    {index === 0 && (
                       <Divider
-                        className={classes.divider}
                         sx={{
+                          width: '105%',
+                          zIndex: 1,
                           borderColor: Type?.color?.replace('-', ''),
-                          transform: 'rotate(90deg)',
                           position: 'absolute',
-                          top: '49%',
+                          left: '50%',
+                          top: '50%',
+                          transform: 'translate(-50%, -50%) rotate(90deg)',
                         }}
                       />
                     )}
@@ -417,7 +279,7 @@ const SpotButton = ({
           anchor={anchor}
           title={title}
           items={contextualMenuItems}
-          onClose={setContextualMenu}
+          onClose={closeContextualMenu}
         />
       )}
     </>
