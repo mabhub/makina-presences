@@ -2,8 +2,7 @@ import clsx from 'clsx';
 import dayjs from 'dayjs';
 import React from 'react';
 
-import { ErrorOutline } from '@mui/icons-material';
-import { Divider, Fab, Grid, Tooltip } from '@mui/material';
+import { Fab, Tooltip } from '@mui/material';
 import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import withStyles from '@mui/styles/withStyles';
@@ -13,8 +12,9 @@ import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/p
 import useSpotPresenceLogic from '../hooks/useSpotPresenceLogic';
 import useSpotInteractions from '../hooks/useSpotInteractions';
 import ContextualMenu from './ContextualMenu';
-import SpotButtonHalfDay from './SpotButtonHalfDay';
 import SpotDescription from './SpotDescription';
+import SpotButtonBadges from './SpotButton/SpotButtonBadges';
+import SpotButtonContent from './SpotButton/SpotButtonContent';
 
 const { FF_HALFDAY } = baseFlags;
 
@@ -160,20 +160,13 @@ const SpotButton = ({
 
   return (
     <>
-      {(isConflict || Boolean(afternoons.length > 1) || Boolean(mornings.length > 1)) && (
-        <Tooltip
-          title="Plusieurs personnes sont inscrites sur ce poste"
-          placement="right"
-        >
-          <ErrorOutline
-            className={classes.badge}
-            style={{
-              left: `${x}px`,
-              top: `${y}px`,
-            }}
-          />
-        </Tooltip>
-      )}
+      <SpotButtonBadges
+        isConflict={isConflict}
+        mornings={mornings}
+        afternoons={afternoons}
+        x={x}
+        y={y}
+      />
       <CustomTooltip
         key={spotId}
         title={(!edit && !isPast) ? tooltip : ''}
@@ -228,50 +221,21 @@ const SpotButton = ({
             return null;
           }}
         >
-          {afternoons.length === 0 && mornings.length === 0
-            ? ((!edit && !isConflict && presenceFullDay?.tri)
-              || (isConflict && (fullDays
-                .some(({ tri }) => sameLowC(ownTri, tri))
-                ? fullDays.find(({ tri }) => sameLowC(ownTri, tri)).tri
-                : presenceFullDay.tri)
-              )
-              || spotId)
-            : (
-              <Grid container>
-                {['left', 'right'].map((position, index) => (
-                  <React.Fragment key={position}>
-                    <SpotButtonHalfDay
-                      presences={position === 'left' ? mornings : afternoons}
-                      onConflict={handleConflict}
-                      disabled={isPast}
-                      position={position}
-                      isShared={Boolean(mornings.length) && Boolean(afternoons.length)}
-                      isHover={isHover}
-                      suggestOtherHalf={
-                        position === 'left'
-                          ? mornings.length === 0 && triPeriod !== AFTERNOON_PERIOD
-                          : afternoons.length === 0 && triPeriod !== MORNING_PERIOD
-                      }
-                      borderColor={Type?.color?.replace('-', '')}
-                    />
-                    {index === 0 && (
-                      <Divider
-                        sx={{
-                          width: '105%',
-                          zIndex: 1,
-                          borderColor: Type?.color?.replace('-', ''),
-                          position: 'absolute',
-                          left: '50%',
-                          top: '50%',
-                          transform: 'translate(-50%, -50%) rotate(90deg)',
-                        }}
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </Grid>
-            )}
-
+          <SpotButtonContent
+            mornings={mornings}
+            afternoons={afternoons}
+            fullDays={fullDays}
+            presenceFullDay={presenceFullDay}
+            isConflict={isConflict}
+            edit={edit}
+            ownTri={ownTri}
+            spotId={spotId}
+            handleConflict={handleConflict}
+            isPast={isPast}
+            isHover={isHover}
+            triPeriod={triPeriod}
+            borderColor={Type?.color?.replace('-', '')}
+          />
         </Fab>
       </CustomTooltip>
       {contextualMenu && (
