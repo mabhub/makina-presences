@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
-const { VITE_BASEROW_TOKEN: token } = import.meta.env;
+const qs = [
+  '?',
+  'user_field_names=true',
+  'size=200',
+].join('&');
 
 /**
  * React hook to fetch all rows from a given Baserow table.
@@ -12,15 +16,10 @@ const { VITE_BASEROW_TOKEN: token } = import.meta.env;
  */
 const useTable = tableId => {
   const basePath = `https://api.baserow.io/api/database/rows/table/${tableId}/`;
+  const token = import.meta.env.VITE_BASEROW_TOKEN;
+  const queryKey = ['table', tableId, qs];
 
-  const queryKey = [tableId];
-  const qs = [
-    '?',
-    'user_field_names=true',
-    'size=200',
-  ].join('&');
-
-  const { data: { results = [] } = {} } = useQuery({
+  const { data } = useQuery({
     queryKey,
     queryFn: async () => {
       const response = await fetch(
@@ -28,17 +27,19 @@ const useTable = tableId => {
         { headers: { Authorization: `Token ${token}` } },
       );
 
-      const nextData = await response.json();
-
-      return nextData;
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
     },
+    enabled: !!tableId && !!token, // Only make the request if tableId and token are defined
     staleTime: 60000,
     refetchInterval: 60000,
     retry: 3,
     retryDelay: 10000,
   });
 
-  return results;
+  return data?.results ?? [];
 };
 
 export default useTable;
