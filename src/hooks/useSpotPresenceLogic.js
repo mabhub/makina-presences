@@ -42,7 +42,12 @@ const useSpotPresenceLogic = (spot, onConflict) => {
   );
 
   const { presences, setPresence, deletePresence } = usePresences(place);
-  const dayPresences = presences.filter(presence => presence.day === day);
+
+  // Memoize day presences filtering for performance
+  const dayPresences = useMemo(
+    () => presences.filter(presence => presence.day === day),
+    [presences, day],
+  );
 
   // Calculate presences by spot
   const spotPresences = useMemo(
