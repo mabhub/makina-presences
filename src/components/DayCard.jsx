@@ -1,23 +1,13 @@
 import React from 'react';
 import clsx from 'clsx';
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Collapse,
-  Divider,
-  Grid,
-} from '@mui/material';
+import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import createPersistedState from 'use-persisted-state';
 import dayjs from 'dayjs';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { displayCard } from '../helpers';
-import DayHeader from './DayHeader';
-import Moment from './Moment';
-import HolidayBanner from './HolidayBanner';
-import NoPresenceMessage from './NoPresenceMessage';
+import WeekSeparator from './WeekSeparator';
+import DayCardContainer from './DayCardContainer';
 import useFavoriteDay from '../hooks/useFavoriteDay';
 import useTodayPresences from '../hooks/useTodayPresences';
 import useCurrentUserPresence from '../hooks/useCurrentUserPresence';
@@ -28,62 +18,15 @@ import usePresences from '../hooks/usePresences';
 // Static array for day labels (0 = Sunday, 6 = Saturday)
 const days = ['S', 'L', 'M', 'Me', 'J', 'V', 'S'];
 
-// Styles specific to DayCard and its children
-const useStyles = makeStyles(theme => {
-  const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
-  return {
-    dayBox: {
-      position: 'relative',
-      margin: theme.spacing(1, 0),
-      width: '100%',
-    },
-    newWeek: {},
-    weekSeparator: {
-      marginTop: theme.spacing(2.5),
-      marginBottom: theme.spacing(0.5),
-    },
-    weekTextSeparator: {
-      opacity: '.7',
-    },
-    firstWeek: {
-      [maxWidth('sm')]: {
-        marginTop: theme.spacing(0),
-      },
-    },
-    holidayCard: {
-      opacity: 0.85,
-    },
-    past: {
-      opacity: 0.40,
-    },
-    dayCard: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      border: theme.palette.mode === 'light' ? '1px solid #00000030' : '1px solid #ededed30',
-      borderRadius: '10px',
-    },
-    todayCard: {
-      border: `3px solid ${theme.palette.primary.main}`,
-    },
-    cardContent: {
-      flex: 1,
-      display: 'flex',
-      background: theme.palette.secondary.fg,
-      fontSize: theme.typography.pxToRem(10),
-      padding: theme.spacing(1),
-      '&:last-child': {
-        paddingBottom: theme.spacing(1),
-      },
-    },
-    holiday: {
-      textAlign: 'center',
-      fontSize: '1rem',
-      fontStyle: 'italic',
-      alignSelf: 'center',
-    },
-  };
-});
+// Styles specific to DayCard container
+const useStyles = makeStyles(theme => ({
+  dayBox: {
+    position: 'relative',
+    margin: theme.spacing(1, 0),
+    width: '100%',
+  },
+  newWeek: {},
+}));
 
 const useTriState = createPersistedState('tri');
 const useDayPrefs = createPersistedState('dayPrefs');
@@ -111,7 +54,6 @@ const DayCard = ({
   const [dayPrefs] = useDayPrefs(['L', 'M', 'Me', 'J', 'V']);
   const [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
-  const navigate = useNavigate();
 
   const cumulativeSpot = useSpots(place).filter(({ Cumul }) => Cumul);
   const today = dayjs(dayjs().format('YYYY-MM-DD'));
@@ -156,64 +98,25 @@ const DayCard = ({
       )}
     >
       {newWeek && (
-        <Divider
-          className={clsx({
-            [classes.weekSeparator]: true,
-            [classes.firstWeek]: index === 1,
-          })}
-          textAlign="right"
-        >
-          <span className={classes.weekTextSeparator}>{`Semaine ${weekIndex}`}</span>
-        </Divider>
+        <WeekSeparator
+          weekIndex={weekIndex}
+          isFirstWeek={index === 1}
+        />
       )}
 
-      <Card
-        className={clsx({
-          [classes.dayCard]: true,
-          [classes.todayCard]: isToday,
-          [classes.past]: isPast,
-          [classes.holidayCard]: isHoliday,
-        })}
-        elevation={0}
-      >
-        <CardActionArea
-          onClick={() => navigate(`/${place}/${isoDate}`)}
-          disableRipple
-          component="div"
-        >
-          <DayHeader
-            date={isoDate}
-            presence={currentTodayPresences}
-            presences={todayPresences}
-            tri={tri}
-            place={place}
-            isHoliday={isHoliday}
-            highlight={day === isoDate}
-            isPast={isPast}
-            isClosed={!showCard}
-            persons={todayPresences.filter(({ spot: m }) => m).length}
-            parkingSpots={cumulativeSpot}
-          />
-          <Collapse in={showCard}>
-            <CardContent className={classes.cardContent}>
-              <Grid container>
-                {isHoliday && (
-                  <HolidayBanner holiday={holiday} classes={classes} />
-                )}
-                {todayPresences.filter(({ spot: m }) => m).length === 0 && !isHoliday && (
-                  <NoPresenceMessage classes={classes} />
-                )}
-                {!isHoliday && (
-                  <Moment
-                    momentPresences={todayPresences.filter(({ spot: m }) => m)}
-                    userPresence={currentTodayPresences}
-                  />
-                )}
-              </Grid>
-            </CardContent>
-          </Collapse>
-        </CardActionArea>
-      </Card>
+      <DayCardContainer
+        isoDate={isoDate}
+        isToday={isToday}
+        isPast={isPast}
+        isHoliday={isHoliday}
+        holiday={holiday}
+        todayPresences={todayPresences}
+        currentTodayPresences={currentTodayPresences}
+        tri={tri}
+        place={place}
+        showCard={showCard}
+        cumulativeSpot={cumulativeSpot}
+      />
     </Box>
   );
 };
