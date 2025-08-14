@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 import dotenv from 'dotenv';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env.local' }); //eslint-disable-line require-hook
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -26,7 +26,7 @@ export default defineConfig({
   server: {
     proxy: {
       '^/.netlify': {
-        target: process.env.LAMBDA_ROOT,
+        target: process.env.LAMBDA_ROOT, //eslint-disable-line no-process-env
         changeOrigin: true,
       },
     },

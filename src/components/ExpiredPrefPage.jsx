@@ -51,7 +51,7 @@ const parseLocalstorage = Object.keys(localStorage)
     let parseValue;
     try {
       parseValue = JSON.parse(localStorage.getItem(curr));
-    } catch (e) {
+    } catch {
       parseValue = localStorage.getItem(curr);
     }
 

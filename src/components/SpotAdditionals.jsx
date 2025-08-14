@@ -206,9 +206,7 @@ const SpotAdditionals = ({ additional }) => {
   };
 
   const handleUnsubscribe = () => {
-    setTris([
-      ...tris.filter(tri => tri !== loggedTri),
-    ]);
+    setTris(tris.filter(tri => tri !== loggedTri));
   };
 
   const getBadgePosition = () => {
