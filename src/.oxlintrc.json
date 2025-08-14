@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "vitest/prefer-to-be-falsy": "off"
+  }
+}
