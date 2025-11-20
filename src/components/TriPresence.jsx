@@ -1,48 +1,59 @@
-import React from 'react';
 import clsx from 'clsx';
+import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
-import { Avatar, Chip } from '@mui/material';
+import { alpha, Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { AFTERNOON_PERIOD, MORNING_PERIOD } from './SpotButton';
+import { LocalParking } from '@mui/icons-material';
 import { sameLowC } from '../helpers';
+import { AFTERNOON_PERIOD, MORNING_PERIOD } from './SpotButton';
 
 const useTriState = createPersistedState('tri');
 
-const useStyle = makeStyles({
-  avatar: {
-    '&.MuiAvatar-root': {
-      transform: 'scale(0.8)',
-    },
+const useStyle = makeStyles(theme => ({
+  chip: {
+    transition: theme.transitions.create('background-color'),
+    padding: theme.spacing(0, 0.8),
+    borderRadius: theme.spacing(2),
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
   },
-  svg: {
-    height: '50px',
+  icon: {
+    height: '70%',
+    width: 'auto',
+    background: alpha(theme.palette.primary.fg, 0.4),
+    borderRadius: '50%',
+    padding: theme.spacing(0.1),
+    color: 'black',
   },
-});
+}));
 
-const TriPresence = ({ tri, alt, className, period, ...props }) => {
+const TriPresence = ({ tri, alt, className, period, isParking, ...props }) => {
   const classes = useStyle();
   const [ownTri] = useTriState();
   const [hl, setHl] = React.useState(false);
-  const color = alt ? 'secondary' : 'primary';
   const isOwnTri = sameLowC(ownTri, tri);
   const theme = useTheme();
+  const color = alt ? theme.palette.secondary.main : theme.palette.primary.main;
+  const textColor = theme.palette.mode === 'dark' ? theme.palette.primary.fg : '#000';
 
   const avatarIcon = () => {
-    if (period === AFTERNOON_PERIOD) {
-      return (
-        <Avatar className={classes.avatar}>
-          <img src="/public/afternoon.svg" size="16x16" alt="afternoon icon" className={classes.svg} />
-        </Avatar>
-      );
-    }
     if (period === MORNING_PERIOD) {
       return (
-        <Avatar className={classes.avatar}>
-          <img src="/morning.svg" size="16x16" alt="morning icon" className={classes.svg} />
-        </Avatar>
+        <img src="/morning.svg" alt="morning icon" className={classes.icon} />
+      );
+    }
+    if (period === AFTERNOON_PERIOD) {
+      return (
+        <img src="/afternoon.svg" alt="afternoon icon" className={classes.icon} />
+      );
+    }
+    if (isParking) {
+      return (
+        <LocalParking className={classes.icon} />
       );
     }
     return null;
@@ -50,16 +61,29 @@ const TriPresence = ({ tri, alt, className, period, ...props }) => {
 
   return (
     <>
-      <Chip
-        size="small"
-        label={tri}
-        avatar={avatarIcon()}
-        color={isOwnTri ? color : undefined}
-        className={clsx(`hl-${tri}`, className)}
+      <Box
+        className={clsx(classes.chip, `hl-${tri}`, className)}
         onMouseEnter={() => setHl(true)}
         onMouseLeave={() => setHl(false)}
+        sx={{
+          color: isOwnTri
+            ? theme.palette.primary.contrastText
+            : textColor,
+          backgroundColor: isOwnTri
+            ? color
+            : alpha(theme.palette.primary.fg, 0.2),
+        }}
         {...props}
-      />
+      >
+        {avatarIcon()}
+        <Typography
+          sx={{
+            fontSize: '0.8125rem',
+          }}
+        >
+          {tri}
+        </Typography>
+      </Box>
 
       {hl && !isOwnTri && (
         <style>
@@ -67,6 +91,9 @@ const TriPresence = ({ tri, alt, className, period, ...props }) => {
           .hl-${tri} {
             background-color: ${theme.palette.secondary.main};
             color:  ${theme.palette.secondary.contrastText};
+          }
+          .hl-${tri} img, .hl-${tri} svg{
+            background: ${theme.palette.mode === 'light' ? alpha(theme.palette.primary.bg, 0.8) : ''};
           }
           `}
         </style>
