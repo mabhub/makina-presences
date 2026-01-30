@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 const qs = [
@@ -18,6 +19,15 @@ const useTable = tableId => {
   const basePath = `https://api.baserow.io/api/database/rows/table/${tableId}/`;
   const token = import.meta.env.VITE_BASEROW_TOKEN;
   const queryKey = ['table', tableId, qs];
+
+  useEffect(() => {
+    if (!tableId) {
+      console.info('useTable: tableId is not defined, query will not be executed');
+    }
+    if (!token) {
+      console.info('useTable: VITE_BASEROW_TOKEN is not defined, query will not be executed');
+    }
+  }, [tableId, token]);
 
   const { data } = useQuery({
     queryKey,
