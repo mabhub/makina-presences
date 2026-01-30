@@ -156,9 +156,12 @@ const DayHeader = ({
   const handlePresence = event => {
     event.stopPropagation();
     if (isPresent) {
-      if (!isParkingPresent) setShowParking(false);
-      // Delete presence
-      return setPresence({ ...presence, spot: null });
+      setShowParking(false);
+      // Delete ALL presences for this user on this day (poste + parking)
+      presences
+        .filter(presence => sameLowC(presence.tri, tri))
+        .forEach(presence => setPresence({ ...presence, spot: null }));
+      return null;
     }
     // May create presence
     if (event.ctrlKey || event.metaKey) {
