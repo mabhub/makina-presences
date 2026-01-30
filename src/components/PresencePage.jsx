@@ -20,7 +20,10 @@ import UserMenu from './UserMenu';
 
 import { name, repository, version } from '../../package.json';
 
-const { VITE_PROJECT_VERSION = version } = import.meta.env;
+const {
+  VITE_PROJECT_VERSION = version,
+  VITE_SENTRY_PROJECT_URL,
+} = import.meta.env;
 
 dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
@@ -192,13 +195,26 @@ const PresencePage = () => {
             <Box className={classes.top}>
               <Grid container alignItems="center">
                 <Grid item xs={1} className={classes.about}>
-                  <Link
-                    href={repository}
-                    className={classes.sourceLink}
-                    title={`${name} version ${VITE_PROJECT_VERSION}`}
-                  >
-                    <GitHub />
-                  </Link>
+                  {repository && (
+                    <Link
+                      href={repository}
+                      className={classes.sourceLink}
+                      title={`${name} version ${VITE_PROJECT_VERSION}`}
+                    >
+                      <GitHub />
+                    </Link>
+                  )}
+                  {VITE_SENTRY_PROJECT_URL && (
+                    <Link
+                      href={VITE_SENTRY_PROJECT_URL}
+                      className={classes.sourceLink}
+                      title="Sentry - Error tracking"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 72 66">
+                        <path fill="currentColor" d="M40 13.26a4.67 4.67 0 0 0-8 0l-6.58 11.27a32.21 32.21 0 0 1 17.75 26.66h-4.62a27.68 27.68 0 0 0-15.46-22.72L17 39a15.92 15.92 0 0 1 9.23 12.17H15.62a.76.76 0 0 1-.62-1.11l2.94-5a10.7 10.7 0 0 0-3.36-1.9l-2.91 5a4.54 4.54 0 0 0 1.69 6.24 4.66 4.66 0 0 0 2.26.6h14.53a19.4 19.4 0 0 0-8-17.31l2.31-4A23.87 23.87 0 0 1 34.76 55h12.31a35.88 35.88 0 0 0-16.41-31.8l4.67-8a.77.77 0 0 1 1.05-.27c.53.29 20.29 34.77 20.66 35.17a.76.76 0 0 1-.68 1.13H51.6q.09 1.91 0 3.81h4.78A4.59 4.59 0 0 0 61 50.43a4.5 4.5 0 0 0-.62-2.28Z" />
+                      </svg>
+                    </Link>
+                  )}
                 </Grid>
                 <Tabs
                   component={Grid}
