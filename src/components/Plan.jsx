@@ -9,7 +9,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC, isCumulativeSpot } from '../helpers';
 import useAdditionals from '../hooks/useAdditionals';
-import usePlans from '../hooks/usePlans';
+import usePlan from '../hooks/usePlan';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
@@ -78,15 +78,15 @@ const Plan = ({ edit }) => {
   const enableComplementary = isEnable(FF_COMPLEMENTARY);
 
   // Data hooks
-  const plans = usePlans();
   const { place } = useParams();
 
+  const currentPlan = usePlan({ Name: place });
   const {
-    plan: [plan] = [], // Get the plan image matching the place param
-    uuid: planUuid, // Get plan UUID for fetching spots
-  } = plans.find(({ Name, uuid }) => Name === place) || {};
+    plan: [planPicture] = [], // Get the plan image matching the place param
+    uuid: currentPlanUuid, // Get plan UUID for fetching spots
+  } = currentPlan || {};
 
-  const spots = useSpots(planUuid);
+  const spots = useSpots(currentPlanUuid);
   const additionals = useAdditionals(place);
 
   const { presences } = usePresences(place);
@@ -183,9 +183,9 @@ const Plan = ({ edit }) => {
             id="box"
           >
             {/* Plan image */}
-            {plan?.url && (
+            {planPicture?.url && (
               <img
-                src={plan.url}
+                src={planPicture.url}
                 alt=""
                 className={classes.plan}
                 id={place}

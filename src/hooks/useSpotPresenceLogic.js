@@ -10,6 +10,7 @@ import createPersistedState from 'use-persisted-state';
 
 import { sameLowC } from '../helpers';
 import usePresences from './usePresences';
+import usePlan from './usePlan';
 import useSpots from './useSpots';
 import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/periods';
 import {
@@ -32,6 +33,9 @@ const useTriState = createPersistedState('tri');
 const useSpotPresenceLogic = (spot, onConflict) => {
   const [ownTri] = useTriState('');
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
+
+  const currentPlan = usePlan({ Name: place });
+  const currentPlanUuid = currentPlan?.uuid;
 
   const spots = useSpots(place);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
@@ -148,6 +152,7 @@ const useSpotPresenceLogic = (spot, onConflict) => {
         tri: ownTri,
         spot: spotId,
         plan: place,
+        presencePlan: currentPlanUuid ? [currentPlanUuid] : undefined,
         period: p,
       });
       extraneous.forEach(i => deletePresence({ id: i }));

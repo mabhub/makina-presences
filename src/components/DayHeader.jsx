@@ -10,6 +10,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { useParams } from 'react-router-dom';
 import { sameLowC } from '../helpers';
+import usePlan from '../hooks/usePlan';
 import usePresences from '../hooks/usePresences';
 import { Days, Months } from '../settings';
 import SpotDialog from './SpotDialog';
@@ -122,6 +123,9 @@ const DayHeader = ({
   const dateObj = dayjs(date);
   const { day = dayjs().format('YYYY-MM-DD') } = useParams();
 
+  const currentPlan = usePlan({ Name: place });
+  const currentPlanUuid = currentPlan?.uuid;
+
   const enableParking = isEnable(FF_PARKING);
 
   const parkingPresences = presences
@@ -187,6 +191,7 @@ const DayHeader = ({
         day: date,
         tri,
         plan: place,
+        presencePlan: currentPlanUuid ? [currentPlanUuid] : undefined,
         spot: parkingAvailable[0],
         period: 'fullday',
       });
@@ -206,7 +211,14 @@ const DayHeader = ({
       [args.length - 1]: periodPref,
     } = args;
     if (spotId) {
-      setPresence({ day: date, tri, plan: place, spot: spotId, period: periodPref });
+      setPresence({
+        day: date,
+        tri,
+        plan: place,
+        presencePlan: currentPlanUuid ? [currentPlanUuid] : undefined,
+        spot: spotId,
+        period: periodPref,
+      });
       // === TO ADD AFTER UPGRADING TO REACT 18 ===
       // toast.success(`Inscription au poste ${spotId}`, {
       //   description:
@@ -214,11 +226,18 @@ const DayHeader = ({
       // });
     }
     if (parkingSlot && !isParkingPresent) {
-      setPresence({ day: date, tri, plan: place, spot: parkingSlot, period: periodPref });
+      setPresence({
+        day: date,
+        tri,
+        plan: place,
+        presencePlan: currentPlanUuid ? [currentPlanUuid] : undefined,
+        spot: parkingSlot,
+        period: periodPref,
+      });
     }
     setDialogOpen(false);
     setFastOpen(false);
-  }, [date, place, setPresence, tri, isParkingPresent]);
+  }, [date, place, currentPlanUuid, setPresence, tri, isParkingPresent]);
 
   const isConflict = Boolean(
     presences
