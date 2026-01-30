@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import reactPlugin from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 // import viteESLint from '@ehutch79/vite-eslint';
@@ -8,17 +9,20 @@ dotenv.config({ path: '.env.local' });
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    reactPlugin({
-      babel: {
-        plugins: [
-          'react-component-data-attribute',
-        ],
-      },
-    }),
-    // viteESLint(),
-    nodePolyfills({ include: ['url'] }),
-  ],
+  plugins: [reactPlugin({
+    babel: {
+      plugins: [
+        'react-component-data-attribute',
+      ],
+    },
+  }),
+  // viteESLint(),
+  nodePolyfills({ include: ['url'] }), sentryVitePlugin({
+    org: 'makinacorpus',
+    project: 'makina-presences',
+    url: 'https://sentry.makina-corpus.net',
+  })],
+
   server: {
     proxy: {
       '^/.netlify': {
@@ -26,5 +30,9 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+
+  build: {
+    sourcemap: true,
   },
 });

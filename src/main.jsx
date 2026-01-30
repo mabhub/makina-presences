@@ -1,8 +1,29 @@
 import React from 'react';
+import * as Sentry from '@sentry/react';
 import { createRoot } from 'react-dom/client';
-
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
+Sentry.init({
+  dsn: 'https://bf4e46b4158993bcf8c6908453850b89@sentry.makina-corpus.net/94',
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  // Tracing
+  // tracesSampleRate: 1.0, //  Capture 100% of the transactions
+  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+  // tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
+  // Session Replay
+  // This sets the sample rate at 10%.
+  // You may want to change it to 100% while in development
+  // and then sample at a lower rate in production.
+  // replaysSessionSampleRate: 0.1,
+  // If you're not already sampling the entire session,
+  // change the sample rate to 100% when sampling sessions where errors occur.
+  // replaysOnErrorSampleRate: 1.0,
+});
+
+/* eslint-disable import/first */
 import {
   StyledEngineProvider,
 } from '@mui/material/styles';
@@ -16,6 +37,7 @@ import PresencePage from './components/PresencePage';
 import ExpiredPrefPage, { expiredPref } from './components/ExpiredPrefPage';
 import TTCount from './components/TTCount';
 import DarkThemeProvider from './DarkThemeProvider';
+/* eslint-enable import/first */
 
 const queryClient = new QueryClient();
 
