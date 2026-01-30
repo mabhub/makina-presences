@@ -81,9 +81,14 @@ const Plan = ({ edit }) => {
   const plans = usePlans();
   const { place } = useParams();
 
-  const spots = useSpots(place);
-  const { plan: [plan] = [] } = plans.find(({ Name }) => Name === place) || {};
+  const {
+    plan: [plan] = [], // Get the plan image matching the place param
+    uuid: planUuid, // Get plan UUID for fetching spots
+  } = plans.find(({ Name, uuid }) => Name === place) || {};
+
+  const spots = useSpots(planUuid);
   const additionals = useAdditionals(place);
+
   const { presences } = usePresences(place);
 
   // Choose wrapper/component depending on edit mode
