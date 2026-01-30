@@ -124,13 +124,13 @@ const PresenceForm = ({ className, ...props }) => {
               >
                 {plans
                   .filter(({ Brouillon }) => !Brouillon)
-                  .map(({ Name, Brouillon }) => (
+                  .map(({ Name, Label, Brouillon }) => (
                     <ToggleButton
                       key={Name}
                       value={Name}
                       sx={Brouillon ? draftPlaceSx : {}}
                     >
-                      {Name}
+                      {Label || Name}
                     </ToggleButton>
                   ))}
               </ToggleButtonGroup>

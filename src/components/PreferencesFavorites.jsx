@@ -60,7 +60,7 @@ const PreferencesFavorites = () => {
 
   const sortedFavorite = plans
     .map(plan => ({
-      agency: plan.Name,
+      agency: plan.Label || plan.Name,
       favs: favorites.filter(({ place: favPlace }) => favPlace === plan.Name),
     }));
 
@@ -164,8 +164,8 @@ const PreferencesFavorites = () => {
                   >
                     {agencies
                       .filter(({ Brouillon }) => !Brouillon)
-                      .map(({ Name }) => (
-                        <MenuItem key={Name} value={Name}>{Name}</MenuItem>
+                      .map(({ Name, Label }) => (
+                        <MenuItem key={Name} value={Name}>{Label || Name}</MenuItem>
                       ))}
                   </Select>
                 </FormControl>

@@ -197,6 +197,7 @@ const Plan = ({ edit }) => {
               <SpotButton
                 key={spot.Identifiant}
                 spot={spot}
+                edit={edit}
                 onConflict={handleConflict}
               />
             ))}

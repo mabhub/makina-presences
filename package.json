@@ -7,7 +7,7 @@
     "build": "VITE_PROJECT_VERSION=`git describe` vite build",
     "lint": "oxlint",
     "serve": "vite preview",
-    "start": "vite",
+    "start": "ntl dev",
     "version": "git changelog -n -t $npm_package_version && git add CHANGELOG.md",
     "test": "vitest --coverage.enabled=true"
   },

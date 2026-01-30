@@ -228,11 +228,11 @@ const PresencePage = () => {
                   textColor="primary"
                 >
                   {plans
-                    .map(({ Name, Brouillon }) => (
+                    .map(({ Name, Label, Brouillon }) => (
                       <Tab
                         key={Name}
                         value={Name}
-                        label={Name}
+                        label={Label || Name}
                         className={classes.tab}
                         sx={Brouillon ? getDraftTabStyle(Name) : {}}
                       />

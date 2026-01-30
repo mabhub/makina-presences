@@ -9,6 +9,12 @@ import { snap } from '../helpers';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
+const qs = [
+  '?',
+  'user_field_names=true',
+  'size=200',
+].join('&');
+
 /**
  * Spot interactions hook
  * @param {Object} spot - Spot data
@@ -17,6 +23,7 @@ const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
  */
 const useSpotInteractions = (spot, edit) => {
   const queryClient = useQueryClient();
+  const queryKey = ['table', Number(spotsTableId), qs];
 
   // Drag & drop state
   const [movingSpot, setMovingSpot] = useState();
@@ -35,27 +42,53 @@ const useSpotInteractions = (spot, edit) => {
   const handleDragEnd = useCallback(async ({ screenX: x2, screenY: y2 }) => {
     if (!movingSpot || !edit) { return; }
 
-    const { s, from: [x1, y1] = [] } = movingSpot;
+    const { spot: s, from: [x1, y1] = [] } = movingSpot;
     const deltas = { x: x2 - x1, y: y2 - y1 };
 
     setMovingSpot();
 
+    // Calcul des nouvelles coordonnées
+    const newX = snap(deltas.x + Number(s.x));
+    const newY = snap(deltas.y + Number(s.y));
+
+    // Optimistic update - utilise la même clé que useTable
+    const previousData = queryClient.getQueryData(queryKey);
+
+    queryClient.setQueryData(queryKey, old => {
+      if (!old?.results) return old;
+      return {
+        ...old,
+        results: old.results.map(item =>
+          item.id === spot.id
+            ? { ...item, x: newX, y: newY }
+            : item,
+        ),
+      };
+    });
+
     const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
-    await fetch(
-      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
-      {
-        method: 'PATCH',
-        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          x: snap(deltas.x + Number(s.x)),
-          y: snap(deltas.y + Number(s.y)),
-        }),
-      },
-    );
+    try {
+      await fetch(
+        `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            x: newX,
+            y: newY,
+          }),
+        },
+      );
 
-    queryClient.invalidateQueries([spotsTableId]);
-  }, [movingSpot, edit, spot.id, queryClient]);
+      queryClient.invalidateQueries({ queryKey: ['table', Number(spotsTableId)] });
+    } catch (error) {
+      // Rollback en cas d'erreur
+      queryClient.setQueryData(queryKey, previousData);
+      // eslint-disable-next-line no-console
+      console.error('Failed to update spot position:', error);
+    }
+  }, [movingSpot, edit, spot.id, queryClient, queryKey]);
 
   // Mouse interaction handlers
   const handleMouseEnter = useCallback(() => setIsHover(true), []);

@@ -254,11 +254,11 @@ const SpotDialog = ({
           centered
           value={selectedPlace}
         >
-          {plans.map(({ Name, Brouillon }) => (
+          {plans.map(({ Name, Label, Brouillon }) => (
             <Tab
               key={Name}
               value={Name}
-              label={Name}
+              label={Label || Name}
               sx={Brouillon ? { display: 'none' } : { textTransform: 'none' }}
             />
           ))}
