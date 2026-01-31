@@ -23,6 +23,21 @@ const bmHeaders = {
   'X-BM-ApiKey': process.env.BM_APIKEY,
 };
 
+/**
+ * Génère la plage de dates pour l'année calendaire en cours au format ISO 8601.
+ * Utilise UTC pour éviter les problèmes de fuseau horaire aux limites d'année.
+ * @returns {{ dateMin: { precision: string, iso8601: string }, dateMax: { precision: string, iso8601: string } }}
+ */
+const getCurrentYearDateRange = () => {
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+
+  return {
+    dateMin: { precision: 'Date', iso8601: `${currentYear}-01-01` },
+    dateMax: { precision: 'Date', iso8601: `${currentYear}-12-31` },
+  };
+};
+
 const getTTO = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/i));
   return validResults.map(({ value: { main } }) => {
@@ -135,8 +150,7 @@ exports.handler = async () => {
           containers: [`calendar:Default:${uid}`],
           eventQuery: {
             query: 'TTO || TTR',
-            dateMin: { precision: 'Date', iso8601: '2025-01-01' },
-            dateMax: { precision: 'Date', iso8601: '2025-12-31' },
+            ...getCurrentYearDateRange(),
             size: 100,
           },
         }),
