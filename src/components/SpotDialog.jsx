@@ -30,7 +30,7 @@ import { baseFlags, isEnable } from '../feature_flag_service';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
-import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from '../constants/periods';
+import { AFTERNOON_PERIOD, FULLDAY_PERIOD, MORNING_PERIOD } from '../hooks/constants/periods';
 
 const useStyles = makeStyles(theme => ({
   buttonGroup: {

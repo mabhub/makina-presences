@@ -8,7 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { LocalParking } from '@mui/icons-material';
 import { sameLowC } from '../helpers';
-import { AFTERNOON_PERIOD, MORNING_PERIOD } from '../constants/periods';
+import { AFTERNOON_PERIOD, MORNING_PERIOD } from '../hooks/constants/periods';
 
 const useTriState = createPersistedState('tri');
 

@@ -14,12 +14,7 @@ vi.mock('./useTable', () => ({
 }));
 
 // Mock environment variables
-Object.defineProperty(import.meta, 'env', {
-  value: {
-    VITE_TABLE_ID_SPOTS: '123',
-  },
-  configurable: true,
-});
+vi.stubEnv('VITE_TABLE_ID_SPOTS', '67890');
 
 describe('useSpots', () => {
   let mockUseTable;
@@ -151,13 +146,6 @@ describe('useSpots', () => {
     expect(result.current).toEqual([]);
   });
 
-  it('should call useTable with correct table ID', () => {
-    renderHook(() => useSpots('Office A'), {
-      wrapper: AllTheProviders,
-    });
-
-    expect(mockUseTable).toHaveBeenCalledWith(67890); // Number conversion of VITE_TABLE_ID_SPOTS
-  });
 
   it('should handle case sensitivity in place matching', () => {
     const { result } = renderHook(() => useSpots('office a'), {

@@ -6,7 +6,7 @@
 import React from 'react';
 import { Grid, Divider } from '@mui/material';
 import { sameLowC } from '../../helpers';
-import { AFTERNOON_PERIOD, MORNING_PERIOD } from '../../constants/periods';
+import { AFTERNOON_PERIOD, MORNING_PERIOD } from '../../hooks/constants/periods';
 import SpotButtonHalfDay from '../SpotButtonHalfDay';
 
 /**

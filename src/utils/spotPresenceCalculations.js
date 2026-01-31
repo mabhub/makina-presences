@@ -4,7 +4,7 @@
  */
 
 import { sameLowC } from '../helpers';
-import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/periods';
+import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../hooks/constants/periods';
 
 /**
  * Filter spot presences by period

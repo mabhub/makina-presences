@@ -7,7 +7,7 @@ import { alpha, lighten } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC } from '../helpers';
-import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/periods';
+import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../hooks/constants/periods';
 import useSpotPresenceLogic from '../hooks/useSpotPresenceLogic';
 import useSpotInteractions from '../hooks/useSpotInteractions';
 import ContextualMenu from './ContextualMenu';

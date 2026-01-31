@@ -12,7 +12,7 @@ import { sameLowC } from '../helpers';
 import usePresences from './usePresences';
 import usePlan from './usePlan';
 import useSpots from './useSpots';
-import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../constants/periods';
+import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from './constants/periods';
 import {
   getPresencesByPeriod,
   getCurrentTriPeriod,
