@@ -1,26 +1,44 @@
 /* eslint-disable no-restricted-syntax */
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
-const fetch = async (...args) => {
+const defaultFetch = async (...args) => {
   const { default: f } = await import('node-fetch');
   return f(...args);
 };
 
-const fetchJson = async (...args) => {
-  const raw = await fetch(...args);
+/**
+ * Crée une fonction fetchJson à partir d'une fonction fetch donnée
+ * @param {Function} fetchFn - La fonction fetch à utiliser
+ * @returns {Function} Une fonction qui fait un fetch et parse le JSON
+ */
+const createFetchJson = (fetchFn) => async (...args) => {
+  const raw = await fetchFn(...args);
   return raw.json();
 };
 
-const baserowTablePath = process.env.TT_BASEROW_TABLE;
-const baserowHeaders = {
-  Authorization: `Token ${process.env.TT_BASEROW_TOKEN}`,
-  'Content-Type': 'application/json',
-};
+/**
+ * Retourne les dépendances par défaut pour le handler.
+ * Permet l'injection de dépendances pour les tests.
+ * @returns {Object} Les dépendances (config, fonctions fetch, etc.)
+ */
+const getDefaultDeps = () => {
+  const fetch = defaultFetch;
+  const fetchJson = createFetchJson(fetch);
 
-const bmApiPath = process.env.BM_APIPATH;
-const bmDomain = process.env.BM_DOMAIN;
-const bmHeaders = {
-  'X-BM-ApiKey': process.env.BM_APIKEY,
+  return {
+    fetch,
+    fetchJson,
+    baserowTablePath: process.env.TT_BASEROW_TABLE,
+    baserowHeaders: {
+      Authorization: `Token ${process.env.TT_BASEROW_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    bmApiPath: process.env.BM_APIPATH,
+    bmDomain: process.env.BM_DOMAIN,
+    bmHeaders: {
+      'X-BM-ApiKey': process.env.BM_APIKEY,
+    },
+  };
 };
 
 /**
@@ -38,6 +56,9 @@ const getCurrentYearDateRange = () => {
   };
 };
 
+// Export functions for testing
+exports.getCurrentYearDateRange = getCurrentYearDateRange;
+
 const getTTO = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/i));
   return validResults.map(({ value: { main } }) => {
@@ -53,6 +74,9 @@ const getTTO = results => {
     };
   });
 };
+
+// Export functions for testing
+exports.getTTO = getTTO;
 
 const getTTR = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTR.*/i));
@@ -88,7 +112,21 @@ const getTTR = results => {
     .sort();
 };
 
-exports.handler = async () => {
+// Export functions for testing
+exports.getTTR = getTTR;
+exports.getDefaultDeps = getDefaultDeps;
+
+exports.handler = async (deps = getDefaultDeps()) => {
+  const {
+    fetch,
+    fetchJson,
+    baserowTablePath,
+    baserowHeaders,
+    bmApiPath,
+    bmDomain,
+    bmHeaders,
+  } = deps;
+
   const { results: cacheTable } = await fetchJson(
     `${baserowTablePath}?user_field_names=true&size=200`,
     { headers: baserowHeaders },
