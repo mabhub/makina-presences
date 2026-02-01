@@ -184,7 +184,7 @@ const SpotDialog = ({
       return setSelectedValue('');
     }
 
-    return null;
+    return;
   }, [defaultFavoriteSpot, enableFavorite, periodPref, isSelectedValueReserved]);
 
   const handleKeyDown = event => {

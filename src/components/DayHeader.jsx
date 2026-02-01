@@ -165,15 +165,13 @@ const DayHeader = ({
       presences
         .filter(presence => sameLowC(presence.tri, tri))
         .forEach(presence => setPresence({ ...presence, spot: null }));
-      return null;
+      return;
     }
     // May create presence
     if (event.ctrlKey || event.metaKey) {
       setFastOpen(true);
     }
     setDialogOpen(true);
-
-    return null;
   };
 
   const [removeParkingIcon, setRemoveParkingIcon] = useState(false);
