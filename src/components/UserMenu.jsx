@@ -8,6 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import PreferencesDisplay from './PreferencesDisplay';
 import PreferencesTri from './PreferencesTri';
 import PreferencesFavorites from './PreferencesFavorites';
+import VersionDisplay from './VersionDisplay';
 
 const useTriState = createPersistedState('tri');
 
@@ -71,9 +72,10 @@ const UserMenu = () => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <Typography style={{ paddingLeft: 10, paddingTop: 10 }} gutterBottom variant="h6">
+        <Typography style={{ paddingLeft: 10, paddingTop: 10 }} variant="h6">
           Réglages
         </Typography>
+        <VersionDisplay />
         <PreferencesDisplay />
         <PreferencesFavorites />
         <PreferencesTri />

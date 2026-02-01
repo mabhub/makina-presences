@@ -24,6 +24,13 @@ Sentry.init({
 });
 
 /* eslint-disable import/first */
+import { initializeGlobalVersion } from './version';
+/* eslint-enable import/first */
+
+// Initialiser la version globale
+initializeGlobalVersion();
+
+/* eslint-disable import/first */
 import {
   StyledEngineProvider,
 } from '@mui/material/styles';
