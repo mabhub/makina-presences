@@ -196,6 +196,10 @@ const SpotDialog = ({
     if (event.keyCode === 27) {
       handleCancel();
     }
+    if (event.key === 'Enter' && selectedValue) {
+      event.preventDefault();
+      handleOk();
+    }
   };
 
   const noParkingAvailable = cumulativeSpot
