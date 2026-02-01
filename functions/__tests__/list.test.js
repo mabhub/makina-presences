@@ -26,7 +26,7 @@ describe('list.js handler', () => {
     mockFetch = nodeFetch.default;
 
     // Import handler after mocking
-    const listModule = await import('./list.js');
+    const listModule = await import('../list.js');
     handler = listModule.handler;
   });
 

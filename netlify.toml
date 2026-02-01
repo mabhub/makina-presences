@@ -1,0 +1,13 @@
+# Netlify configuration for Makina Presences
+# Documentation: https://docs.netlify.com/build/configure-builds/file-based-configuration/
+
+[functions]
+  # Directory containing serverless functions
+  directory = "functions/"
+
+  # Use esbuild bundler for faster and optimized deployments
+  # Documentation: https://www.netlify.com/blog/2021/04/02/modern-faster-netlify-functions/
+  node_bundler = "esbuild"
+
+# Note: Test files (*.test.js, *.spec.js) are excluded from deployment via .netlifyignore
+# This prevents Netlify from attempting to deploy test files as lambda functions

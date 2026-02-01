@@ -20,7 +20,7 @@ import {
   getCurrentYearDateRange,
   getTTO,
   getTTR,
-} from './update';
+} from '../update';
 
 describe('getCurrentYearDateRange', () => {
   it('should return date range for current year', () => {
@@ -399,7 +399,7 @@ describe('handler', () => {
   let handler;
 
   beforeEach(async () => {
-    const updateModule = await import('./update.js');
+    const updateModule = await import('../update.js');
     handler = updateModule.handler;
   });
 
