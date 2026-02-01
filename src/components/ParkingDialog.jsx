@@ -23,12 +23,23 @@ const ParkingDialog = ({
     onClose(value);
   };
 
+  const handleKeyDown = event => {
+    if (event.keyCode === 27) {
+      onSubmit(false);
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onSubmit(true);
+    }
+  };
+
   const textConfirm = 'Vous êtes toujours inscrit sur une ou plusieurs places de parking. Voulez-vous aussi vous désinscrire de celles-ci ?';
 
   return (
     <Dialog
       maxWidth="xs"
       open={open}
+      onKeyDown={handleKeyDown}
     >
       <DialogTitle>
         Se désinscrire aussi du parking ?
