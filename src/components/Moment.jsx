@@ -6,6 +6,7 @@ import { alpha } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { useParams } from 'react-router-dom';
+import usePlan from '../hooks/usePlan';
 import useSpots from '../hooks/useSpots';
 import TriPresence from './TriPresence';
 import { deduplicate } from '../helpers';
@@ -45,7 +46,8 @@ const Moment = ({
   const classes = useStyles();
   const { place } = useParams();
 
-  const spots = useSpots(place);
+  const currentPlan = usePlan({ Name: place });
+  const spots = useSpots(currentPlan?.uuid);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
   const isCumulativeSpot = React.useCallback(
     identifiant => cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(identifiant),

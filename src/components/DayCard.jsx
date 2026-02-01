@@ -11,6 +11,7 @@ import DayCardContainer from './DayCardContainer';
 import useFavoriteDay from '../hooks/useFavoriteDay';
 import useTodayPresences from '../hooks/useTodayPresences';
 import useCurrentUserPresence from '../hooks/useCurrentUserPresence';
+import usePlan from '../hooks/usePlan';
 import useSpots from '../hooks/useSpots';
 import useHolidays from '../hooks/useHolidays';
 import usePresences from '../hooks/usePresences';
@@ -55,7 +56,8 @@ const DayCard = ({
   const [showPastDays] = usePastDays();
   const { place, day = dayjs().format('YYYY-MM-DD') } = useParams();
 
-  const cumulativeSpot = useSpots(place).filter(({ Cumul }) => Cumul);
+  const currentPlan = usePlan({ Name: place });
+  const cumulativeSpot = useSpots(currentPlan?.uuid).filter(({ Cumul }) => Cumul);
   const today = dayjs(dayjs().format('YYYY-MM-DD'));
   const { presences } = usePresences(place);
   const holidays = useHolidays();

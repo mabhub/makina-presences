@@ -58,6 +58,9 @@ const PreferencesFavorites = () => {
   const [agencyPref, setAgencyPref] = useAgencyPref();
   const [selectedAgency, setSelectedAgency] = useState(agencyPref || agencies[0].Name);
 
+  // Use the first available plan if place is not defined in route params
+  const defaultPlace = place || plans[0]?.Name;
+
   const sortedFavorite = plans
     .map(plan => ({
       agency: plan.Label || plan.Name,
@@ -209,7 +212,7 @@ const PreferencesFavorites = () => {
         <SpotDialog
           open={dialogOpen}
           onClose={handleDialogClose}
-          place={place}
+          place={defaultPlace}
           date={null}
         />
       )}

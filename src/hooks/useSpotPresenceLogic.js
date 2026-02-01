@@ -37,7 +37,7 @@ const useSpotPresenceLogic = (spot, onConflict) => {
   const currentPlan = usePlan({ Name: place });
   const currentPlanUuid = currentPlan?.uuid;
 
-  const spots = useSpots(place);
+  const spots = useSpots(currentPlanUuid);
   const cumulativeSpots = spots.filter(({ Cumul }) => Cumul);
 
   const isCumulativeSpot = useCallback(

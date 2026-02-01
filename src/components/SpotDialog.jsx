@@ -27,6 +27,7 @@ import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { baseFlags, isEnable } from '../feature_flag_service';
+import usePlan from '../hooks/usePlan';
 import usePlans from '../hooks/usePlans';
 import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
@@ -109,7 +110,11 @@ const SpotDialog = ({
       [spot]: tri,
     }), {});
 
-  const spots = useSpots(selectedPlace)
+  // Get plan UUID for fetching spots
+  const selectedPlan = usePlan({ Name: selectedPlace });
+  const selectedPlanUuid = selectedPlan?.uuid;
+
+  const spots = useSpots(selectedPlanUuid)
     .sort(({ Identifiant: a }, { Identifiant: b }) => a.localeCompare(b));
   const favoriteName = favorites
     .filter(({ place: spotPLace }) => spotPLace === selectedPlace)
