@@ -102,6 +102,7 @@ const useSpotInteractions = (spot, edit) => {
 
   const closeContextualMenu = useCallback(() => {
     setContextualMenu(false);
+    setAnchor(null);
   }, []);
 
   return {

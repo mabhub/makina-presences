@@ -126,12 +126,37 @@ describe('useSpotInteractions', () => {
         result.current.openContextualMenu(mockEvent);
       });
       expect(result.current.contextualMenu).toBe(true);
+      expect(result.current.anchor).not.toBeNull();
 
       act(() => {
         result.current.closeContextualMenu();
       });
 
       expect(result.current.contextualMenu).toBe(false);
+      expect(result.current.anchor).toBeNull();
+    });
+
+    it('should reset anchor when closing contextual menu', () => {
+      const { result } = renderHook(
+        () => useSpotInteractions(mockSpot, false),
+        { wrapper: AllTheProviders },
+      );
+
+      const mockTarget = document.createElement('div');
+      const mockEvent = { target: mockTarget };
+
+      act(() => {
+        result.current.openContextualMenu(mockEvent);
+      });
+      expect(result.current.contextualMenu).toBe(true);
+      expect(result.current.anchor).toBe(mockTarget);
+
+      act(() => {
+        result.current.closeContextualMenu();
+      });
+
+      expect(result.current.contextualMenu).toBe(false);
+      expect(result.current.anchor).toBeNull();
     });
   });
 

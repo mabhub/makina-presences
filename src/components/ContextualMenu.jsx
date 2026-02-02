@@ -1,5 +1,5 @@
 import { Divider, Menu, MenuItem, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles(theme => ({
@@ -22,6 +22,11 @@ const ContextualMenu = ({ anchor, title, items, onClose }) => {
   const classes = useStyles();
 
   const [anchorEl, setAnchorEl] = useState(anchor);
+
+  // Synchronize anchorEl with anchor prop changes
+  useEffect(() => {
+    setAnchorEl(anchor);
+  }, [anchor]);
 
   const handleClose = () => {
     onClose(false);

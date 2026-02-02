@@ -209,7 +209,7 @@ const SpotButton = ({
 
             if (event.ctrlKey) return afternoonOnly();
 
-            openContextualMenu(event.target);
+            openContextualMenu(event);
             return null;
           }}
         >
