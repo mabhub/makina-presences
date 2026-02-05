@@ -116,7 +116,11 @@ const getTTR = results => {
 exports.getTTR = getTTR;
 exports.getDefaultDeps = getDefaultDeps;
 
-exports.handler = async (deps = getDefaultDeps()) => {
+exports.handler = async (event, context) => {
+  // Support both Netlify invocation (event, context) and test invocation (deps)
+  // If event looks like deps (has fetchJson), use it as deps
+  const deps = (event && typeof event === 'object' && 'fetchJson' in event) ? event : getDefaultDeps();
+
   const {
     fetch,
     fetchJson,
