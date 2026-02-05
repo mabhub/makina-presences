@@ -7,11 +7,7 @@ import {
   afterEach,
 } from 'vitest';
 
-// Mock node-fetch and p-limit before importing
-vi.mock('node-fetch', () => ({
-  default: vi.fn(),
-}));
-
+// Mock p-limit before importing
 vi.mock('p-limit', () => ({
   default: vi.fn(() => (fn) => fn()),
 }));
@@ -20,7 +16,8 @@ import {
   getCurrentYearDateRange,
   getTTO,
   getTTR,
-} from '../update';
+  handleUpdate,
+} from '../update.mjs';
 
 describe('getCurrentYearDateRange', () => {
   it('should return date range for current year', () => {
@@ -163,8 +160,8 @@ describe('getTTO', () => {
         displayName: 'TTO - Event 1',
         value: {
           main: {
-            dtstart: { iso8601: '2026-01-01T00:00:00Z' },
-            dtend: { iso8601: '2026-01-04T00:00:00Z' },
+            dtstart: { iso8601: '2026-02-01T00:00:00Z' },
+            dtend: { iso8601: '2026-02-03T00:00:00Z' },
           },
         },
       },
@@ -172,8 +169,8 @@ describe('getTTO', () => {
         displayName: 'TTO - Event 2',
         value: {
           main: {
-            dtstart: { iso8601: '2026-02-01T00:00:00Z' },
-            dtend: { iso8601: '2026-02-06T00:00:00Z' },
+            dtstart: { iso8601: '2026-03-01T00:00:00Z' },
+            dtend: { iso8601: '2026-03-06T00:00:00Z' },
           },
         },
       },
@@ -182,7 +179,7 @@ describe('getTTO', () => {
     const result = getTTO(mockResults);
 
     expect(result).toHaveLength(2);
-    expect(result[0].days).toBe(3);
+    expect(result[0].days).toBe(2);
     expect(result[1].days).toBe(5);
   });
 
@@ -192,9 +189,9 @@ describe('getTTO', () => {
         displayName: 'TTO - Fractional',
         value: {
           main: {
-            // 1.5 days
-            dtstart: { iso8601: '2026-06-01T00:00:00Z' },
-            dtend: { iso8601: '2026-06-02T12:00:00Z' },
+            // 1.5 days difference
+            dtstart: { iso8601: '2026-02-01T00:00:00Z' },
+            dtend: { iso8601: '2026-02-02T12:00:00Z' },
           },
         },
       },
@@ -202,14 +199,15 @@ describe('getTTO', () => {
 
     const result = getTTO(mockResults);
 
-    expect(result[0].days).toBe(2); // Math.ceil(1.5) = 2
+    // Should ceil to 2 days
+    expect(result[0].days).toBe(2);
   });
 });
 
 describe('getTTR', () => {
   beforeEach(() => {
-    // Set a known date for testing: 2026-06-15
-    vi.setSystemTime(new Date('2026-06-15T12:00:00Z'));
+    // Set a fixed date for consistent testing
+    vi.setSystemTime(new Date('2026-02-15T12:00:00Z'));
   });
 
   afterEach(() => {
@@ -219,13 +217,13 @@ describe('getTTR', () => {
   it('should filter TTR events and return day indices', () => {
     const mockResults = [
       {
-        displayName: 'TTR - Weekly',
+        displayName: 'TTR - Work from home',
         value: {
           main: {
             dtstart: { iso8601: '2026-01-01T00:00:00Z' },
             dtend: { iso8601: '2026-01-02T00:00:00Z' },
             rrule: {
-              byDay: [{ day: 'MO' }, { day: 'WE' }],
+              byDay: [{ day: 'MO' }],
               until: { iso8601: '2026-12-31T00:00:00Z' },
             },
           },
@@ -235,9 +233,7 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    // MO=0, WE=2
-    expect(result).toContain(0); // Monday
-    expect(result).toContain(2); // Wednesday
+    expect(result).toContain(0); // Monday index
   });
 
   it('should exclude events without rrule', () => {
@@ -261,14 +257,14 @@ describe('getTTR', () => {
   it('should exclude events that have not started yet', () => {
     const mockResults = [
       {
-        displayName: 'TTR - Future',
+        displayName: 'TTR - Future event',
         value: {
           main: {
-            dtstart: { iso8601: '2026-12-01T00:00:00Z' }, // After mock date
+            dtstart: { iso8601: '2026-12-01T00:00:00Z' }, // In the future
             dtend: { iso8601: '2026-12-02T00:00:00Z' },
             rrule: {
               byDay: [{ day: 'MO' }],
-              until: { iso8601: '2026-12-31T00:00:00Z' },
+              until: { iso8601: '2027-12-31T00:00:00Z' },
             },
           },
         },
@@ -283,14 +279,14 @@ describe('getTTR', () => {
   it('should exclude events that have already ended', () => {
     const mockResults = [
       {
-        displayName: 'TTR - Past',
+        displayName: 'TTR - Past event',
         value: {
           main: {
             dtstart: { iso8601: '2025-01-01T00:00:00Z' },
             dtend: { iso8601: '2025-01-02T00:00:00Z' },
             rrule: {
               byDay: [{ day: 'MO' }],
-              until: { iso8601: '2025-12-31T00:00:00Z' }, // Before mock date
+              until: { iso8601: '2025-12-31T00:00:00Z' }, // Already ended
             },
           },
         },
@@ -305,14 +301,14 @@ describe('getTTR', () => {
   it('should handle recurring events without end date', () => {
     const mockResults = [
       {
-        displayName: 'TTR - No end',
+        displayName: 'TTR - No end date',
         value: {
           main: {
             dtstart: { iso8601: '2026-01-01T00:00:00Z' },
             dtend: { iso8601: '2026-01-02T00:00:00Z' },
             rrule: {
-              byDay: [{ day: 'FR' }],
-              // No until field - recurring indefinitely
+              byDay: [{ day: 'TU' }],
+              // No until property
             },
           },
         },
@@ -321,20 +317,19 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    // FR=4 (Friday)
-    expect(result).toContain(4);
+    expect(result).toContain(1); // Tuesday index
   });
 
   it('should handle multi-day recurring events', () => {
     const mockResults = [
       {
-        displayName: 'TTR - Multi-day',
+        displayName: 'TTR - Two days',
         value: {
           main: {
-            dtstart: { iso8601: '2026-01-01T00:00:00Z' }, // Thursday
+            dtstart: { iso8601: '2026-01-01T00:00:00Z' },
             dtend: { iso8601: '2026-01-03T00:00:00Z' }, // 2 days
             rrule: {
-              byDay: [{ day: 'TH' }], // Start on Thursday
+              byDay: [{ day: 'MO' }],
               until: { iso8601: '2026-12-31T00:00:00Z' },
             },
           },
@@ -344,15 +339,15 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    // TH=3, and the event lasts 2 days, so TH(3) and FR(4)
-    expect(result).toContain(3); // Thursday
-    expect(result).toContain(4); // Friday
+    // Should include Monday (0) and Tuesday (1)
+    expect(result).toContain(0);
+    expect(result).toContain(1);
   });
 
   it('should return sorted day indices', () => {
     const mockResults = [
       {
-        displayName: 'TTR - Unsorted',
+        displayName: 'TTR - Multiple days',
         value: {
           main: {
             dtstart: { iso8601: '2026-01-01T00:00:00Z' },
@@ -368,7 +363,7 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    // Should be sorted: MO(0), WE(2), FR(4)
+    // Should be sorted: [0 (MO), 2 (WE), 4 (FR)]
     expect(result).toEqual([0, 2, 4]);
   });
 
@@ -395,14 +390,7 @@ describe('getTTR', () => {
   });
 });
 
-describe('handler', () => {
-  let handler;
-
-  beforeEach(async () => {
-    const updateModule = await import('../update.js');
-    handler = updateModule.handler;
-  });
-
+describe('handleUpdate', () => {
   const createMockDeps = (mockFetch) => ({
     fetch: mockFetch,
     fetchJson: vi.fn(async (...args) => {
@@ -446,7 +434,7 @@ describe('handler', () => {
       json: async () => ({ id: 2 }),
     });
 
-    await handler(deps);
+    await handleUpdate(deps);
 
     // Verify POST was called to create new user
     expect(mockFetch).toHaveBeenCalledWith(
@@ -499,7 +487,7 @@ describe('handler', () => {
       json: async () => ({}),
     });
 
-    const result = await handler(deps);
+    const response = await handleUpdate(deps);
 
     // Verify PATCH was called to update the record
     expect(mockFetch).toHaveBeenCalledWith(
@@ -509,8 +497,8 @@ describe('handler', () => {
       }),
     );
 
-    expect(result.statusCode).toBe(200);
-    const updates = JSON.parse(result.body);
+    expect(response.status).toBe(200);
+    const updates = JSON.parse(await response.text());
     expect(updates).toContain('abc');
   });
 
@@ -545,13 +533,13 @@ describe('handler', () => {
         },
       ]);
 
-    const result = await handler(deps);
+    const response = await handleUpdate(deps);
 
     // Verify PATCH was NOT called (data unchanged)
     expect(mockFetch).not.toHaveBeenCalled();
 
-    expect(result.statusCode).toBe(200);
-    const updates = JSON.parse(result.body);
+    expect(response.status).toBe(200);
+    const updates = JSON.parse(await response.text());
     expect(updates).toEqual([]);
   });
 
@@ -588,7 +576,7 @@ describe('handler', () => {
       json: async () => ({}),
     });
 
-    await handler(deps);
+    await handleUpdate(deps);
 
     // Verify calendar search was only called once (for enabled user)
     expect(deps.fetchJson).toHaveBeenCalledTimes(3); // cache + allUids + 1 calendar search
@@ -622,7 +610,7 @@ describe('handler', () => {
       json: async () => ({}),
     });
 
-    const result = await handler(deps);
+    const response = await handleUpdate(deps);
 
     // Verify error was logged in the update
     expect(mockFetch).toHaveBeenCalledWith(
@@ -633,7 +621,7 @@ describe('handler', () => {
       }),
     );
 
-    expect(result.statusCode).toBe(200);
+    expect(response.status).toBe(200);
   });
 
   it('should return list of updated user tris', async () => {
@@ -690,10 +678,10 @@ describe('handler', () => {
       json: async () => ({}),
     });
 
-    const result = await handler(deps);
+    const response = await handleUpdate(deps);
 
-    expect(result.statusCode).toBe(200);
-    const updates = JSON.parse(result.body);
+    expect(response.status).toBe(200);
+    const updates = JSON.parse(await response.text());
     expect(updates).toContain('user1');
     expect(updates).toContain('user2');
     expect(updates).toHaveLength(2);
@@ -735,7 +723,7 @@ describe('handler', () => {
       text: async () => 'Internal Server Error',
     });
 
-    await handler(deps);
+    await handleUpdate(deps);
 
     expect(stderrSpy).toHaveBeenCalledWith('Internal Server Error');
 

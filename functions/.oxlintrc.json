@@ -1,0 +1,10 @@
+{
+  "extends": ["../.oxlintrc.json"],
+  "rules": {
+    "arrow-body-style": "off",
+    "import/no-named-export": "off",
+    "no-unused-vars": "off",
+    "require-await": "off",
+    "unicorn/no-anonymous-default-export": "off"
+  }
+}

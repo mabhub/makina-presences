@@ -7,33 +7,30 @@ import {
   afterEach,
 } from 'vitest';
 
-// Mock node-fetch before importing the handler
-vi.mock('node-fetch', () => ({
-  default: vi.fn(),
-}));
+import { handleList } from '../list.mjs';
 
-describe('list.js handler', () => {
-  let handler;
+describe('list.mjs handler', () => {
   let mockFetch;
+  let deps;
 
-  beforeEach(async () => {
-    // Set up environment variables
-    process.env.TT_BASEROW_TABLE = 'https://api.baserow.io/api/database/rows/table/123';
-    process.env.TT_BASEROW_TOKEN = 'test-token-123';
+  beforeEach(() => {
+    // Mock global fetch
+    mockFetch = vi.fn();
+    global.fetch = mockFetch;
 
-    // Get the mocked fetch
-    const nodeFetch = await import('node-fetch');
-    mockFetch = nodeFetch.default;
-
-    // Import handler after mocking
-    const listModule = await import('../list.js');
-    handler = listModule.handler;
+    // Create dependencies for injection
+    deps = {
+      baserowTablePath: 'https://api.baserow.io/api/database/rows/table/123',
+      baserowHeaders: {
+        Authorization: 'Token test-token-123',
+        'Content-Type': 'application/json',
+      },
+    };
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    delete process.env.TT_BASEROW_TABLE;
-    delete process.env.TT_BASEROW_TOKEN;
+    delete global.fetch;
   });
 
   it('should return filtered and transformed records', async () => {
@@ -67,11 +64,12 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await handler();
+    const response = await handleList(deps);
 
-    expect(result.statusCode).toBe(200);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toBe('application/json');
 
-    const body = JSON.parse(result.body);
+    const body = JSON.parse(await response.text());
     expect(body).toHaveLength(2); // Only enabled records
 
     expect(body[0]).toEqual({
@@ -96,7 +94,7 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    await handler();
+    await handleList(deps);
 
     expect(mockFetch).toHaveBeenCalledWith(
       'https://api.baserow.io/api/database/rows/table/123?&user_field_names=true&include=tri,total,enabled,tto,ttr&size=200',
@@ -126,8 +124,8 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await handler();
-    const body = JSON.parse(result.body);
+    const response = await handleList(deps);
+    const body = JSON.parse(await response.text());
 
     expect(body[0].tto).toEqual([
       { from: '2026-03-15', days: 10 },
@@ -160,8 +158,8 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await handler();
-    const body = JSON.parse(result.body);
+    const response = await handleList(deps);
+    const body = JSON.parse(await response.text());
 
     expect(body).toEqual([]);
   });
@@ -173,11 +171,11 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await handler();
-    const body = JSON.parse(result.body);
+    const response = await handleList(deps);
+    const body = JSON.parse(await response.text());
 
     expect(body).toEqual([]);
-    expect(result.statusCode).toBe(200);
+    expect(response.status).toBe(200);
   });
 
   it('should format response body with pretty print', async () => {
@@ -197,11 +195,12 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await handler();
+    const response = await handleList(deps);
+    const bodyText = await response.text();
 
     // Check that body is formatted with 2-space indentation
-    expect(result.body).toContain('\n');
-    expect(result.body).toContain('  '); // 2-space indentation
+    expect(bodyText).toContain('\n');
+    expect(bodyText).toContain('  '); // 2-space indentation
   });
 
   it('should only include specified fields in output', async () => {
@@ -223,8 +222,8 @@ describe('list.js handler', () => {
       json: () => Promise.resolve(mockResponse),
     });
 
-    const result = await handler();
-    const body = JSON.parse(result.body);
+    const response = await handleList(deps);
+    const body = JSON.parse(await response.text());
 
     expect(body[0]).toEqual({
       tri: 'test',

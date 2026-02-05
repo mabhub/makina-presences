@@ -1,11 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
-const defaultFetch = async (...args) => {
-  const { default: f } = await import('node-fetch');
-  return f(...args);
-};
-
 /**
  * Crée une fonction fetchJson à partir d'une fonction fetch donnée
  * @param {Function} fetchFn - La fonction fetch à utiliser
@@ -22,21 +17,20 @@ const createFetchJson = (fetchFn) => async (...args) => {
  * @returns {Object} Les dépendances (config, fonctions fetch, etc.)
  */
 const getDefaultDeps = () => {
-  const fetch = defaultFetch;
   const fetchJson = createFetchJson(fetch);
 
   return {
     fetch,
     fetchJson,
-    baserowTablePath: process.env.TT_BASEROW_TABLE,
+    baserowTablePath: Netlify.env.get('TT_BASEROW_TABLE'),
     baserowHeaders: {
-      Authorization: `Token ${process.env.TT_BASEROW_TOKEN}`,
+      Authorization: `Token ${Netlify.env.get('TT_BASEROW_TOKEN')}`,
       'Content-Type': 'application/json',
     },
-    bmApiPath: process.env.BM_APIPATH,
-    bmDomain: process.env.BM_DOMAIN,
+    bmApiPath: Netlify.env.get('BM_APIPATH'),
+    bmDomain: Netlify.env.get('BM_DOMAIN'),
     bmHeaders: {
-      'X-BM-ApiKey': process.env.BM_APIKEY,
+      'X-BM-ApiKey': Netlify.env.get('BM_APIKEY'),
     },
   };
 };
@@ -46,7 +40,7 @@ const getDefaultDeps = () => {
  * Utilise UTC pour éviter les problèmes de fuseau horaire aux limites d'année.
  * @returns {{ dateMin: { precision: string, iso8601: string }, dateMax: { precision: string, iso8601: string } }}
  */
-const getCurrentYearDateRange = () => {
+export const getCurrentYearDateRange = () => {
   const now = new Date();
   const currentYear = now.getUTCFullYear();
 
@@ -56,10 +50,7 @@ const getCurrentYearDateRange = () => {
   };
 };
 
-// Export functions for testing
-exports.getCurrentYearDateRange = getCurrentYearDateRange;
-
-const getTTO = results => {
+export const getTTO = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/i));
   return validResults.map(({ value: { main } }) => {
     const start = new Date(main.dtstart.iso8601);
@@ -75,10 +66,7 @@ const getTTO = results => {
   });
 };
 
-// Export functions for testing
-exports.getTTO = getTTO;
-
-const getTTR = results => {
+export const getTTR = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTR.*/i));
 
   return validResults
@@ -112,15 +100,13 @@ const getTTR = results => {
     .sort();
 };
 
-// Export functions for testing
-exports.getTTR = getTTR;
-exports.getDefaultDeps = getDefaultDeps;
-
-exports.handler = async (event, context) => {
-  // Support both Netlify invocation (event, context) and test invocation (deps)
-  // If event looks like deps (has fetchJson), use it as deps
-  const deps = (event && typeof event === 'object' && 'fetchJson' in event) ? event : getDefaultDeps();
-
+/**
+ * Logique principale de mise à jour des TTO/TTR
+ * Export séparé pour permettre l'injection de dépendances dans les tests
+ * @param {Object} deps - Dépendances (fetch, config, etc.)
+ * @returns {Response} Réponse HTTP avec la liste des mises à jour
+ */
+export const handleUpdate = async (deps) => {
   const {
     fetch,
     fetchJson,
@@ -246,8 +232,21 @@ exports.handler = async (event, context) => {
   const pipe = enabledUids.map(({ uid }) => limit(() => processUid(uid)));
   await Promise.all(pipe);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(updates),
-  };
+  return new Response(JSON.stringify(updates), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 };
+
+/**
+ * Handler Netlify Functions (nouvelle API)
+ * @param {Request} req - Requête HTTP entrante
+ * @param {Object} context - Contexte Netlify
+ * @returns {Response} Réponse HTTP
+ */
+export default async (req, context) => {
+  return handleUpdate(getDefaultDeps());
+};
+
+// Export getDefaultDeps pour les tests
+export { getDefaultDeps };

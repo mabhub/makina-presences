@@ -1,0 +1,17 @@
+# Exclude test files from Netlify deployment
+functions/**/*.test.js
+functions/**/*.test.mjs
+functions/**/*.spec.js
+functions/**/*.spec.mjs
+functions/__tests__/
+
+# Exclude coverage reports
+coverage/
+
+# Exclude development dependencies
+node_modules/
+
+# Exclude temporary files
+temp/
+*.tmp
+*.log
