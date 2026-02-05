@@ -1,3 +1,18 @@
+4.4.0 / 2026-02-06
+==================
+
+  * Refactor lambda functions with dependency injection and add comprehensive tests
+  * Replace hardcoded year with dynamic date range calculation
+  * Externalize Sentry DSN to environment variable
+  * Expose application version in UI and global scope
+  * Migrate remaining components to use plan UUID with useSpots
+  * Add keyboard shortcuts to parking confirmation dialog
+  * Add Enter key support to submit spot selection dialog
+  * Fix Netlify Lambda handler signature to support both deployment and testing
+  * Fix Netlify lambda deployment by moving tests to __tests__ subdirectory
+  * Fix spot contextual menu not appearing after refactor
+  * Fix useEffect cleanup errors in calendar components
+
 4.3.0 / 2026-01-31
 ==================
 
