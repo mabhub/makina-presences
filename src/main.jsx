@@ -2,30 +2,32 @@ import React from 'react';
 import * as Sentry from '@sentry/react';
 import { createRoot } from 'react-dom/client';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { getAppVersion, initializeGlobalVersion } from './version';
 
-Sentry.init({
-  dsn: 'https://bf4e46b4158993bcf8c6908453850b89@sentry.makina-corpus.net/94',
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-  ],
-  // Tracing
-  // tracesSampleRate: 1.0, //  Capture 100% of the transactions
-  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-  // tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
-  // Session Replay
-  // This sets the sample rate at 10%.
-  // You may want to change it to 100% while in development
-  // and then sample at a lower rate in production.
-  // replaysSessionSampleRate: 0.1,
-  // If you're not already sampling the entire session,
-  // change the sample rate to 100% when sampling sessions where errors occur.
-  // replaysOnErrorSampleRate: 1.0,
-});
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 
-/* eslint-disable import/first */
-import { initializeGlobalVersion } from './version';
-/* eslint-enable import/first */
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn,
+    release: `presences@${getAppVersion()}`,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    // Tracing
+    // tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+    // tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
+    // Session Replay
+    // This sets the sample rate at 10%.
+    // You may want to change it to 100% while in development
+    // and then sample at a lower rate in production.
+    // replaysSessionSampleRate: 0.1,
+    // If you're not already sampling the entire session,
+    // change the sample rate to 100% when sampling sessions where errors occur.
+    // replaysOnErrorSampleRate: 1.0,
+  });
+}
 
 // Initialiser la version globale
 initializeGlobalVersion();
