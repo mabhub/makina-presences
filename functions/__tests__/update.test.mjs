@@ -514,6 +514,7 @@ describe('handleUpdate', () => {
             id: 1,
             uid: 'test-uid',
             enabled: true,
+            exclude: false,
             tri: 'abc',
             tto: JSON.stringify(existingTTO, null, 2),
             ttr: '[]',
@@ -554,6 +555,7 @@ describe('handleUpdate', () => {
             id: 1,
             uid: 'disabled-uid',
             enabled: false,
+            exclude: false,
             tri: 'disabled',
             tto: '[]',
             ttr: '[]',
@@ -562,6 +564,7 @@ describe('handleUpdate', () => {
             id: 2,
             uid: 'enabled-uid',
             enabled: true,
+            exclude: false,
             tri: 'enabled',
             tto: '[]',
             ttr: '[]',
@@ -582,6 +585,47 @@ describe('handleUpdate', () => {
     expect(deps.fetchJson).toHaveBeenCalledTimes(3); // cache + allUids + 1 calendar search
   });
 
+  it('should skip excluded users even if enabled', async () => {
+    const mockFetch = vi.fn();
+    const deps = createMockDeps(mockFetch);
+
+    deps.fetchJson = vi.fn()
+      .mockResolvedValueOnce({
+        results: [
+          {
+            id: 1,
+            uid: 'excluded-uid',
+            enabled: true,
+            exclude: true,
+            tri: 'gitlab',
+            tto: '[]',
+            ttr: '[]',
+          },
+          {
+            id: 2,
+            uid: 'normal-uid',
+            enabled: true,
+            exclude: false,
+            tri: 'user',
+            tto: '[]',
+            ttr: '[]',
+          },
+        ],
+      })
+      .mockResolvedValueOnce(['excluded-uid', 'normal-uid'])
+      .mockResolvedValueOnce([]); // Calendar results for normal user only
+
+    mockFetch.mockResolvedValue({
+      status: 200,
+      json: async () => ({}),
+    });
+
+    await handleUpdate(deps);
+
+    // Verify calendar search was only called once (excluded user was skipped)
+    expect(deps.fetchJson).toHaveBeenCalledTimes(3); // cache + allUids + 1 calendar search
+  });
+
   it('should handle API errors gracefully', async () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
@@ -593,6 +637,7 @@ describe('handleUpdate', () => {
             id: 1,
             uid: 'test-uid',
             enabled: true,
+            exclude: false,
             tri: 'abc',
             tto: '[]',
             ttr: '[]',
@@ -635,6 +680,7 @@ describe('handleUpdate', () => {
             id: 1,
             uid: 'uid1',
             enabled: true,
+            exclude: false,
             tri: 'user1',
             tto: '[]',
             ttr: '[]',
@@ -643,6 +689,7 @@ describe('handleUpdate', () => {
             id: 2,
             uid: 'uid2',
             enabled: true,
+            exclude: false,
             tri: 'user2',
             tto: '[]',
             ttr: '[]',
@@ -699,6 +746,7 @@ describe('handleUpdate', () => {
             id: 1,
             uid: 'test-uid',
             enabled: true,
+            exclude: false,
             tri: 'abc',
             tto: '[]',
             ttr: '[]',

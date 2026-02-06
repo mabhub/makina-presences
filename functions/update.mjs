@@ -156,7 +156,7 @@ export const handleUpdate = async (deps) => {
   }
 
   const enabledUids = cacheTable
-    .filter(({ enabled }) => enabled);
+    .filter(({ enabled, exclude }) => enabled && !exclude);
     // .filter(({ 'last-check': last }) => {
     //   const then = (new Date(last)).getTime();
     //   const now = Date.now();
