@@ -1,4 +1,6 @@
 /* eslint-disable no-restricted-syntax */
+import { wrapWithSentry } from './sentry.mjs';
+
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
 /**
@@ -245,9 +247,9 @@ export const handleUpdate = async (deps) => {
  * @param {Object} context - Contexte Netlify
  * @returns {Response} Réponse HTTP
  */
-export default async (req, context) => {
+export default wrapWithSentry('update', async (req, context) => {
   return handleUpdate(getDefaultDeps());
-};
+});
 
 // Export getDefaultDeps pour les tests
 export { getDefaultDeps };

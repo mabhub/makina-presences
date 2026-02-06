@@ -5,6 +5,7 @@
     "import/no-named-export": "off",
     "no-unused-vars": "off",
     "require-await": "off",
-    "unicorn/no-anonymous-default-export": "off"
+    "unicorn/no-anonymous-default-export": "off",
+    "vitest/require-hook": "off"
   }
 }

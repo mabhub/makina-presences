@@ -1,3 +1,5 @@
+import { wrapWithSentry } from './sentry.mjs';
+
 /**
  * Liste les présences actives depuis Baserow
  * @param {Object} deps - Dépendances injectées (pour tests)
@@ -46,6 +48,6 @@ const getDefaultDeps = () => ({
  * @param {Object} context - Contexte Netlify
  * @returns {Response} Réponse HTTP
  */
-export default async (req, context) => {
+export default wrapWithSentry('list', async (req, context) => {
   return handleList(getDefaultDeps());
-};
+});
