@@ -423,7 +423,7 @@ describe('handleUpdate', () => {
       })
       .mockResolvedValueOnce(['existing-uid', 'new-uid']) // Second call: get all UIDs
       .mockResolvedValueOnce({
-        // Third call: get user complete info
+        // Third call: get user light info (displayName + login only)
         displayName: 'New User',
         value: { login: 'newuser' },
       });

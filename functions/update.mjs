@@ -136,8 +136,9 @@ export const handleUpdate = async (deps) => {
    */
   for await (const uid of allUids) {
     if (!cacheUids.includes(uid)) {
+      // Use /light instead of /complete (77% lighter, no vcard/mailbox)
       const { displayName, value: { login } } = await fetchJson(
-        `${bmApiPath}users/${bmDomain}/${uid}/complete`,
+        `${bmApiPath}users/${bmDomain}/${uid}/light`,
         { headers: bmHeaders },
       );
 
