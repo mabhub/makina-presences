@@ -784,11 +784,11 @@ describe('handleUpdate', () => {
 
     deps.fetchJson = vi.fn()
       .mockResolvedValueOnce({
-        // Premier appel : cache Baserow (ok)
+        // First call: Baserow cache (ok)
         results: [{ id: 1, uid: 'some-uid', enabled: true, tri: 'abc', tto: '[]', ttr: '[]' }],
       })
       .mockResolvedValueOnce({
-        // Deuxième appel : _alluids → erreur BM
+        // Second call: _alluids → BM auth error
         errorCode: 'PERMISSION_DENIED',
         errorType: 'ServerFault',
         message: 'anonymous@null Doesnt have role domainManager,manageUser on domain test-domain',

@@ -131,7 +131,7 @@ export const handleUpdate = async (deps) => {
     { headers: bmHeaders },
   );
 
-  // Vérifier que la réponse BM n'est pas une erreur d'autorisation
+  // Guard against BM authorization errors instead of a UID array
   if (allUids?.errorCode) {
     return Response.json(
       { error: allUids.errorCode, message: allUids.message },
