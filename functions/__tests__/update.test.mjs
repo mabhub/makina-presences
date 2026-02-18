@@ -777,4 +777,28 @@ describe('handleUpdate', () => {
 
     stderrSpy.mockRestore();
   });
+
+  it('should return 403 when BlueMind API returns PERMISSION_DENIED on _alluids', async () => {
+    const mockFetch = vi.fn();
+    const deps = createMockDeps(mockFetch);
+
+    deps.fetchJson = vi.fn()
+      .mockResolvedValueOnce({
+        // Premier appel : cache Baserow (ok)
+        results: [{ id: 1, uid: 'some-uid', enabled: true, tri: 'abc', tto: '[]', ttr: '[]' }],
+      })
+      .mockResolvedValueOnce({
+        // Deuxième appel : _alluids → erreur BM
+        errorCode: 'PERMISSION_DENIED',
+        errorType: 'ServerFault',
+        message: 'anonymous@null Doesnt have role domainManager,manageUser on domain test-domain',
+      });
+
+    const response = await handleUpdate(deps);
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.error).toBe('PERMISSION_DENIED');
+    expect(body.message).toMatch(/domainManager/);
+  });
 });

@@ -131,6 +131,14 @@ export const handleUpdate = async (deps) => {
     { headers: bmHeaders },
   );
 
+  // Vérifier que la réponse BM n'est pas une erreur d'autorisation
+  if (allUids?.errorCode) {
+    return Response.json(
+      { error: allUids.errorCode, message: allUids.message },
+      { status: 403 },
+    );
+  }
+
   const updates = [];
 
   /**
