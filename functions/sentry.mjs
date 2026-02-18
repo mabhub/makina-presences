@@ -135,3 +135,9 @@ export const wrapWithSentry = (functionName, handler) => {
     });
   };
 };
+
+/**
+ * Handler Netlify vide — sentry.mjs n'est pas une vraie fonction lambda.
+ * Répond 204 No Content pour éviter les erreurs si le fichier est appelé directement.
+ */
+export default async () => new Response(null, { status: 204 });
