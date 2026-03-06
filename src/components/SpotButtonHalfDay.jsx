@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import React, { useEffect } from 'react';
 import createPersistedState from 'use-persisted-state';
 import { sameLowC } from '../helpers';
+import { getDisplayTri } from '../utils/spotPresenceCalculations';
 
 const useTriState = createPersistedState('tri');
 
@@ -140,10 +141,7 @@ const SpotButtonHalfDay = ({
   }, [isConflict, onConflict, ownTri, presences, rest]);
 
   const triPresence = (!isConflict && presence?.tri)
-  || (isConflict && (presences
-    .some(({ tri }) => sameLowC(ownTri, tri))
-    ? presences.find(({ tri }) => sameLowC(ownTri, tri)).tri
-    : presence.tri));
+    || (isConflict && getDisplayTri(presences, ownTri));
 
   return (
     <>

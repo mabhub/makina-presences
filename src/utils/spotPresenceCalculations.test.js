@@ -4,6 +4,7 @@ import {
   getPresencesByPeriod,
   getCurrentPresence,
   isCumulativeSpot,
+  getDisplayTri,
 } from './spotPresenceCalculations';
 import { FULLDAY_PERIOD, MORNING_PERIOD, AFTERNOON_PERIOD } from '../hooks/constants/periods';
 
@@ -111,6 +112,32 @@ describe(getCurrentPresence, () => {
     const presences = [{ tri: 'xyz', id: 2 }];
     const result = getCurrentPresence(presences, 'abc');
     expect(result).toBeUndefined();
+  });
+});
+
+describe(getDisplayTri, () => {
+  it('returns ownTri when ownTri is present in conflict presences', () => {
+    const presences = [{ tri: 'abc' }, { tri: 'xyz' }];
+    expect(getDisplayTri(presences, 'abc')).toBe('abc');
+  });
+
+  it('returns ownTri case-insensitively when ownTri is uppercase', () => {
+    const presences = [{ tri: 'ABC' }, { tri: 'xyz' }];
+    expect(getDisplayTri(presences, 'abc')).toBe('ABC');
+  });
+
+  it('returns first presence tri when ownTri is not in presences', () => {
+    const presences = [{ tri: 'xyz' }, { tri: 'foo' }];
+    expect(getDisplayTri(presences, 'abc')).toBe('xyz');
+  });
+
+  it('returns undefined when presences is empty', () => {
+    expect(getDisplayTri([], 'abc')).toBeUndefined();
+  });
+
+  it('returns first presence tri when ownTri is null', () => {
+    const presences = [{ tri: 'xyz' }];
+    expect(getDisplayTri(presences, null)).toBe('xyz');
   });
 });
 

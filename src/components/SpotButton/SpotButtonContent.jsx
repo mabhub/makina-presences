@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { Grid, Divider } from '@mui/material';
-import { sameLowC } from '../../helpers';
 import { AFTERNOON_PERIOD, MORNING_PERIOD } from '../../hooks/constants/periods';
+import { getDisplayTri } from '../../utils/spotPresenceCalculations';
 import SpotButtonHalfDay from '../SpotButtonHalfDay';
 
 /**
@@ -46,11 +46,7 @@ const SpotButtonContent = ({
   if (afternoons.length === 0 && mornings.length === 0) {
     return (
       (!edit && !isConflict && presenceFullDay?.tri)
-        || (isConflict && (fullDays
-          .some(({ tri }) => sameLowC(ownTri, tri))
-          ? fullDays.find(({ tri }) => sameLowC(ownTri, tri)).tri
-          : presenceFullDay.tri)
-        )
+        || (isConflict && getDisplayTri(fullDays, ownTri))
         || spotId
     );
   }

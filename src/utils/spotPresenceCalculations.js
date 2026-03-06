@@ -90,6 +90,21 @@ export const isCumulativeSpot = (spotId, cumulativeSpots) =>
   cumulativeSpots.map(({ Identifiant }) => Identifiant).includes(spotId);
 
 /**
+ * Determine which trigram to display in a conflict scenario.
+ * Returns ownTri if present in the conflict presences (case-insensitive),
+ * otherwise returns the first presence's tri.
+ * @param {Array} presences - Conflict presences list
+ * @param {string|null} ownTri - Current user's trigram
+ * @returns {string|undefined} Trigram to display
+ */
+export const getDisplayTri = (presences, ownTri) => {
+  const ownPresence = ownTri
+    ? presences.find(({ tri }) => sameLowC(tri, ownTri))
+    : undefined;
+  return (ownPresence ?? presences[0])?.tri;
+};
+
+/**
  * Calculate contextual menu items
  * @param {Object} params - Menu parameters
  * @returns {Array} Contextual menu items
