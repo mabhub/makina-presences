@@ -62,6 +62,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -93,6 +94,7 @@ describe('list.mjs handler', () => {
     const mockResponse = { results: [] };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -123,6 +125,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -157,6 +160,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -170,6 +174,7 @@ describe('list.mjs handler', () => {
     const mockResponse = { results: [] };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -194,6 +199,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
@@ -222,6 +228,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
 
