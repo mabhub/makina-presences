@@ -3,8 +3,6 @@ import reactPlugin from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 // import viteESLint from '@ehutch79/vite-eslint';
 import dotenv from 'dotenv';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
-
 dotenv.config({ path: '.env.local' }); //eslint-disable-line require-hook
 
 // https://vitejs.dev/config/
@@ -17,7 +15,7 @@ export default defineConfig({
     },
   }),
   // viteESLint(),
-  nodePolyfills({ include: ['url'] }), sentryVitePlugin({
+  sentryVitePlugin({
     org: 'makinacorpus',
     project: 'makina-presences',
     url: 'https://sentry.makina-corpus.net',
