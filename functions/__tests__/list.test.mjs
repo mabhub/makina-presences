@@ -46,7 +46,8 @@ describe('list.mjs handler', () => {
         {
           tri: 'def',
           total: 5,
-          enabled: false, // This should be filtered out
+          // This should be filtered out
+          enabled: false,
           tto: '[]',
           ttr: '[]',
         },
@@ -70,7 +71,8 @@ describe('list.mjs handler', () => {
     expect(response.headers.get('Content-Type')).toBe('application/json');
 
     const body = JSON.parse(await response.text());
-    expect(body).toHaveLength(2); // Only enabled records
+    // Only enabled records
+    expect(body).toHaveLength(2);
 
     expect(body[0]).toEqual({
       tri: 'abc',
@@ -200,7 +202,8 @@ describe('list.mjs handler', () => {
 
     // Check that body is formatted with 2-space indentation
     expect(bodyText).toContain('\n');
-    expect(bodyText).toContain('  '); // 2-space indentation
+    // 2-space indentation
+    expect(bodyText).toContain('  ');
   });
 
   it('should only include specified fields in output', async () => {

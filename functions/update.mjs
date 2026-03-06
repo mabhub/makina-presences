@@ -85,7 +85,8 @@ export const getTTR = results => {
 
       return (start < now && now < end);
     })
-    .map(({ value: { main } }) => { // Return an array of { day, len }
+    // Return an array of { day, len }
+    .map(({ value: { main } }) => {
       const start = new Date(main.dtstart.iso8601);
       const end = new Date(main.dtend.iso8601);
 

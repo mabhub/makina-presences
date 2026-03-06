@@ -232,7 +232,8 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    expect(result).toContain(0); // Monday index
+    // Monday index
+    expect(result).toContain(0);
   });
 
   it('should exclude events without rrule', () => {
@@ -259,7 +260,8 @@ describe('getTTR', () => {
         displayName: 'TTR - Future event',
         value: {
           main: {
-            dtstart: { iso8601: '2026-12-01T00:00:00Z' }, // In the future
+            // In the future
+            dtstart: { iso8601: '2026-12-01T00:00:00Z' },
             dtend: { iso8601: '2026-12-02T00:00:00Z' },
             rrule: {
               byDay: [{ day: 'MO' }],
@@ -285,7 +287,8 @@ describe('getTTR', () => {
             dtend: { iso8601: '2025-01-02T00:00:00Z' },
             rrule: {
               byDay: [{ day: 'MO' }],
-              until: { iso8601: '2025-12-31T00:00:00Z' }, // Already ended
+              // Already ended
+              until: { iso8601: '2025-12-31T00:00:00Z' },
             },
           },
         },
@@ -316,7 +319,8 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    expect(result).toContain(1); // Tuesday index
+    // Tuesday index
+    expect(result).toContain(1);
   });
 
   it('should handle multi-day recurring events', () => {
@@ -326,7 +330,8 @@ describe('getTTR', () => {
         value: {
           main: {
             dtstart: { iso8601: '2026-01-01T00:00:00Z' },
-            dtend: { iso8601: '2026-01-03T00:00:00Z' }, // 2 days
+            // 2 days
+            dtend: { iso8601: '2026-01-03T00:00:00Z' },
             rrule: {
               byDay: [{ day: 'MO' }],
               until: { iso8601: '2026-12-31T00:00:00Z' },
@@ -420,7 +425,8 @@ describe('handleUpdate', () => {
           { id: 1, uid: 'existing-uid', enabled: false, tri: 'abc', tto: '[]', ttr: '[]' },
         ],
       })
-      .mockResolvedValueOnce(['existing-uid', 'new-uid']) // Second call: get all UIDs
+      // Second call: get all UIDs
+      .mockResolvedValueOnce(['existing-uid', 'new-uid'])
       .mockResolvedValueOnce({
         // Third call: get user light info (displayName + login only)
         displayName: 'New User',
@@ -467,7 +473,8 @@ describe('handleUpdate', () => {
           },
         ],
       })
-      .mockResolvedValueOnce(['test-uid']) // All UIDs
+      // All UIDs
+      .mockResolvedValueOnce(['test-uid'])
       .mockResolvedValueOnce([
         // Calendar search results
         {
@@ -571,7 +578,8 @@ describe('handleUpdate', () => {
         ],
       })
       .mockResolvedValueOnce(['disabled-uid', 'enabled-uid'])
-      .mockResolvedValueOnce([]); // Calendar results for enabled user
+      // Calendar results for enabled user
+      .mockResolvedValueOnce([]);
 
     mockFetch.mockResolvedValue({
       status: 200,
@@ -581,7 +589,8 @@ describe('handleUpdate', () => {
     await handleUpdate(deps);
 
     // Verify calendar search was only called once (for enabled user)
-    expect(deps.fetchJson).toHaveBeenCalledTimes(3); // cache + allUids + 1 calendar search
+    // cache + allUids + 1 calendar search
+    expect(deps.fetchJson).toHaveBeenCalledTimes(3);
   });
 
   it('should skip excluded users even if enabled', async () => {
@@ -612,7 +621,8 @@ describe('handleUpdate', () => {
         ],
       })
       .mockResolvedValueOnce(['excluded-uid', 'normal-uid'])
-      .mockResolvedValueOnce([]); // Calendar results for normal user only
+      // Calendar results for normal user only
+      .mockResolvedValueOnce([]);
 
     mockFetch.mockResolvedValue({
       status: 200,
@@ -622,7 +632,8 @@ describe('handleUpdate', () => {
     await handleUpdate(deps);
 
     // Verify calendar search was only called once (excluded user was skipped)
-    expect(deps.fetchJson).toHaveBeenCalledTimes(3); // cache + allUids + 1 calendar search
+    // cache + allUids + 1 calendar search
+    expect(deps.fetchJson).toHaveBeenCalledTimes(3);
   });
 
   it('should handle API errors gracefully', async () => {
