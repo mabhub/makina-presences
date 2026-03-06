@@ -30,7 +30,8 @@
     "dist",
     "dist-ssr",
     "functions/*.js",
-    "bin/update.js"
+    "bin/update.js",
+    "temp"
   ],
   "rules": {
     // ========================================
