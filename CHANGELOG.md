@@ -1,3 +1,15 @@
+4.4.3 / 2026-03-06
+==================
+
+  * Add fetch timeout via AbortController to prevent blocked concurrency slots
+  * Validate HTTP responses in serverless fetch calls
+  * Guard against Baserow application-level errors in list handler
+  * Fix case-insensitive trigram matching in presence calculations
+  * Avoid mutating React Query cache in TTCount tto sort
+  * Increase Sentry flush timeout and remove dead commented code
+  * Resolve npm vulnerabilities: react-router-dom, minimatch, rollup, sha.js
+  * Add oxlint ignore
+
 4.4.2 / 2026-03-06
 ==================
 
