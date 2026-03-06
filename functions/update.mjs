@@ -183,11 +183,6 @@ export const handleUpdate = async (deps) => {
 
   const enabledUids = cacheTable
     .filter(({ enabled, exclude }) => enabled && !exclude);
-    // .filter(({ 'last-check': last }) => {
-    //   const then = (new Date(last)).getTime();
-    //   const now = Date.now();
-    //   return (now - then) > 3600 * 1000;
-    // });
 
   /**
    * Do calendar search
@@ -229,11 +224,9 @@ export const handleUpdate = async (deps) => {
       && !data.error
     ) {
       // Data did not change: early return.
-      // console.info(`No change on ${record.tri} data: skip update.`);
       return;
     }
 
-    // console.info(`Do ${record.tri} update !!`);
     updates.push(record.tri);
 
     const body = JSON.stringify({

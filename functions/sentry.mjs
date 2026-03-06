@@ -130,7 +130,7 @@ export const wrapWithSentry = (functionName, handler) => {
       } finally {
         // S'assurer que tous les événements sont envoyés avant la fin de l'exécution
         // Critique pour les fonctions serverless qui peuvent terminer brutalement
-        await Sentry.flush(2000);
+        await Sentry.flush(3000);
       }
     });
   };
