@@ -1,19 +1,31 @@
 /* eslint-disable no-restricted-syntax */
 import { wrapWithSentry } from './sentry.mjs';
+import fetchWithTimeout from './utils.mjs';
 
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
+const BLUEMING_TIMEOUT_MS = 8000;
+
 /**
- * Crée une fonction fetchJson à partir d'une fonction fetch donnée
+ * Crée une fonction fetchJson à partir d'une fonction fetch donnée.
+ * Applique un timeout via AbortController et vérifie response.ok.
  * @param {Function} fetchFn - La fonction fetch à utiliser
- * @returns {Function} Une fonction qui fait un fetch et parse le JSON
+ * @param {number} timeoutMs - Timeout en millisecondes (défaut BLUEMING_TIMEOUT_MS)
+ * @returns {Function} Une fonction qui fait un fetch avec timeout et parse le JSON
  */
-export const createFetchJson = (fetchFn) => async (...args) => {
-  const raw = await fetchFn(...args);
-  if (!raw.ok) {
-    throw new Error(`HTTP ${raw.status}`);
-  }
-  return raw.json();
+export const createFetchJson = (fetchFn, timeoutMs = BLUEMING_TIMEOUT_MS) => {
+  /**
+   * @param {string} url - URL to fetch
+   * @param {RequestInit} [options] - Fetch options
+   * @returns {Promise<unknown>} Parsed JSON response
+   */
+  return async (url, options) => {
+    const raw = await fetchWithTimeout(url, options ?? {}, timeoutMs, fetchFn);
+    if (!raw.ok) {
+      throw new Error(`HTTP ${raw.status}`);
+    }
+    return raw.json();
+  };
 };
 
 /**

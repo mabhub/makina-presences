@@ -408,6 +408,24 @@ describe(createFetchJson, () => {
     await expect(fetchJson('https://example.com')).rejects.toThrow('HTTP 401');
   });
 
+  it('should abort fetch when timeout is exceeded', async () => {
+    const mockFetch = vi.fn().mockImplementation(
+      (_url, { signal }) => new Promise((_resolve, reject) => {
+        signal.addEventListener('abort', () => {
+          reject(new DOMException('The operation was aborted.', 'AbortError'));
+        });
+      }),
+    );
+
+    vi.useFakeTimers();
+    const fetchJson = createFetchJson(mockFetch, 1000);
+    const fetchPromise = fetchJson('https://example.com');
+    vi.advanceTimersByTime(1001);
+
+    await expect(fetchPromise).rejects.toThrow('aborted');
+    vi.useRealTimers();
+  });
+
   it('should return parsed JSON when response is ok', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,

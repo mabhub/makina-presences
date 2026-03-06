@@ -1,4 +1,7 @@
 import { wrapWithSentry } from './sentry.mjs';
+import fetchWithTimeout from './utils.mjs';
+
+const BASEROW_TIMEOUT_MS = 5000;
 
 /**
  * Liste les présences actives depuis Baserow
@@ -6,9 +9,9 @@ import { wrapWithSentry } from './sentry.mjs';
  * @returns {Response} Liste des utilisateurs actifs avec leurs TTO/TTR
  */
 export const handleList = async (deps) => {
-  const { baserowTablePath, baserowHeaders } = deps;
+  const { baserowTablePath, baserowHeaders, fetch: fetchFn, timeoutMs = BASEROW_TIMEOUT_MS } = deps;
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     [
       `${baserowTablePath}?`,
       'user_field_names=true',
@@ -16,6 +19,8 @@ export const handleList = async (deps) => {
       'size=200',
     ].join('&'),
     { headers: baserowHeaders },
+    timeoutMs,
+    fetchFn,
   );
 
   if (!response.ok) {

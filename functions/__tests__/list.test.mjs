@@ -104,12 +104,13 @@ describe('list.mjs handler', () => {
 
     expect(mockFetch).toHaveBeenCalledWith(
       'https://api.baserow.io/api/database/rows/table/123?&user_field_names=true&include=tri,total,enabled,tto,ttr&size=200',
-      {
+      expect.objectContaining({
         headers: {
           Authorization: 'Token test-token-123',
           'Content-Type': 'application/json',
         },
-      },
+        signal: expect.any(AbortSignal),
+      }),
     );
   });
 
@@ -216,6 +217,25 @@ describe('list.mjs handler', () => {
     expect(bodyText).toContain('\n');
     // 2-space indentation
     expect(bodyText).toContain('  ');
+  });
+
+  it('should abort and throw when Baserow fetch exceeds timeout', async () => {
+    mockFetch.mockImplementation((_url, { signal }) =>
+      new Promise((_resolve, reject) => {
+        signal.addEventListener('abort', () => {
+          reject(new DOMException('The operation was aborted.', 'AbortError'));
+        });
+      }),
+    );
+
+    const depsWithFetch = { ...deps, fetch: mockFetch, timeoutMs: 100 };
+    vi.useFakeTimers();
+
+    const responsePromise = handleList(depsWithFetch);
+    vi.advanceTimersByTime(200);
+
+    await expect(responsePromise).rejects.toThrow('aborted');
+    vi.useRealTimers();
   });
 
   it('should throw an error with HTTP status when Baserow returns non-ok response', async () => {
