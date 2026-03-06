@@ -32,9 +32,9 @@ export const getPresencesByPeriod = spotPresences => {
  * @returns {string|undefined} Current period or undefined
  */
 export const getCurrentTriPeriod = (fullDays, mornings, afternoons, ownTri) => {
-  if (fullDays.some(({ tri }) => tri === ownTri)) return FULLDAY_PERIOD;
-  if (mornings.some(({ tri }) => tri === ownTri)) return MORNING_PERIOD;
-  if (afternoons.some(({ tri }) => tri === ownTri)) return AFTERNOON_PERIOD;
+  if (fullDays.some(({ tri }) => sameLowC(tri, ownTri))) return FULLDAY_PERIOD;
+  if (mornings.some(({ tri }) => sameLowC(tri, ownTri))) return MORNING_PERIOD;
+  if (afternoons.some(({ tri }) => sameLowC(tri, ownTri))) return AFTERNOON_PERIOD;
   return undefined;
 };
 

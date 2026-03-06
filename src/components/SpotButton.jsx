@@ -191,10 +191,10 @@ const SpotButton = ({
           onMouseLeave={handleMouseLeave}
           onClick={event => {
             if (isCumulative && triPeriod) return unsubscribe();
-            if (mornings.length === 1 && mornings[0].tri !== ownTri) {
+            if (mornings.length === 1 && !sameLowC(mornings[0].tri, ownTri)) {
               return afternoonOnly();
             }
-            if ((afternoons.length === 1 && afternoons[0].tri !== ownTri) || event.ctrlKey) {
+            if ((afternoons.length === 1 && !sameLowC(afternoons[0].tri, ownTri)) || event.ctrlKey) {
               return morningOnly();
             }
             if (afternoons.some(({ tri }) => sameLowC(tri, ownTri))
