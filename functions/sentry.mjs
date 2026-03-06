@@ -139,5 +139,6 @@ export const wrapWithSentry = (functionName, handler) => {
 /**
  * Empty Netlify handler — sentry.mjs is not a real lambda function.
  * Returns 204 No Content to avoid errors if the file is invoked directly.
+ * @returns {Promise<Response>} 204 No Content response
  */
 export default async () => new Response(null, { status: 204 });

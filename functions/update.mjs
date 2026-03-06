@@ -106,7 +106,7 @@ export const getTTR = results => {
  * Logique principale de mise à jour des TTO/TTR
  * Export séparé pour permettre l'injection de dépendances dans les tests
  * @param {Object} deps - Dépendances (fetch, config, etc.)
- * @returns {Response} Réponse HTTP avec la liste des mises à jour
+ * @returns {Promise<Response>} Réponse HTTP avec la liste des mises à jour
  */
 export const handleUpdate = async (deps) => {
   const {
