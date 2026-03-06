@@ -28,6 +28,11 @@ export const handleList = async (deps) => {
   }
 
   const data = await response.json();
+
+  if (data.errorCode) {
+    throw new Error(data.errorCode);
+  }
+
   const results = data.results
     .filter(({ enabled }) => enabled)
     .map(({ tri, total, tto, ttr }) =>

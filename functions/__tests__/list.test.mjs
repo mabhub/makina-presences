@@ -260,6 +260,16 @@ describe('list.mjs handler', () => {
     await expect(handleList(deps)).rejects.toThrow('HTTP 503');
   });
 
+  it('should throw a structured error when Baserow returns an errorCode', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      // oxlint-disable-next-line promise/prefer-await-to-then
+      json: () => Promise.resolve({ errorCode: 'ERROR_REQUEST_BODY_VALIDATION', detail: 'invalid' }),
+    });
+
+    await expect(handleList(deps)).rejects.toThrow('ERROR_REQUEST_BODY_VALIDATION');
+  });
+
   it('should only include specified fields in output', async () => {
     const mockResponse = {
       results: [
