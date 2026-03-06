@@ -62,6 +62,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
@@ -94,6 +95,7 @@ describe('list.mjs handler', () => {
     const mockResponse = { results: [] };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
@@ -125,6 +127,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
@@ -160,6 +163,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
@@ -174,6 +178,7 @@ describe('list.mjs handler', () => {
     const mockResponse = { results: [] };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
@@ -199,6 +204,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });
@@ -210,6 +216,28 @@ describe('list.mjs handler', () => {
     expect(bodyText).toContain('\n');
     // 2-space indentation
     expect(bodyText).toContain('  ');
+  });
+
+  it('should throw an error with HTTP status when Baserow returns non-ok response', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 401,
+      // oxlint-disable-next-line promise/prefer-await-to-then
+      json: () => Promise.resolve({ error: 'unauthorized' }),
+    });
+
+    await expect(handleList(deps)).rejects.toThrow('HTTP 401');
+  });
+
+  it('should throw an error when Baserow returns 503', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 503,
+      // oxlint-disable-next-line promise/prefer-await-to-then
+      json: () => Promise.resolve({}),
+    });
+
+    await expect(handleList(deps)).rejects.toThrow('HTTP 503');
   });
 
   it('should only include specified fields in output', async () => {
@@ -228,6 +256,7 @@ describe('list.mjs handler', () => {
     };
 
     mockFetch.mockResolvedValue({
+      ok: true,
       // oxlint-disable-next-line promise/prefer-await-to-then
       json: () => Promise.resolve(mockResponse),
     });

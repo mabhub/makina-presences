@@ -11,6 +11,7 @@ import {
   getTTO,
   getTTR,
   handleUpdate,
+  createFetchJson,
 } from '../update.mjs';
 
 // Mock p-limit before importing
@@ -391,6 +392,32 @@ describe(getTTR, () => {
     const result = getTTR(mockResults);
 
     expect(result).toStrictEqual([]);
+  });
+});
+
+describe(createFetchJson, () => {
+  it('should throw an error with HTTP status when response is not ok', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      // oxlint-disable-next-line promise/prefer-await-to-then
+      json: () => Promise.resolve({ error: 'unauthorized' }),
+    });
+
+    const fetchJson = createFetchJson(mockFetch);
+    await expect(fetchJson('https://example.com')).rejects.toThrow('HTTP 401');
+  });
+
+  it('should return parsed JSON when response is ok', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      // oxlint-disable-next-line promise/prefer-await-to-then
+      json: () => Promise.resolve({ data: 'ok' }),
+    });
+
+    const fetchJson = createFetchJson(mockFetch);
+    const result = await fetchJson('https://example.com');
+    expect(result).toStrictEqual({ data: 'ok' });
   });
 });
 
@@ -790,6 +817,20 @@ describe(handleUpdate, () => {
     expect(stderrSpy).toHaveBeenCalledWith('Internal Server Error');
 
     stderrSpy.mockRestore();
+  });
+
+  it('should throw an HTTP error when a dependency fetch returns non-ok response', async () => {
+    const mockFetch = vi.fn();
+    const deps = createMockDeps(mockFetch);
+
+    // fetchJson should reject with HTTP error when response is not ok
+    vi.spyOn(deps, 'fetchJson').mockResolvedValueOnce({
+      results: [{ id: 1, uid: 'uid', enabled: true, tri: 'abc', tto: '[]', ttr: '[]' }],
+    })
+      .mockResolvedValueOnce(['uid'])
+      .mockRejectedValueOnce(new Error('HTTP 503'));
+
+    await expect(handleUpdate(deps)).rejects.toThrow('HTTP 503');
   });
 
   it('should return 403 when BlueMind API returns PERMISSION_DENIED on _alluids', async () => {

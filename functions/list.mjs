@@ -18,6 +18,10 @@ export const handleList = async (deps) => {
     { headers: baserowHeaders },
   );
 
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
   const data = await response.json();
   const results = data.results
     .filter(({ enabled }) => enabled)

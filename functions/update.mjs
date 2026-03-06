@@ -8,8 +8,11 @@ const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
  * @param {Function} fetchFn - La fonction fetch à utiliser
  * @returns {Function} Une fonction qui fait un fetch et parse le JSON
  */
-const createFetchJson = (fetchFn) => async (...args) => {
+export const createFetchJson = (fetchFn) => async (...args) => {
   const raw = await fetchFn(...args);
+  if (!raw.ok) {
+    throw new Error(`HTTP ${raw.status}`);
+  }
   return raw.json();
 };
 
