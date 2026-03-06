@@ -18,7 +18,7 @@ vi.mock('p-limit', () => ({
   default: vi.fn(() => (fn) => fn()),
 }));
 
-describe('getCurrentYearDateRange', () => {
+describe(getCurrentYearDateRange, () => {
   it('should return date range for current year', () => {
     const result = getCurrentYearDateRange();
     const currentYear = new Date().getUTCFullYear();
@@ -58,7 +58,7 @@ describe('getCurrentYearDateRange', () => {
   });
 });
 
-describe('getTTO', () => {
+describe(getTTO, () => {
   it('should filter and transform TTO events', () => {
     const mockResults = [
       {
@@ -203,7 +203,7 @@ describe('getTTO', () => {
   });
 });
 
-describe('getTTR', () => {
+describe(getTTR, () => {
   beforeEach(() => {
     // Set a fixed date for consistent testing
     vi.setSystemTime(new Date('2026-02-15T12:00:00Z'));
@@ -394,7 +394,7 @@ describe('getTTR', () => {
   });
 });
 
-describe('handleUpdate', () => {
+describe(handleUpdate, () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
