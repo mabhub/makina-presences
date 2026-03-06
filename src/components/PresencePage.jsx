@@ -7,8 +7,6 @@ import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
-import createPersistedState from 'use-persisted-state';
-
 import PresenceForm from './PresenceForm';
 
 import usePlans from '../hooks/usePlans';
@@ -29,8 +27,8 @@ dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
-const useTriState = createPersistedState('tri');
-const useMaxWidthState = createPersistedState('useMaxWidth');
+import { useTriState, useMaxWidthState } from '../hooks/usePersistedStates';
+
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;
 

@@ -14,10 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import createPersistedState from 'use-persisted-state';
-
 import { cleanTri } from '../helpers';
 import usePlans from '../hooks/usePlans';
+import { useTriState, useAgencyPref } from '../hooks/usePersistedStates';
 import { NO_AGENCYPREF_LABEL } from './PreferencesFavorites';
 
 const useStyles = makeStyles(theme => ({
@@ -44,9 +43,6 @@ const useStyles = makeStyles(theme => ({
     textAlign: 'center',
   },
 }));
-
-const useTriState = createPersistedState('tri');
-const useAgencyPref = createPersistedState('agency');
 
 const draftPlaceSx = {
   position: 'absolute',

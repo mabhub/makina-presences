@@ -5,9 +5,7 @@ import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/s
 import { ThemeProvider as StylesThemeProvider } from '@mui/styles';
 import { grey } from '@mui/material/colors';
 
-import createPersistedState from 'use-persisted-state';
-
-const useThemePrefs = createPersistedState('themePref');
+import { useThemePrefs } from './hooks/usePersistedStates';
 
 const validateTheme = themePrefs => (['light', 'dark'].includes(themePrefs) ? themePrefs : 'light');
 

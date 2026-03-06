@@ -6,8 +6,6 @@ import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
-import createPersistedState from 'use-persisted-state';
-
 import DayCard from './DayCard';
 import { getTimespan } from '../helpers';
 
@@ -16,7 +14,7 @@ dayjs.extend(weekOfYear);
 dayjs.extend(isoWeek);
 dayjs.extend(dayOfYear);
 
-const useWeekPrefs = createPersistedState('weekPref');
+import { useWeekPrefs } from '../hooks/usePersistedStates';
 
 const useStyles = makeStyles(() => ({
   root: {

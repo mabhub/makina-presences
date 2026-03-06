@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import createPersistedState from 'use-persisted-state';
+import { useFavoritesState } from '../hooks/usePersistedStates';
 
 import {
   Button,
@@ -72,8 +72,6 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'uppercase',
   },
 }));
-const useFavoritesState = createPersistedState('favorites');
-
 const { FF_FAVORITE, FF_HALFDAY, FF_PARKING } = baseFlags;
 
 const SpotDialog = ({

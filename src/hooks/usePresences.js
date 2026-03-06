@@ -1,10 +1,9 @@
 import dayjs from 'dayjs';
 import React from 'react';
 
-import createPersistedState from 'use-persisted-state';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_DEFAULTS } from './queryDefaults';
+import { useWeekPrefs } from './usePersistedStates';
 import { cleanTri } from '../helpers';
 
 const { VITE_BASEROW_TOKEN: token,
@@ -14,8 +13,6 @@ const headers = {
   Authorization: `Token ${token}`,
   'Content-Type': 'application/json',
 };
-
-const useWeekPrefs = createPersistedState('weekPref');
 
 /**
  * React hook to manage presences for a given place.

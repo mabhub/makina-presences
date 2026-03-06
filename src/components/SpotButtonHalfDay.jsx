@@ -2,11 +2,9 @@ import { alpha, Box, lighten, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
-import createPersistedState from 'use-persisted-state';
 import { sameLowC } from '../helpers';
 import { getDisplayTri } from '../utils/spotPresenceCalculations';
-
-const useTriState = createPersistedState('tri');
+import { useTriState } from '../hooks/usePersistedStates';
 
 const useStyles = makeStyles(theme => ({
   left: {

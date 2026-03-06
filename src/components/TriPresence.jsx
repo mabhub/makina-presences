@@ -1,7 +1,5 @@
 import clsx from 'clsx';
 import React from 'react';
-import createPersistedState from 'use-persisted-state';
-
 import { alpha, Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
@@ -9,8 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { LocalParking } from '@mui/icons-material';
 import { sameLowC } from '../helpers';
 import { AFTERNOON_PERIOD, MORNING_PERIOD } from '../hooks/constants/periods';
-
-const useTriState = createPersistedState('tri');
+import { useTriState } from '../hooks/usePersistedStates';
 
 const useStyle = makeStyles(theme => ({
   chip: {

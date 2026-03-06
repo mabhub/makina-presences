@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import createPersistedState from 'use-persisted-state';
+import { useTriState } from '../hooks/usePersistedStates';
 
 import { grey } from '@mui/material/colors';
 import clsx from 'clsx';
@@ -142,8 +142,6 @@ const useStyles = makeStyles(theme => ({
     float: 'right',
   },
 }));
-
-const useTriState = createPersistedState('tri');
 
 const SpotAdditionals = ({ additional }) => {
   const { Titre, Description, Fixe, Tache, x, y, Tris } = additional;

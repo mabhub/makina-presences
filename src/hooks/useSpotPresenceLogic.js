@@ -6,9 +6,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom';
-import createPersistedState from 'use-persisted-state';
-
 import { sameLowC } from '../helpers';
+import { useTriState } from './usePersistedStates';
 import usePresences from './usePresences';
 import usePlan from './usePlan';
 import useSpots from './useSpots';
@@ -22,7 +21,6 @@ import {
   getContextualMenuItems,
 } from '../utils/spotPresenceCalculations';
 
-const useTriState = createPersistedState('tri');
 
 /**
  * Spot presence logic hook

@@ -1,6 +1,4 @@
 import React from 'react';
-import createPersistedState from 'use-persisted-state';
-
 import { ArrowDropDown, Person } from '@mui/icons-material';
 import { Button, IconButton, Menu, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
@@ -9,8 +7,7 @@ import PreferencesDisplay from './PreferencesDisplay';
 import PreferencesTri from './PreferencesTri';
 import PreferencesFavorites from './PreferencesFavorites';
 import VersionDisplay from './VersionDisplay';
-
-const useTriState = createPersistedState('tri');
+import { useTriState } from '../hooks/usePersistedStates';
 
 const useStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;

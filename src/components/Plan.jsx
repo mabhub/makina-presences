@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import createPersistedState from 'use-persisted-state';
-
 import { Alert, AlertTitle, Box, Snackbar, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
@@ -15,6 +13,7 @@ import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
 import TriPresence from './TriPresence';
+import { useTriState } from '../hooks/usePersistedStates';
 
 const { FF_COMPLEMENTARY } = baseFlags;
 
@@ -58,7 +57,6 @@ const transformWrapperProps = {
 
 const Children = ({ children }) => children;
 
-const useTriState = createPersistedState('tri');
 
 /**
  * Plan component: displays the interactive plan with spots and additionals.

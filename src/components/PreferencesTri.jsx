@@ -1,11 +1,8 @@
 import React from 'react';
-import createPersistedState from 'use-persisted-state';
-
 import { Done, Edit } from '@mui/icons-material';
 import { Box, Divider, IconButton, TextField } from '@mui/material';
 import { cleanTri } from '../helpers';
-
-const useTriState = createPersistedState('tri');
+import { useTriState } from '../hooks/usePersistedStates';
 
 const PreferencesTri = () => {
   const [tri, setTri] = useTriState();

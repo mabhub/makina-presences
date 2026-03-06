@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import createPersistedState from 'use-persisted-state';
-
 import { Add, Computer, ErrorOutline, RemoveCircleOutline, Room } from '@mui/icons-material';
 import { Chip, Divider, FormControl, IconButton, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Tooltip, Typography } from '@mui/material';
 
@@ -10,6 +8,7 @@ import usePlans from '../hooks/usePlans';
 import useTable from '../hooks/useTable';
 import SpotDialog from './SpotDialog';
 import { baseFlags, isEnable } from '../feature_flag_service';
+import { useFavoritesState, useAgencyPref } from '../hooks/usePersistedStates';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -38,9 +37,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
 }));
-
-const useFavoritesState = createPersistedState('favorites');
-const useAgencyPref = createPersistedState('agency');
 
 export const NO_AGENCYPREF_LABEL = 'Aucune';
 

@@ -1,18 +1,11 @@
 import React from 'react';
-import createPersistedState from 'use-persisted-state';
-
 import { CalendarToday, DarkMode, EventBusy, Fullscreen, Looks3, LooksOne, LooksTwo, SettingsBrightness, WbSunny } from '@mui/icons-material';
 import { alpha, Box, Divider, List, ListItem, ListItemIcon, ListItemText, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
+import { useMaxWidthState, useThemePrefs, useWeekPrefs, useDayPrefs, usePastDays } from '../hooks/usePersistedStates';
 
 const { FF_FULLSCREEN, FF_WEEKPREF, FF_WEEKDAY, FF_PASTDAYS } = baseFlags;
-
-const useMaxWidthState = createPersistedState('useMaxWidth');
-const useThemePrefs = createPersistedState('themePref');
-const useWeekPrefs = createPersistedState('weekPref');
-const useDayPrefs = createPersistedState('dayPrefs');
-const usePastDays = createPersistedState('pastDays');
 
 const useStyles = makeStyles(() => ({
   themeIcon: {

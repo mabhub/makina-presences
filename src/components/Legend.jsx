@@ -4,15 +4,12 @@ import { ExpandMore, HelpOutline } from '@mui/icons-material';
 import { Box, Divider, IconButton } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
-import createPersistedState from 'use-persisted-state';
-
 import clsx from 'clsx';
 import useFields from '../hooks/useFields';
 import Circle from './LegendCircle';
+import { useLegendState } from '../hooks/usePersistedStates';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
-
-const useLegendState = createPersistedState('legend');
 
 const useLegendStyles = makeStyles(theme => {
   const maxWidth = mq => `@media (max-width: ${theme.breakpoints.values[mq]}px)`;

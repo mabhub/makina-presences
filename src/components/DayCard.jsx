@@ -2,7 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import createPersistedState from 'use-persisted-state';
+
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom';
 import { displayCard } from '../helpers';
@@ -15,6 +15,7 @@ import usePlan from '../hooks/usePlan';
 import useSpots from '../hooks/useSpots';
 import useHolidays from '../hooks/useHolidays';
 import usePresences from '../hooks/usePresences';
+import { useTriState, useDayPrefs, usePastDays } from '../hooks/usePersistedStates';
 
 // Static array for day labels (0 = Sunday, 6 = Saturday)
 const days = ['S', 'L', 'M', 'Me', 'J', 'V', 'S'];
@@ -29,9 +30,9 @@ const useStyles = makeStyles(theme => ({
   newWeek: {},
 }));
 
-const useTriState = createPersistedState('tri');
-const useDayPrefs = createPersistedState('dayPrefs');
-const usePastDays = createPersistedState('pastDays');
+
+
+
 
 /**
  * DayCard component: Renders a single day in the presence calendar.
