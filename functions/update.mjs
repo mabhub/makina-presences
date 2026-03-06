@@ -81,7 +81,7 @@ export const getTTR = results => {
       // Keep only (recurring) event including "today"
       const start = new Date(main.dtstart.iso8601).getTime();
       const end = main.rrule.until ? new Date(main.rrule.until.iso8601).getTime() : Infinity;
-      const now = new Date().getTime();
+      const now = Date.now();
 
       return (start < now && now < end);
     })
@@ -98,9 +98,9 @@ export const getTTR = results => {
     .flat()
     .reduce((acc, { day, len } = {}) => {
       const first = DAYS.indexOf(day);
-      return [...acc, ...[...Array(len)].map((_, index) => ((first + index) % 7))];
+      return [...acc, ...[...new Array(len)].map((_, index) => ((first + index) % 7))];
     }, [])
-    .sort();
+    .toSorted();
 };
 
 /**
@@ -125,7 +125,7 @@ export const handleUpdate = async (deps) => {
     { headers: baserowHeaders },
   );
 
-  const cacheUids = cacheTable.map(({ uid }) => uid).filter(Boolean);
+  const cacheUids = new Set(cacheTable.map(({ uid }) => uid).filter(Boolean));
 
   const allUids = await fetchJson(
     `${bmApiPath}users/${bmDomain}/_alluids`,
@@ -146,7 +146,7 @@ export const handleUpdate = async (deps) => {
    * Create new entries
    */
   for await (const uid of allUids) {
-    if (!cacheUids.includes(uid)) {
+    if (!cacheUids.has(uid)) {
       // Use /light instead of /complete (77% lighter, no vcard/mailbox)
       const { displayName, value: { login } } = await fetchJson(
         `${bmApiPath}users/${bmDomain}/${uid}/light`,
@@ -203,7 +203,7 @@ export const handleUpdate = async (deps) => {
       data.error = results;
     } else {
       data.tto = getTTO(results);
-      data.ttr = Array.from(new Set(getTTR(results)));
+      data.ttr = [...new Set(getTTR(results))];
     }
 
     const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
@@ -244,10 +244,7 @@ export const handleUpdate = async (deps) => {
   const pipe = enabledUids.map(({ uid }) => limit(() => processUid(uid)));
   await Promise.all(pipe);
 
-  return new Response(JSON.stringify(updates), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return Response.json(updates, { status: 200 });
 };
 
 /**
