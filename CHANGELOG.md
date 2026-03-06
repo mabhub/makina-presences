@@ -1,3 +1,14 @@
+4.4.1 / 2026-02-19
+==================
+
+  * Migrate Netlify Functions to modern API with ES modules
+  * Optimize BlueMind API calls by switching to /light endpoint
+  * Enforce exclude filter to prevent processing technical accounts
+  * Integrate Sentry error monitoring for Netlify functions
+  * Expose dummy Netlify handler in sentry.mjs to prevent 500 on direct invocation
+  * Detect BlueMind PERMISSION_DENIED on _alluids and return 403
+  * Translate inline comments to English
+
 4.4.0 / 2026-02-06
 ==================
 
