@@ -6,18 +6,17 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-
-// Mock p-limit before importing
-vi.mock('p-limit', () => ({
-  default: vi.fn(() => (fn) => fn()),
-}));
-
 import {
   getCurrentYearDateRange,
   getTTO,
   getTTR,
   handleUpdate,
 } from '../update.mjs';
+
+// Mock p-limit before importing
+vi.mock('p-limit', () => ({
+  default: vi.fn(() => (fn) => fn()),
+}));
 
 describe('getCurrentYearDateRange', () => {
   it('should return date range for current year', () => {
