@@ -40,7 +40,7 @@ const getDefaultDeps = () => {
 /**
  * Génère la plage de dates pour l'année calendaire en cours au format ISO 8601.
  * Utilise UTC pour éviter les problèmes de fuseau horaire aux limites d'année.
- * @returns {{ dateMin: { precision: string, iso8601: string }, dateMax: { precision: string, iso8601: string } }}
+ * @returns {{ dateMin: { precision: string, iso8601: string }, dateMax: { precision: string, iso8601: string } }} Date range object for the current year
  */
 export const getCurrentYearDateRange = () => {
   const now = new Date();
@@ -98,7 +98,7 @@ export const getTTR = results => {
     .flat()
     .reduce((acc, { day, len } = {}) => {
       const first = DAYS.indexOf(day);
-      return [...acc, ...[...new Array(len)].map((_, index) => ((first + index) % 7))];
+      return [...acc, ...Array.from({ length: len }, (_, index) => ((first + index) % 7))];
     }, [])
     .toSorted();
 };
