@@ -57,6 +57,11 @@
     "unicorn/filename-case": "off",
     "unicorn/no-null": "off",
     "unicorn/numeric-separators-style": "off",
+    "jest/no-hooks": "off",
+    "vitest/no-hooks": "off",
+    "unicorn/no-array-reduce": "off",
+    "oxc/no-accumulating-spread": "off",
+    "unicorn/prefer-array-flat-map": "off",
 
     // Best Practices
     "array-callback-return": ["error", { "allowImplicit": true, "checkForEach": false }],
@@ -120,6 +125,7 @@
     "func-names": ["warn"],
     "func-style": ["off", "expression"],
     "id-length": ["off"],
+    "max-statements": ["warn", { "max": 20 }],
     "max-depth": ["off", 4 ],
     "max-lines": ["off", { "max": 300, "skipBlankLines": true, "skipComments": true }],
     "max-lines-per-function": ["off", { "max": 50, "skipBlankLines": true, "skipComments": true, "IIFEs": true }],
