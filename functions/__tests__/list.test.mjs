@@ -74,14 +74,14 @@ describe('list.mjs handler', () => {
     // Only enabled records
     expect(body).toHaveLength(2);
 
-    expect(body[0]).toEqual({
+    expect(body[0]).toStrictEqual({
       tri: 'abc',
       total: 10,
       tto: [{ from: '2026-01-01', days: 5 }],
       ttr: [0, 2, 4],
     });
 
-    expect(body[1]).toEqual({
+    expect(body[1]).toStrictEqual({
       tri: 'ghi',
       total: 8,
       tto: [{ from: '2026-02-01', days: 3 }],
@@ -129,11 +129,11 @@ describe('list.mjs handler', () => {
     const response = await handleList(deps);
     const body = JSON.parse(await response.text());
 
-    expect(body[0].tto).toEqual([
+    expect(body[0].tto).toStrictEqual([
       { from: '2026-03-15', days: 10 },
       { from: '2026-06-01', days: 5 },
     ]);
-    expect(body[0].ttr).toEqual([0, 1, 2, 3, 4]);
+    expect(body[0].ttr).toStrictEqual([0, 1, 2, 3, 4]);
   });
 
   it('should return empty array when no enabled records', async () => {
@@ -163,7 +163,7 @@ describe('list.mjs handler', () => {
     const response = await handleList(deps);
     const body = JSON.parse(await response.text());
 
-    expect(body).toEqual([]);
+    expect(body).toStrictEqual([]);
   });
 
   it('should handle empty results', async () => {
@@ -176,7 +176,7 @@ describe('list.mjs handler', () => {
     const response = await handleList(deps);
     const body = JSON.parse(await response.text());
 
-    expect(body).toEqual([]);
+    expect(body).toStrictEqual([]);
     expect(response.status).toBe(200);
   });
 
@@ -228,7 +228,7 @@ describe('list.mjs handler', () => {
     const response = await handleList(deps);
     const body = JSON.parse(await response.text());
 
-    expect(body[0]).toEqual({
+    expect(body[0]).toStrictEqual({
       tri: 'test',
       total: 5,
       tto: [],

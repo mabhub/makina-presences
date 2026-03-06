@@ -23,7 +23,7 @@ describe('getCurrentYearDateRange', () => {
     const result = getCurrentYearDateRange();
     const currentYear = new Date().getUTCFullYear();
 
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       dateMin: { precision: 'Date', iso8601: `${currentYear}-01-01` },
       dateMax: { precision: 'Date', iso8601: `${currentYear}-12-31` },
     });
@@ -84,7 +84,7 @@ describe('getTTO', () => {
     const result = getTTO(mockResults);
 
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({
+    expect(result[0]).toStrictEqual({
       from: '2026-02-01T00:00:00Z',
       days: 5,
     });
@@ -150,7 +150,7 @@ describe('getTTO', () => {
 
     const result = getTTO(mockResults);
 
-    expect(result).toEqual([]);
+    expect(result).toStrictEqual([]);
   });
 
   it('should handle multiple TTO events', () => {
@@ -251,7 +251,7 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    expect(result).toEqual([]);
+    expect(result).toStrictEqual([]);
   });
 
   it('should exclude events that have not started yet', () => {
@@ -274,7 +274,7 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    expect(result).toEqual([]);
+    expect(result).toStrictEqual([]);
   });
 
   it('should exclude events that have already ended', () => {
@@ -297,7 +297,7 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    expect(result).toEqual([]);
+    expect(result).toStrictEqual([]);
   });
 
   it('should handle recurring events without end date', () => {
@@ -368,7 +368,7 @@ describe('getTTR', () => {
     const result = getTTR(mockResults);
 
     // Should be sorted: [0 (MO), 2 (WE), 4 (FR)]
-    expect(result).toEqual([0, 2, 4]);
+    expect(result).toStrictEqual([0, 2, 4]);
   });
 
   it('should ignore non-TTR events', () => {
@@ -390,7 +390,7 @@ describe('getTTR', () => {
 
     const result = getTTR(mockResults);
 
-    expect(result).toEqual([]);
+    expect(result).toStrictEqual([]);
   });
 });
 
@@ -547,7 +547,7 @@ describe('handleUpdate', () => {
 
     expect(response.status).toBe(200);
     const updates = JSON.parse(await response.text());
-    expect(updates).toEqual([]);
+    expect(updates).toStrictEqual([]);
   });
 
   it('should skip disabled users', async () => {
