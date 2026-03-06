@@ -1,3 +1,10 @@
+4.5.0 / 2026-03-06
+==================
+
+  * Extract shared React Query defaults to queryDefaults.js
+  * Extract getDisplayTri to eliminate conflict display duplication
+  * Centralise all createPersistedState calls in usePersistedStates.js
+
 4.4.3 / 2026-03-06
 ==================
 
