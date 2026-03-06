@@ -508,7 +508,7 @@ describe('useSpotPresenceLogic', () => {
     it('should handle blocked spots in state calculation', async () => {
       const blockedSpot = { ...mockSpot, Bloqué: true };
 
-      const { result } = renderHook(
+      renderHook(
         () => useSpotPresenceLogic(blockedSpot, mockOnConflict),
         { wrapper: AllTheProviders },
       );
