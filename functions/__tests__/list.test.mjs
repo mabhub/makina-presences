@@ -16,7 +16,7 @@ describe('list.mjs handler', () => {
   beforeEach(() => {
     // Mock global fetch
     mockFetch = vi.fn();
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     // Create dependencies for injection
     deps = {
@@ -30,7 +30,7 @@ describe('list.mjs handler', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-    delete global.fetch;
+    delete globalThis.fetch;
   });
 
   it('should return filtered and transformed records', async () => {
