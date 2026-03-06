@@ -4,6 +4,7 @@ import React from 'react';
 import createPersistedState from 'use-persisted-state';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QUERY_DEFAULTS } from './queryDefaults';
 import { cleanTri } from '../helpers';
 
 const { VITE_BASEROW_TOKEN: token,
@@ -86,10 +87,7 @@ const usePresences = place => {
 
       return nextData;
     },
-    staleTime: 60000,
-    refetchInterval: 60000,
-    retry: 3,
-    retryDelay: 10000,
+    ...QUERY_DEFAULTS,
   });
 
   const createRow = useMutation({

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { QUERY_DEFAULTS } from './queryDefaults';
 
 const qs = [
   '?',
@@ -43,10 +44,7 @@ const useTable = tableId => {
       return response.json();
     },
     enabled: !!tableId && !!token, // Only make the request if tableId and token are defined
-    staleTime: 60000,
-    refetchInterval: 60000,
-    retry: 3,
-    retryDelay: 10000,
+    ...QUERY_DEFAULTS,
   });
 
   return data?.results ?? [];
