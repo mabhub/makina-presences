@@ -395,6 +395,10 @@ describe('getTTR', () => {
 });
 
 describe('handleUpdate', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const createMockDeps = (mockFetch) => ({
     fetch: mockFetch,
     fetchJson: vi.fn(async (...args) => {
@@ -418,7 +422,7 @@ describe('handleUpdate', () => {
     const deps = createMockDeps(mockFetch);
 
     // Override fetchJson with custom implementation
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         // First call: get cache table
         results: [
@@ -459,7 +463,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         // Cache table
         results: [
@@ -513,7 +517,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         results: [
           {
@@ -554,7 +558,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         results: [
           {
@@ -597,7 +601,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         results: [
           {
@@ -640,7 +644,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         results: [
           {
@@ -683,7 +687,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         results: [
           {
@@ -749,7 +753,7 @@ describe('handleUpdate', () => {
     const deps = createMockDeps(mockFetch);
     const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => {});
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         results: [
           {
@@ -792,7 +796,7 @@ describe('handleUpdate', () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    deps.fetchJson = vi.fn()
+    vi.spyOn(deps, 'fetchJson')
       .mockResolvedValueOnce({
         // First call: Baserow cache (ok)
         results: [{ id: 1, uid: 'some-uid', enabled: true, tri: 'abc', tto: '[]', ttr: '[]' }],
