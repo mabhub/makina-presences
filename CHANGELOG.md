@@ -1,3 +1,13 @@
+4.4.2 / 2026-03-06
+==================
+
+  * Disable noise-generating lint rules in oxlint config
+  * Modernize array, date and Response patterns in update.mjs
+  * Fix regressions introduced by unicorn and describe-function-title corrections
+  * Add missing @returns tags to JSDoc in sentry.mjs and update.mjs
+  * Move inline comments to their own line across function files
+  * Improve test patterns (toStrictEqual, globalThis, vi.spyOn, function refs)
+
 4.4.1 / 2026-02-19
 ==================
 
