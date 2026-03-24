@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import baserowFetch from '../helpers/baserowFetch';
 
 const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
@@ -18,14 +19,11 @@ const useFields = tableId => {
   const { data = [] } = useQuery({
     queryKey,
     queryFn: async () => {
-      const response = await fetch(
+      const response = await baserowFetch(
         basePath,
         { headers: { Authorization: `Token ${token}` } },
       );
-
-      const nextData = await response.json();
-
-      return nextData;
+      return response.json();
     },
     staleTime: 60000,
     refetchInterval: 60000,

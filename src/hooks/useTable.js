@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_DEFAULTS } from './queryDefaults';
+import baserowFetch from '../helpers/baserowFetch';
 
 const qs = [
   '?',
@@ -33,14 +34,10 @@ const useTable = tableId => {
   const { data } = useQuery({
     queryKey,
     queryFn: async () => {
-      const response = await fetch(
+      const response = await baserowFetch(
         basePath + qs,
         { headers: { Authorization: `Token ${token}` } },
       );
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
       return response.json();
     },
     enabled: !!tableId && !!token, // Only make the request if tableId and token are defined

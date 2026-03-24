@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_DEFAULTS } from './queryDefaults';
 import { useWeekPrefs } from './usePersistedStates';
 import { cleanTri } from '../helpers';
+import baserowFetch from '../helpers/baserowFetch';
 
 const { VITE_BASEROW_TOKEN: token,
   VITE_TABLE_ID_PRESENCES: presencesTableId } = import.meta.env;
@@ -57,7 +58,7 @@ const usePresences = place => {
   const { data: { results: presences = [] } = {} } = useQuery({
     queryKey,
     queryFn: async () => {
-      const response = await fetch(
+      const response = await baserowFetch(
         basePath + qs,
         { headers },
       );
@@ -88,10 +89,13 @@ const usePresences = place => {
   });
 
   const createRow = useMutation({
-    mutationFn: record => fetch(
-      `${basePath}?user_field_names=true`,
-      { headers, method: 'POST', body: JSON.stringify(record) },
-    ),
+    mutationFn: async record => {
+      const response = await baserowFetch(
+        `${basePath}?user_field_names=true`,
+        { headers, method: 'POST', body: JSON.stringify(record) },
+      );
+      return response.json();
+    },
     onMutate: async record => {
       queryClient.setQueryData(queryKey, previous => ({
         results: [
@@ -106,10 +110,13 @@ const usePresences = place => {
   });
 
   const updateRow = useMutation({
-    mutationFn: record => fetch(
-      `${basePath}${record.id}/?user_field_names=true`,
-      { headers, method: 'PATCH', body: JSON.stringify(record) },
-    ),
+    mutationFn: async record => {
+      const response = await baserowFetch(
+        `${basePath}${record.id}/?user_field_names=true`,
+        { headers, method: 'PATCH', body: JSON.stringify(record) },
+      );
+      return response.json();
+    },
     onMutate: async record => {
       queryClient.setQueryData(queryKey, ({ results = [] }) => ({
         results: results.map(result => (
@@ -123,7 +130,7 @@ const usePresences = place => {
   });
 
   const deleteRow = useMutation({
-    mutationFn: record => fetch(
+    mutationFn: record => baserowFetch(
       `${basePath}${record.id}/`,
       { headers, method: 'DELETE' },
     ),

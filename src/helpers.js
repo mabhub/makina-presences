@@ -1,3 +1,5 @@
+import baserowFetch from './helpers/baserowFetch';
+
 /**
  * Normalize a string: lowercase and trim.
  * @param {string} [str=''] - The string to normalize.
@@ -144,27 +146,17 @@ export const createSpot = async (e, {
   spotsTableId = import.meta.env.VITE_TABLE_ID_SPOTS,
   token,
 }) => {
-  try {
-    const rect = e.target.getBoundingClientRect();
-    const response = await fetch(
-      `https://api.baserow.io/api/database/rows/table/${spotsTableId}/?user_field_names=true`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Identifiant: 'PX',
-          x: Math.round((e.clientX - rect.left) / 5) * 5,
-          y: Math.round((e.clientY - rect.top) / 5) * 5,
-        }),
-      },
-    );
-    if (!response.ok) {
-      throw new Error(`Failed to create spot: ${response.status}`);
-    }
-  } catch (err) {
-    // Log technical error for dev/ops
-    // eslint-disable-next-line no-console
-    console.error('createSpot error:', err);
-    throw err;
-  }
+  const rect = e.target.getBoundingClientRect();
+  await baserowFetch(
+    `https://api.baserow.io/api/database/rows/table/${spotsTableId}/?user_field_names=true`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        Identifiant: 'PX',
+        x: Math.round((e.clientX - rect.left) / 5) * 5,
+        y: Math.round((e.clientY - rect.top) / 5) * 5,
+      }),
+    },
+  );
 };

@@ -6,6 +6,7 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { snap } from '../helpers';
+import baserowFetch from '../helpers/baserowFetch';
 
 const { VITE_TABLE_ID_SPOTS: spotsTableId } = import.meta.env;
 
@@ -69,7 +70,7 @@ const useSpotInteractions = (spot, edit) => {
     const { VITE_BASEROW_TOKEN: token } = import.meta.env;
 
     try {
-      await fetch(
+      await baserowFetch(
         `https://api.baserow.io/api/database/rows/table/${spotsTableId}/${spot.id}/?user_field_names=true`,
         {
           method: 'PATCH',
