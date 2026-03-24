@@ -174,12 +174,6 @@ const PresencePage = () => {
     <div className="PresencePage">
       <LoadIndicator />
 
-      {/* === TOASTER CAN BE ENABLED WITH REACT 19 === */}
-      {/* <Toaster
-        richColors
-        visibleToasts={7}
-      /> */}
-
       {(!isTriValid || !place) && (
         <PresenceForm />
       )}

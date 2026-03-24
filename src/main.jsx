@@ -26,7 +26,9 @@ import {
 } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast, Toaster } from 'sonner';
+import { getErrorMessage } from './helpers/baserowFetch';
 
 import ArchivePage from './components/ArchivePage';
 import PresencePage from './components/PresencePage';
@@ -36,7 +38,15 @@ import TTCount from './components/TTCount';
 import DarkThemeProvider from './DarkThemeProvider';
 /* eslint-enable import/first */
 
-const queryClient = new QueryClient();
+const handleGlobalError = (error) => {
+  toast.error(getErrorMessage(error));
+  Sentry.captureException(error);
+};
+
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: handleGlobalError }),
+  mutationCache: new MutationCache({ onError: handleGlobalError }),
+});
 
 const arePrefsExpired = expiredPref.length;
 
@@ -50,6 +60,7 @@ root.render(
       <StyledEngineProvider injectFirst>
         <DarkThemeProvider>
           <CssBaseline />
+          <Toaster richColors visibleToasts={7} position="top-right" />
           {arePrefsExpired
             ? <ExpiredPrefPage />
             : (
