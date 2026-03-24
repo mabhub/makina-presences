@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { Alert, AlertTitle, Box, Snackbar, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { baseFlags, isEnable } from '../feature_flag_service';
 import { sameLowC, isCumulativeSpot } from '../helpers';
@@ -12,7 +13,6 @@ import usePresences from '../hooks/usePresences';
 import useSpots from '../hooks/useSpots';
 import SpotAdditionals from './SpotAdditionals';
 import SpotButton from './SpotButton';
-import TriPresence from './TriPresence';
 import { useTriState } from '../hooks/usePersistedStates';
 
 const { FF_COMPLEMENTARY } = baseFlags;
@@ -29,14 +29,6 @@ const useStyles = makeStyles(theme => ({
   },
   plan: {
     filter: theme.palette.mode === 'dark' ? 'invert(100%)' : 'invert(0%)',
-  },
-  tri: {
-    marginRight: theme.spacing(0.5),
-    marginLeft: theme.spacing(0.5),
-    height: theme.spacing(2.5),
-    '& .MuiChip-label': {
-      padding: theme.spacing(0.5, 1, 0.5, 1),
-    },
   },
 }));
 
@@ -93,19 +85,6 @@ const Plan = ({ edit }) => {
   const DragWrapper = edit ? Children : TransformWrapper;
   const DragComponent = edit ? Children : TransformComponent;
 
-  // State for snackbar info
-  const [snackBarInfo, setSnackBarInfo] = useState({
-    showSnackBar: false,
-    currentTri: '',
-    currentSpot: '',
-    conflict: false,
-    isClosed: false,
-  });
-  const snackBarPosition = {
-    vertical: 'top',
-    horizontal: 'right',
-  };
-
   // Utility: check if a spot is cumulative (parking)
   const isCumulativeSpotCb = React.useCallback(
     spot => isCumulativeSpot(spot, spots),
@@ -130,37 +109,18 @@ const Plan = ({ edit }) => {
     [ownPresences, isCumulativeSpotCb],
   );
 
-  // Show snackbar if only parking or conflict
+  // Show toast if only parking
   useEffect(() => {
-    if (onlyParkingDay.length && !snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
-      setSnackBarInfo(previous => ({
-        ...previous,
-        showSnackBar: true,
-        parking: true,
-      }));
+    if (onlyParkingDay.length) {
+      toast.warning('Il y a des journées où vous êtes uniquement inscrit sur une place de parking.');
     }
-  }, [onlyParkingDay, snackBarInfo.showSnackBar, snackBarInfo.isClosed]);
+  }, [onlyParkingDay.length]);
 
-  // Handle conflict notification
+  // Handle conflict notification via toast
   const handleConflict = (value, t, spot) => {
-    if (!snackBarInfo.showSnackBar && !snackBarInfo.isClosed) {
-      setSnackBarInfo(previous => ({
-        ...previous,
-        showSnackBar: value,
-        currentTri: t,
-        currentSpot: spot,
-        conflict: true,
-      }));
+    if (value) {
+      toast.error(`Vous êtes inscrit sur le même poste que ${t} (${spot}). Discutez-en ou changez de poste.`);
     }
-  };
-
-  // Handle snackbar close
-  const handleSnackbarClose = () => {
-    setSnackBarInfo({
-      ...snackBarInfo,
-      showSnackBar: false,
-      isClosed: true,
-    });
   };
 
   // Ref for plan zoom/pan
@@ -216,46 +176,6 @@ const Plan = ({ edit }) => {
           </Box>
         </DragComponent>
       </DragWrapper>
-      {/* Snackbar for conflicts or parking-only days */}
-      <Snackbar
-        open={snackBarInfo.showSnackBar}
-        anchorOrigin={snackBarPosition}
-        autoHideDuration={5000}
-        onClose={handleSnackbarClose}
-      >
-        <Alert
-          severity={snackBarInfo.conflict ? 'error' : 'warning'}
-        >
-          <AlertTitle><strong>Attention</strong></AlertTitle>
-          <Box
-            sx={{
-              display: 'grid',
-              gap: theme => (theme.spacing(1.5)),
-            }}
-          >
-            {snackBarInfo.conflict && (
-              <Box>
-                Vous êtes inscris sur le même poste que
-                <TriPresence
-                  tri={snackBarInfo.currentTri}
-                  alt
-                  className={classes.tri}
-                />
-                (<strong>{snackBarInfo.currentSpot}</strong>)
-                <br />
-                Discutez-en avec lui ou changez de poste.
-              </Box>
-            )}
-            {snackBarInfo.parking && (
-              <Box className={classes.sectionParking}>
-                <Typography variant="body2">
-                  Il y a des journées où vous êtes uniquement inscrit sur une place de parking.
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </Alert>
-      </Snackbar>
     </>
   );
 };
