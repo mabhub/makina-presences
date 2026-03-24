@@ -54,7 +54,7 @@ describe('useTT', () => {
     });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/.netlify/functions/list');
+      expect(global.fetch).toHaveBeenCalledWith('/.netlify/functions/list', undefined);
     });
   });
 

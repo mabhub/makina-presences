@@ -60,6 +60,7 @@ describe('useBackups', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         'https://archive.example.com/liste.json',
+        undefined,
       );
     });
   });
@@ -157,7 +158,7 @@ describe('useBackups', () => {
     });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('undefined/liste.json');
+      expect(global.fetch).toHaveBeenCalledWith('undefined/liste.json', undefined);
     });
 
     // Restore

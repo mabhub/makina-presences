@@ -319,13 +319,13 @@ describe('createSpot', () => {
     expect(body.Identifiant).toBe('PX');
   });
 
-  // Test: should throw error if response is not ok
+  // Test: should throw BaserowError if response is not ok
   it('should throw error if response is not ok', async () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: false,
         status: 500,
-        json: () => Promise.resolve({}),
+        json: () => Promise.resolve({ error: 'ERROR_INTERNAL', detail: 'Server error' }),
       }));
     const mockRect = { left: 0, top: 0 };
     const mockEvent = {
@@ -336,10 +336,10 @@ describe('createSpot', () => {
       },
     };
     const options = { spotsTableId: '123', token: 'abc' };
-    await expect(createSpot(mockEvent, options)).rejects.toThrow('Failed to create spot: 500');
+    await expect(createSpot(mockEvent, options)).rejects.toThrow('Server error');
   });
 
-  // Test: should throw and log error if fetch throws
+  // Test: should throw error if fetch itself fails (network error)
   it('should throw and log error if fetch throws', async () => {
     const error = new Error('Network error');
     global.fetch = vi.fn(() => Promise.reject(error));
@@ -352,10 +352,6 @@ describe('createSpot', () => {
       },
     };
     const options = { spotsTableId: '123', token: 'abc' };
-    // Mock console.error to suppress output in test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     await expect(createSpot(mockEvent, options)).rejects.toThrow('Network error');
-    expect(consoleSpy).toHaveBeenCalledWith('createSpot error:', error);
-    consoleSpy.mockRestore();
   });
 });

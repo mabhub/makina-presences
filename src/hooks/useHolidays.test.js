@@ -57,6 +57,7 @@ describe('useHolidays', () => {
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         'https://etalab.github.io/jours-feries-france-data/json/metropole.json',
+        undefined,
       );
     });
   });

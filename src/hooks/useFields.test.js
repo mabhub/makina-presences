@@ -40,6 +40,7 @@ describe('useFields', () => {
 
   it('should return empty array initially', () => {
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockResolvedValueOnce(mockFields),
     });
 
@@ -52,6 +53,7 @@ describe('useFields', () => {
 
   it('should fetch and return fields successfully', async () => {
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockResolvedValueOnce(mockFields),
     });
 
@@ -72,6 +74,7 @@ describe('useFields', () => {
   it('should handle different table IDs correctly', async () => {
     const differentTableId = '67890';
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockResolvedValueOnce(mockFields),
     });
 
@@ -92,6 +95,7 @@ describe('useFields', () => {
   it('should handle numeric table ID', async () => {
     const numericTableId = 12345;
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockResolvedValueOnce(mockFields),
     });
 
@@ -127,6 +131,7 @@ describe('useFields', () => {
 
   it('should handle empty response', async () => {
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockResolvedValueOnce([]),
     });
 
@@ -141,6 +146,7 @@ describe('useFields', () => {
 
   it('should handle malformed JSON response', async () => {
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockRejectedValueOnce(new Error('Invalid JSON')),
     });
 
@@ -156,6 +162,7 @@ describe('useFields', () => {
 
   it('should use correct query configuration', async () => {
     global.fetch.mockResolvedValueOnce({
+      ok: true,
       json: vi.fn().mockResolvedValueOnce(mockFields),
     });
 
