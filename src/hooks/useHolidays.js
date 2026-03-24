@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import checkedFetch from '../helpers/checkedFetch';
 
 /**
  * React hook to fetch French public holidays (Metropole) as an object.
@@ -11,7 +12,7 @@ const useHolidays = () => {
   const { data } = useQuery({
     queryKey: ['holidays'],
     queryFn: async () => {
-      const response = await fetch('https://etalab.github.io/jours-feries-france-data/json/metropole.json');
+      const response = await checkedFetch('https://etalab.github.io/jours-feries-france-data/json/metropole.json');
       return response.json();
     },
     staleTime: Infinity,

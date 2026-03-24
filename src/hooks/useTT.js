@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import checkedFetch from '../helpers/checkedFetch';
 
 /**
  * Custom hook to fetch TT (time tracking) data from Netlify functions.
@@ -9,9 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 const useTT = () => useQuery({
   queryKey: ['tt'],
   queryFn: async () => {
-    const response = await fetch('/.netlify/functions/list');
-    const nextData = await response.json();
-    return nextData;
+    const response = await checkedFetch('/.netlify/functions/list');
+    return response.json();
   },
   staleTime: 60000,
   refetchInterval: 60000,

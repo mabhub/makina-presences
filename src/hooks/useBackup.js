@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import checkedFetch from '../helpers/checkedFetch';
 
 /**
  * React hook to fetch and cache the list of backup files from the archive root.
@@ -14,7 +15,7 @@ const useBackups = () => {
   const { data } = useQuery({
     queryKey: ['backups'],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_ARCHIVE_ROOT}/liste.json`);
+      const response = await checkedFetch(`${import.meta.env.VITE_ARCHIVE_ROOT}/liste.json`);
       return response.json();
     },
     staleTime: 1000 * 60 * 60,
