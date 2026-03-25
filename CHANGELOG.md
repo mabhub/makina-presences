@@ -1,3 +1,14 @@
+
+4.6.0 / 2026-03-25
+==================
+
+  * Adapt tests to baserowFetch and checkedFetch wrappers
+  * Migrate Plan.jsx conflict and parking notifications to sonner toasts
+  * Migrate non-Baserow hooks to checkedFetch wrapper
+  * Migrate all Baserow API calls to baserowFetch wrapper
+  * Wire up global error toasts via sonner and Sentry
+  * Introduce baserowFetch and checkedFetch wrappers
+  * Install sonner toast notification library
 4.5.0 / 2026-03-06
 ==================
 
