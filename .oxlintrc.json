@@ -30,7 +30,6 @@
     "dist",
     "dist-ssr",
     "functions/*.js",
-    "bin/update.js",
     "temp"
   ],
   "rules": {
