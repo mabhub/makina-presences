@@ -135,6 +135,77 @@ const weekdayCodeToJsDay = code => (DAYS.indexOf(code) + 1) % 7;
  * @param {string[]} options.warnings - Mutable array collecting unhandled-frequency warnings
  * @returns {Array<{ from: string, days: number }>} Atomic occurrences sorted by date
  */
+/**
+ * Generate the candidate recurrence dates (epoch ms at the targeted days) for a
+ * handled rrule, in ascending order, bounded by [startMs, hardEnd]. Pure
+ * mechanics: applies frequency, interval and byDay but knows nothing about
+ * exdate, exceptions or count.
+ *
+ * @param {Object} rrule - The BlueMind RRule (frequency DAILY or WEEKLY)
+ * @param {number} startMs - Series start, epoch ms
+ * @param {number} hardEnd - Upper bound (min of until and year end), epoch ms
+ * @returns {number[]} Candidate dates as epoch ms, sorted ascending
+ */
+const generateRecurrenceDates = (rrule, startMs, hardEnd) => {
+  const interval = rrule.interval ?? 1;
+  // WEEKLY with byDay targets specific weekdays; otherwise the dtstart weekday.
+  const targetJsDays = rrule.frequency === 'WEEKLY' && rrule.byDay?.length
+    ? rrule.byDay.map(({ day }) => weekdayCodeToJsDay(day)).toSorted((a, b) => a - b)
+    : null;
+
+  const dates = [];
+  let cursor = startMs;
+  let safety = 0;
+
+  while (cursor <= hardEnd && safety < MAX_ITER) {
+    safety += 1;
+
+    if (rrule.frequency === 'DAILY') {
+      dates.push(cursor);
+      cursor += interval * DAY_MS;
+    } else if (targetJsDays) {
+      const weekStart = cursor - ((new Date(cursor).getUTCDay() + 6) % 7) * DAY_MS;
+      const weekDates = targetJsDays
+        .map(jsDay => weekStart + ((jsDay + 6) % 7) * DAY_MS)
+        .filter(dateMs => dateMs >= startMs && dateMs <= hardEnd);
+      dates.push(...weekDates);
+      cursor = weekStart + 7 * interval * DAY_MS;
+    } else {
+      dates.push(cursor);
+      cursor += 7 * interval * DAY_MS;
+    }
+  }
+
+  return dates.toSorted((a, b) => a - b);
+};
+
+/**
+ * Resolve a candidate recurrence date into a concrete occurrence, applying the
+ * matching exception. Yields null when the occurrence is cancelled (so the
+ * caller can drop it without consuming the count).
+ *
+ * @param {number} dateMs - Candidate date, epoch ms
+ * @param {Object|undefined} exception - Matching VEventOccurrence, if any
+ * @param {number} masterDays - Default occurrence length in days
+ * @returns {{ from: string, days: number }|null} The occurrence, or null if cancelled
+ */
+const resolveOccurrence = (dateMs, exception, masterDays) => {
+  if (!exception) {
+    return { from: isoAtUtcMidnight(dateMs), days: masterDays };
+  }
+
+  if (exception.status === 'Cancelled') {
+    return null;
+  }
+
+  const from = exception.dtstart?.iso8601 ?? isoAtUtcMidnight(dateMs);
+  const days = exception.dtstart && exception.dtend
+    ? durationInDays(exception.dtstart, exception.dtend)
+    : masterDays;
+
+  return { from, days };
+};
+
 export const expandTtoSeries = (eventSeries, { yearEnd, warnings }) => {
   const { displayName, value: { main, occurrences = [] } = {} } = eventSeries;
   const { rrule } = main;
@@ -152,93 +223,53 @@ export const expandTtoSeries = (eventSeries, { yearEnd, warnings }) => {
   }
 
   const startMs = new Date(main.dtstart.iso8601).getTime();
-  const interval = rrule.interval ?? 1;
   const untilMs = rrule.until ? new Date(rrule.until.iso8601).getTime() : Infinity;
   const hardEnd = Math.min(untilMs, yearEnd);
   const maxCount = rrule.count ?? Infinity;
 
-  const exdateKeys = new Set((main.exdate ?? []).map(toDateKey));
+  const exdateKeys = new Set((main.exdate ?? []).map(bmDate => toDateKey(bmDate)));
   const exceptionByKey = new Map(occurrences.map(occ => [toDateKey(occ.recurid), occ]));
 
-  // WEEKLY with byDay targets specific weekdays; otherwise the dtstart weekday.
-  const targetJsDays = rrule.frequency === 'WEEKLY' && rrule.byDay?.length
-    ? rrule.byDay.map(({ day }) => weekdayCodeToJsDay(day)).sort((a, b) => a - b)
-    : null;
-
-  const results = [];
-  let emitted = 0;
-  let cursor = startMs;
-  let safety = 0;
-
-  while (cursor <= hardEnd && emitted < maxCount && safety < MAX_ITER) {
-    safety += 1;
-
-    let candidates;
-    let nextCursor;
-
-    if (rrule.frequency === 'DAILY') {
-      candidates = [cursor];
-      nextCursor = cursor + interval * DAY_MS;
-    } else if (targetJsDays) {
-      // Walk the week of `cursor` (Monday-first) and emit each targeted day.
-      const cursorDate = new Date(cursor);
-      const cursorJsDay = cursorDate.getUTCDay();
-      const isoOffset = (cursorJsDay + 6) % 7; // days since Monday
-      const weekStart = cursor - isoOffset * DAY_MS;
-      candidates = targetJsDays.map(jsDay => weekStart + ((jsDay + 6) % 7) * DAY_MS);
-      nextCursor = weekStart + 7 * interval * DAY_MS;
-    } else {
-      candidates = [cursor];
-      nextCursor = cursor + 7 * interval * DAY_MS;
-    }
-
-    for (const dateMs of candidates.sort((a, b) => a - b)) {
-      if (emitted >= maxCount) break;
-      if (dateMs < startMs || dateMs > hardEnd) continue;
-
+  const results = generateRecurrenceDates(rrule, startMs, hardEnd)
+    // Deleted occurrences: dropped, do not consume the count.
+    .filter(dateMs => !exdateKeys.has(toDateKey({ iso8601: isoAtUtcMidnight(dateMs) })))
+    .map(dateMs => {
       const key = toDateKey({ iso8601: isoAtUtcMidnight(dateMs) });
+      return resolveOccurrence(dateMs, exceptionByKey.get(key), masterDays);
+    })
+    // Cancelled occurrences (null): dropped, do not consume the count.
+    .filter(Boolean)
+    .slice(0, maxCount === Infinity ? undefined : maxCount);
 
-      // Deleted occurrence: skipped, does not consume the count.
-      if (exdateKeys.has(key)) continue;
-
-      const exception = exceptionByKey.get(key);
-      if (exception) {
-        // Cancelled exception: skipped, does not consume the count.
-        if (exception.status === 'Cancelled') continue;
-
-        const from = exception.dtstart?.iso8601 ?? isoAtUtcMidnight(dateMs);
-        const days = exception.dtstart && exception.dtend
-          ? durationInDays(exception.dtstart, exception.dtend)
-          : masterDays;
-        results.push({ from, days });
-        emitted += 1;
-        continue;
-      }
-
-      results.push({ from: isoAtUtcMidnight(dateMs), days: masterDays });
-      emitted += 1;
-    }
-
-    cursor = nextCursor;
-  }
-
-  return results.sort(({ from: a }, { from: b }) => a.localeCompare(b));
+  return results.toSorted(({ from: a }, { from: b }) => a.localeCompare(b));
 };
 
-export const getTTO = results => {
-  const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/i));
-  return validResults.map(({ value: { main } }) => {
-    const start = new Date(main.dtstart.iso8601);
-    const end = new Date(main.dtend.iso8601);
+/**
+ * Build the calendar-year-end epoch ms (UTC) for the year of `now`.
+ * Mirrors the UTC reasoning of getCurrentYearDateRange.
+ * @param {number} now - Reference epoch ms
+ * @returns {number} Epoch ms of Dec 31 23:59:59.999 UTC of that year
+ */
+const yearEndMs = now => Date.UTC(new Date(now).getUTCFullYear(), 11, 31, 23, 59, 59, 999);
 
-    const delta = end.getTime() - start.getTime();
-    const days = Math.ceil(delta / (1000 * 3600 * 24));
+/**
+ * Collect every TTO occurrence for a user, expanding recurring series.
+ * Filters events whose displayName starts with "TTO", expands each series via
+ * expandTtoSeries (handling rrule/exdate/exceptions), flattens and sorts by date.
+ *
+ * @param {Array} results - Raw VEventSeries from the BlueMind _search
+ * @param {Object} [options] - Options
+ * @param {number} [options.now] - Reference time (defaults to Date.now())
+ * @param {string[]} [options.warnings] - Mutable array collecting unhandled-frequency warnings
+ * @returns {Array<{ from: string, days: number }>} Atomic occurrences sorted by date
+ */
+export const getTTO = (results, { now = Date.now(), warnings = [] } = {}) => {
+  const yearEnd = yearEndMs(now);
 
-    return {
-      from: main.dtstart.iso8601,
-      days,
-    };
-  });
+  return results
+    .filter(({ displayName }) => displayName.match(/^TTO.*/i))
+    .flatMap(eventSeries => expandTtoSeries(eventSeries, { yearEnd, warnings }))
+    .toSorted(({ from: a }, { from: b }) => a.localeCompare(b));
 };
 
 export const getTTR = results => {
@@ -366,11 +397,12 @@ export const handleUpdate = async (deps) => {
     );
 
     const data = {};
+    const warnings = [];
 
     if (results.errorCode) {
       data.error = results;
     } else {
-      data.tto = getTTO(results);
+      data.tto = getTTO(results, { warnings });
       data.ttr = [...new Set(getTTR(results))];
     }
 
@@ -382,6 +414,9 @@ export const handleUpdate = async (deps) => {
       && !data.error
     ) {
       // Data did not change: early return.
+      // Warnings are intentionally excluded from this comparison: an unhandled
+      // frequency produces stable tto/ttr, so its warning was already written
+      // on the migration PATCH and must not trigger parasitic rewrites.
       return;
     }
 
@@ -393,7 +428,7 @@ export const handleUpdate = async (deps) => {
       total: (data.tto || []).reduce((acc, { days: d = 0 }) => (acc + d), 0),
       ttr: JSON.stringify(data.ttr || []),
       'last-check': new Date().toISOString(),
-      log: data?.error?.message,
+      log: data?.error?.message ?? (warnings.length > 0 ? warnings.join(' | ') : undefined),
     });
 
     const response = await fetch(

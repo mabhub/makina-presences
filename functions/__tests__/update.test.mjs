@@ -72,24 +72,24 @@ describe(toDateKey, () => {
 
   it('should return empty string for null or undefined input', () => {
     expect(toDateKey(null)).toBe('');
-    expect(toDateKey(undefined)).toBe('');
+    expect(toDateKey()).toBe('');
     expect(toDateKey({})).toBe('');
   });
 });
 
+/**
+ * Build a minimal VEventSeries fixture.
+ * @param {Object} main - The main VEvent (dtstart/dtend/rrule/exdate)
+ * @param {Array} [occurrences] - Exception occurrences
+ * @param {string} [displayName] - Series display name
+ * @returns {Object} A VEventSeries-shaped object
+ */
+const series = (main, occurrences = [], displayName = 'TTO - Télétravail') =>
+  ({ displayName, value: { main, occurrences } });
+
 describe(expandTtoSeries, () => {
   // Fixed reference: 2026-06-15 is a Monday, mid-year (clear past/future split).
   const YEAR_END = Date.UTC(2026, 11, 31, 23, 59, 59, 999);
-
-  /**
-   * Build a minimal VEventSeries fixture.
-   * @param {Object} main - The main VEvent (dtstart/dtend/rrule/exdate)
-   * @param {Array} [occurrences] - Exception occurrences
-   * @param {string} [displayName] - Series display name
-   * @returns {Object} A VEventSeries-shaped object
-   */
-  const series = (main, occurrences = [], displayName = 'TTO - Télétravail') =>
-    ({ displayName, value: { main, occurrences } });
 
   const expand = (s, warnings = []) => expandTtoSeries(s, { yearEnd: YEAR_END, warnings });
 
@@ -116,12 +116,12 @@ describe(expandTtoSeries, () => {
 
     // All entries are Mondays of 1 day each, sorted ascending.
     expect(result.length).toBeGreaterThan(50);
-    expect(result.every(({ days }) => days === 1)).toBe(true);
-    expect(result[0].from.startsWith('2026-01-05')).toBe(true);
+    expect(result.filter(({ days }) => days !== 1)).toStrictEqual([]);
+    expect(result[0].from).toMatch(/^2026-01-05/);
     const froms = result.map(({ from }) => from);
-    expect(froms).toStrictEqual([...froms].sort((a, b) => a.localeCompare(b)));
+    expect(froms).toStrictEqual(froms.toSorted((a, b) => a.localeCompare(b)));
     // Every occurrence falls on a Monday (UTC day 1).
-    expect(result.every(({ from }) => new Date(from).getUTCDay() === 1)).toBe(true);
+    expect(result.filter(({ from }) => new Date(from).getUTCDay() !== 1)).toStrictEqual([]);
   });
 
   it('should expand a WEEKLY event with multiple byDay, sorted', () => {
@@ -138,8 +138,8 @@ describe(expandTtoSeries, () => {
     // January 2026: Mondays 5,12,19,26 and Wednesdays 7,14,21,28 = 8 occurrences.
     expect(result).toHaveLength(8);
     const froms = result.map(({ from }) => from);
-    expect(froms).toStrictEqual([...froms].sort((a, b) => a.localeCompare(b)));
-    expect(result.every(({ from }) => [1, 3].includes(new Date(from).getUTCDay()))).toBe(true);
+    expect(froms).toStrictEqual(froms.toSorted((a, b) => a.localeCompare(b)));
+    expect(result.filter(({ from }) => ![1, 3].includes(new Date(from).getUTCDay()))).toStrictEqual([]);
   });
 
   it('should honour interval (every other week)', () => {
@@ -187,7 +187,7 @@ describe(expandTtoSeries, () => {
     }));
 
     expect(result).toHaveLength(3);
-    expect(result.every(({ days }) => days === 2)).toBe(true);
+    expect(result.filter(({ days }) => days !== 2)).toStrictEqual([]);
   });
 
   it('should subtract exdate (Date precision) from occurrences', () => {
@@ -308,8 +308,9 @@ describe(expandTtoSeries, () => {
       },
     }));
 
-    expect(result.every(({ from }) => from <= '2026-06-30')).toBe(true);
-    expect(result.some(({ from }) => from.slice(0, 10) === '2026-06-29')).toBe(true);
+    expect(result.filter(({ from }) => from > '2026-06-30')).toStrictEqual([]);
+    const lastMondayBeforeUntil = result.map(({ from }) => from.slice(0, 10));
+    expect(lastMondayBeforeUntil).toContain('2026-06-29');
   });
 
   it('should bound to end of calendar year when there is no until nor count', () => {
@@ -322,7 +323,7 @@ describe(expandTtoSeries, () => {
       },
     }));
 
-    expect(result.every(({ from }) => from.slice(0, 10) <= '2026-12-31')).toBe(true);
+    expect(result.filter(({ from }) => from.slice(0, 10) > '2026-12-31')).toStrictEqual([]);
     // Should not run away: a year of Mondays is ~52 occurrences.
     expect(result.length).toBeLessThan(54);
   });
@@ -755,8 +756,14 @@ describe(createFetchJson, () => {
 });
 
 describe(handleUpdate, () => {
+  beforeEach(() => {
+    // Mid-year reference so the year-end expansion bound is deterministic.
+    vi.setSystemTime(new Date('2026-06-15T12:00:00Z'));
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   const createMockDeps = (mockFetch) => ({
@@ -1164,6 +1171,80 @@ describe(handleUpdate, () => {
       .mockRejectedValueOnce(new Error('HTTP 503'));
 
     await expect(handleUpdate(deps)).rejects.toThrow('HTTP 503');
+  });
+
+  it('should expand a recurring TTO so total reflects every occurrence', async () => {
+    const mockFetch = vi.fn();
+    const deps = createMockDeps(mockFetch);
+
+    vi.spyOn(deps, 'fetchJson')
+      .mockResolvedValueOnce({
+        results: [
+          { id: 1, uid: 'rec-uid', enabled: true, exclude: false, tri: 'rec', tto: '[]', ttr: '[]' },
+        ],
+      })
+      .mockResolvedValueOnce(['rec-uid'])
+      .mockResolvedValueOnce([
+        {
+          displayName: 'TTO - Récurrent',
+          value: {
+            main: {
+              dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+              dtend: { iso8601: '2026-01-06T00:00:00Z' },
+              rrule: {
+                frequency: 'WEEKLY',
+                byDay: [{ day: 'MO' }],
+                count: 4,
+              },
+            },
+          },
+        },
+      ]);
+
+    mockFetch.mockResolvedValue({ status: 200, json: async () => ({}) });
+
+    await handleUpdate(deps);
+
+    // Single series, but 4 occurrences expanded -> total === 4 (not 1).
+    const patchCall = mockFetch.mock.calls.find(([, opts]) => opts?.method === 'PATCH');
+    const body = JSON.parse(patchCall[1].body);
+    expect(body.total).toBe(4);
+    expect(JSON.parse(body.tto)).toHaveLength(4);
+  });
+
+  it('should log a warning for an unhandled recurrence frequency', async () => {
+    const mockFetch = vi.fn();
+    const deps = createMockDeps(mockFetch);
+
+    vi.spyOn(deps, 'fetchJson')
+      .mockResolvedValueOnce({
+        results: [
+          { id: 1, uid: 'm-uid', enabled: true, exclude: false, tri: 'mon', tto: '[]', ttr: '[]' },
+        ],
+      })
+      .mockResolvedValueOnce(['m-uid'])
+      .mockResolvedValueOnce([
+        {
+          displayName: 'TTO - Mensuel',
+          value: {
+            main: {
+              dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+              dtend: { iso8601: '2026-01-06T00:00:00Z' },
+              rrule: { frequency: 'MONTHLY', byMonthDay: [5] },
+            },
+          },
+        },
+      ]);
+
+    mockFetch.mockResolvedValue({ status: 200, json: async () => ({}) });
+
+    await handleUpdate(deps);
+
+    const patchCall = mockFetch.mock.calls.find(([, opts]) => opts?.method === 'PATCH');
+    const body = JSON.parse(patchCall[1].body);
+    expect(body.log).toMatch(/MONTHLY/);
+    // Unhandled frequency still counts the master occurrence.
+    expect(body.total).toBe(1);
   });
 
   it('should return 403 when BlueMind API returns PERMISSION_DENIED on _alluids', async () => {
