@@ -1,6 +1,6 @@
 {
   "name": "makina-presences",
-  "version": "4.6.0",
+  "version": "4.7.0",
   "repository": "https://github.com/mabhub/makina-presences",
   "overrides": {
     "minimatch": ">=9.0.6",

@@ -1,4 +1,12 @@
 
+4.7.0 / 2026-06-05
+==================
+
+  * Remove dead bin/update.js TT sync script
+  * Dim future TTO occurrences in the timeline
+  * Expand recurring TTO occurrences in getTTO and surface warnings
+  * Introduce TTO recurrence expander with exdate and exception handling
+
 4.6.0 / 2026-03-25
 ==================
 
