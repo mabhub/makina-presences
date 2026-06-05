@@ -12,6 +12,8 @@ import {
   getTTR,
   handleUpdate,
   createFetchJson,
+  toDateKey,
+  expandTtoSeries,
 } from '../update.mjs';
 
 // Mock p-limit before importing
@@ -56,6 +58,319 @@ describe(getCurrentYearDateRange, () => {
     // Check format: YYYY-MM-DD
     expect(result.dateMin.iso8601).toMatch(/^\d{4}-01-01$/);
     expect(result.dateMax.iso8601).toMatch(/^\d{4}-12-31$/);
+  });
+});
+
+describe(toDateKey, () => {
+  it('should extract YYYY-MM-DD from a DateTime precision BmDateTime', () => {
+    expect(toDateKey({ iso8601: '2026-09-04T00:00:00Z', precision: 'DateTime' })).toBe('2026-09-04');
+  });
+
+  it('should pass through a Date precision BmDateTime unchanged', () => {
+    expect(toDateKey({ iso8601: '2026-09-04', precision: 'Date' })).toBe('2026-09-04');
+  });
+
+  it('should return empty string for null or undefined input', () => {
+    expect(toDateKey(null)).toBe('');
+    expect(toDateKey(undefined)).toBe('');
+    expect(toDateKey({})).toBe('');
+  });
+});
+
+describe(expandTtoSeries, () => {
+  // Fixed reference: 2026-06-15 is a Monday, mid-year (clear past/future split).
+  const YEAR_END = Date.UTC(2026, 11, 31, 23, 59, 59, 999);
+
+  /**
+   * Build a minimal VEventSeries fixture.
+   * @param {Object} main - The main VEvent (dtstart/dtend/rrule/exdate)
+   * @param {Array} [occurrences] - Exception occurrences
+   * @param {string} [displayName] - Series display name
+   * @returns {Object} A VEventSeries-shaped object
+   */
+  const series = (main, occurrences = [], displayName = 'TTO - Télétravail') =>
+    ({ displayName, value: { main, occurrences } });
+
+  const expand = (s, warnings = []) => expandTtoSeries(s, { yearEnd: YEAR_END, warnings });
+
+  it('should return a single entry for a non-recurring event', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-03-02T00:00:00Z' },
+      dtend: { iso8601: '2026-03-03T00:00:00Z' },
+    }));
+
+    expect(result).toStrictEqual([{ from: '2026-03-02T00:00:00Z', days: 1 }]);
+  });
+
+  it('should expand a WEEKLY event with a single byDay until end of year', () => {
+    // Start Monday 2026-01-05, every Monday, until 2026-12-31.
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'MO' }],
+        until: { iso8601: '2026-12-31T00:00:00Z' },
+      },
+    }));
+
+    // All entries are Mondays of 1 day each, sorted ascending.
+    expect(result.length).toBeGreaterThan(50);
+    expect(result.every(({ days }) => days === 1)).toBe(true);
+    expect(result[0].from.startsWith('2026-01-05')).toBe(true);
+    const froms = result.map(({ from }) => from);
+    expect(froms).toStrictEqual([...froms].sort((a, b) => a.localeCompare(b)));
+    // Every occurrence falls on a Monday (UTC day 1).
+    expect(result.every(({ from }) => new Date(from).getUTCDay() === 1)).toBe(true);
+  });
+
+  it('should expand a WEEKLY event with multiple byDay, sorted', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'WE' }, { day: 'MO' }],
+        until: { iso8601: '2026-01-31T00:00:00Z' },
+      },
+    }));
+
+    // January 2026: Mondays 5,12,19,26 and Wednesdays 7,14,21,28 = 8 occurrences.
+    expect(result).toHaveLength(8);
+    const froms = result.map(({ from }) => from);
+    expect(froms).toStrictEqual([...froms].sort((a, b) => a.localeCompare(b)));
+    expect(result.every(({ from }) => [1, 3].includes(new Date(from).getUTCDay()))).toBe(true);
+  });
+
+  it('should honour interval (every other week)', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        interval: 2,
+        byDay: [{ day: 'MO' }],
+        until: { iso8601: '2026-02-28T00:00:00Z' },
+      },
+    }));
+
+    // Mondays every 2 weeks from Jan 5: 5, 19, Feb 2, 16 → 4 occurrences.
+    expect(result.map(({ from }) => from.slice(0, 10)))
+      .toStrictEqual(['2026-01-05', '2026-01-19', '2026-02-02', '2026-02-16']);
+  });
+
+  it('should expand a DAILY event with interval', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-01T00:00:00Z' },
+      dtend: { iso8601: '2026-01-02T00:00:00Z' },
+      rrule: {
+        frequency: 'DAILY',
+        interval: 2,
+        count: 3,
+      },
+    }));
+
+    expect(result.map(({ from }) => from.slice(0, 10)))
+      .toStrictEqual(['2026-01-01', '2026-01-03', '2026-01-05']);
+  });
+
+  it('should carry per-occurrence days for multi-day recurring events', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      // 2-day occurrence
+      dtend: { iso8601: '2026-01-07T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'MO' }],
+        count: 3,
+      },
+    }));
+
+    expect(result).toHaveLength(3);
+    expect(result.every(({ days }) => days === 2)).toBe(true);
+  });
+
+  it('should subtract exdate (Date precision) from occurrences', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'MO' }],
+        count: 3,
+      },
+      // Exclude the second Monday, Date precision (no time component).
+      exdate: [{ iso8601: '2026-01-12', precision: 'Date' }],
+    }));
+
+    // count=3 means 3 actually-posted days; exdate does NOT consume the count.
+    const dates = result.map(({ from }) => from.slice(0, 10));
+    expect(dates).not.toContain('2026-01-12');
+    expect(dates).toStrictEqual(['2026-01-05', '2026-01-19', '2026-01-26']);
+  });
+
+  it('should apply a moved exception (recurid -> new dtstart)', () => {
+    const result = expand(series(
+      {
+        dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+        dtend: { iso8601: '2026-01-06T00:00:00Z' },
+        rrule: {
+          frequency: 'WEEKLY',
+          byDay: [{ day: 'MO' }],
+          count: 2,
+        },
+      },
+      [{
+        recurid: { iso8601: '2026-01-12', precision: 'Date' },
+        dtstart: { iso8601: '2026-01-13T00:00:00Z' },
+        dtend: { iso8601: '2026-01-14T00:00:00Z' },
+      }],
+    ));
+
+    const dates = result.map(({ from }) => from.slice(0, 10));
+    expect(dates).toContain('2026-01-13');
+    expect(dates).not.toContain('2026-01-12');
+  });
+
+  it('should apply a shortened exception (reduced days)', () => {
+    const result = expand(series(
+      {
+        dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+        // base occurrence is 2 days
+        dtend: { iso8601: '2026-01-07T00:00:00Z' },
+        rrule: {
+          frequency: 'WEEKLY',
+          byDay: [{ day: 'MO' }],
+          count: 2,
+        },
+      },
+      [{
+        recurid: { iso8601: '2026-01-12', precision: 'Date' },
+        dtstart: { iso8601: '2026-01-12T00:00:00Z' },
+        // shortened to 1 day
+        dtend: { iso8601: '2026-01-13T00:00:00Z' },
+      }],
+    ));
+
+    const jan12 = result.find(({ from }) => from.slice(0, 10) === '2026-01-12');
+    expect(jan12.days).toBe(1);
+  });
+
+  it('should drop a cancelled exception without consuming the count', () => {
+    const result = expand(series(
+      {
+        dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+        dtend: { iso8601: '2026-01-06T00:00:00Z' },
+        rrule: {
+          frequency: 'WEEKLY',
+          byDay: [{ day: 'MO' }],
+          count: 3,
+        },
+      },
+      [{
+        recurid: { iso8601: '2026-01-12', precision: 'Date' },
+        // BlueMind enum is PascalCase: 'Cancelled', not 'CANCELLED'
+        status: 'Cancelled',
+      }],
+    ));
+
+    const dates = result.map(({ from }) => from.slice(0, 10));
+    expect(dates).not.toContain('2026-01-12');
+    expect(dates).toStrictEqual(['2026-01-05', '2026-01-19', '2026-01-26']);
+  });
+
+  it('should count actually-posted days when count and exdate coexist', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'MO' }],
+        count: 2,
+      },
+      exdate: [{ iso8601: '2026-01-12', precision: 'Date' }],
+    }));
+
+    // 2 posted days: the excluded Monday does not consume the count.
+    expect(result).toHaveLength(2);
+    expect(result.map(({ from }) => from.slice(0, 10)))
+      .toStrictEqual(['2026-01-05', '2026-01-19']);
+  });
+
+  it('should stop at until even if the year continues', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'MO' }],
+        until: { iso8601: '2026-06-30T00:00:00Z' },
+      },
+    }));
+
+    expect(result.every(({ from }) => from <= '2026-06-30')).toBe(true);
+    expect(result.some(({ from }) => from.slice(0, 10) === '2026-06-29')).toBe(true);
+  });
+
+  it('should bound to end of calendar year when there is no until nor count', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        byDay: [{ day: 'MO' }],
+      },
+    }));
+
+    expect(result.every(({ from }) => from.slice(0, 10) <= '2026-12-31')).toBe(true);
+    // Should not run away: a year of Mondays is ~52 occurrences.
+    expect(result.length).toBeLessThan(54);
+  });
+
+  it('should count an unhandled frequency as a single master occurrence and warn', () => {
+    const warnings = [];
+    const result = expandTtoSeries(
+      series({
+        dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+        dtend: { iso8601: '2026-01-06T00:00:00Z' },
+        rrule: { frequency: 'MONTHLY', byMonthDay: [5] },
+      }, [], 'TTO - Mensuel'),
+      { yearEnd: YEAR_END, warnings },
+    );
+
+    expect(result).toStrictEqual([{ from: '2026-01-05T00:00:00Z', days: 1 }]);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toMatch(/MONTHLY/);
+    expect(warnings[0]).toMatch(/TTO - Mensuel/);
+  });
+
+  it('should handle WEEKLY without byDay (same weekday as dtstart)', () => {
+    const result = expand(series({
+      // Monday
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'WEEKLY',
+        count: 3,
+      },
+    }));
+
+    expect(result.map(({ from }) => from.slice(0, 10)))
+      .toStrictEqual(['2026-01-05', '2026-01-12', '2026-01-19']);
+  });
+
+  it('should not run away for an unbounded WEEKLY recurrence', () => {
+    const result = expand(series({
+      dtstart: { iso8601: '2026-01-05T00:00:00Z' },
+      dtend: { iso8601: '2026-01-06T00:00:00Z' },
+      rrule: {
+        frequency: 'DAILY',
+      },
+    }));
+
+    // Bounded by year end, never the MAX_ITER guard.
+    expect(result.length).toBeLessThanOrEqual(366);
+    expect(result.length).toBeGreaterThan(300);
   });
 });
 

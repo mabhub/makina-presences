@@ -67,6 +67,164 @@ export const getCurrentYearDateRange = () => {
   };
 };
 
+const DAY_MS = 1000 * 3600 * 24;
+
+// Hard cap on expansion iterations: a safety net against malformed rrules.
+// The real bound is always `yearEnd`; a daily recurrence over a year is ~366.
+const MAX_ITER = 400;
+
+// Frequencies the expander knows how to unroll. Others are counted as a single
+// master occurrence and logged, so we never silently undercount.
+const HANDLED_FREQUENCIES = new Set(['DAILY', 'WEEKLY']);
+
+/**
+ * Extract a stable calendar-date key "YYYY-MM-DD" from a BmDateTime.
+ * Slices the raw ISO string rather than reinterpreting it, so a `Date`
+ * precision value ('2026-09-04') and a `DateTime` value
+ * ('2026-09-04T00:00:00Z') yield the same key. Never compare exdate/recurid
+ * via getTime() — TTO/TTR are whole days, compared on the calendar date.
+ *
+ * @param {{ iso8601?: string }} [bmDateTime] - A BlueMind BmDateTime object
+ * @returns {string} The "YYYY-MM-DD" key, or '' when absent
+ */
+export const toDateKey = bmDateTime => (bmDateTime?.iso8601 ?? '').slice(0, 10);
+
+/**
+ * Compute the duration in whole days between two BmDateTime values.
+ * Mirrors the legacy getTTO calculation; always at least 1 day.
+ * @param {{ iso8601: string }} dtstart - Start
+ * @param {{ iso8601: string }} dtend - End
+ * @returns {number} Number of days (>= 1)
+ */
+const durationInDays = (dtstart, dtend) => {
+  const delta = new Date(dtend.iso8601).getTime() - new Date(dtstart.iso8601).getTime();
+  return Math.max(Math.ceil(delta / DAY_MS), 1);
+};
+
+/**
+ * Build the ISO string for a calendar date at UTC midnight.
+ * @param {number} ms - Epoch milliseconds
+ * @returns {string} ISO 8601 string
+ */
+const isoAtUtcMidnight = ms => {
+  const d = new Date(ms);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+};
+
+/**
+ * Map a BlueMind weekday code (MO..SU, Monday-first) to a JS getUTCDay()
+ * index (SU=0..SA=6).
+ * @param {string} code - Weekday code
+ * @returns {number} JS day index 0..6
+ */
+const weekdayCodeToJsDay = code => (DAYS.indexOf(code) + 1) % 7;
+
+/**
+ * Expand a single TTO series into atomic occurrences `[{ from, days }]`.
+ *
+ * Handles DAILY/WEEKLY recurrences with interval/byDay/count/until, bounded by
+ * the calendar year end. Subtracts `main.exdate`, applies exception
+ * occurrences (moved/shortened/cancelled) matched on `recurid`. `count`
+ * counts actually-posted days (exdate and cancelled exceptions do not consume
+ * it). Unhandled frequencies (MONTHLY/YEARLY/...) yield the master occurrence
+ * and push a warning.
+ *
+ * @param {Object} eventSeries - A VEventSeries: { displayName, value: { main, occurrences } }
+ * @param {Object} options - Options
+ * @param {number} options.yearEnd - Epoch ms of the calendar year end (hard upper bound)
+ * @param {string[]} options.warnings - Mutable array collecting unhandled-frequency warnings
+ * @returns {Array<{ from: string, days: number }>} Atomic occurrences sorted by date
+ */
+export const expandTtoSeries = (eventSeries, { yearEnd, warnings }) => {
+  const { displayName, value: { main, occurrences = [] } = {} } = eventSeries;
+  const { rrule } = main;
+
+  const masterDays = durationInDays(main.dtstart, main.dtend);
+  const masterOccurrence = { from: main.dtstart.iso8601, days: masterDays };
+
+  if (!rrule) {
+    return [masterOccurrence];
+  }
+
+  if (!HANDLED_FREQUENCIES.has(rrule.frequency)) {
+    warnings.push(`${displayName}: fréquence ${rrule.frequency} non gérée, comptée comme occurrence unique`);
+    return [masterOccurrence];
+  }
+
+  const startMs = new Date(main.dtstart.iso8601).getTime();
+  const interval = rrule.interval ?? 1;
+  const untilMs = rrule.until ? new Date(rrule.until.iso8601).getTime() : Infinity;
+  const hardEnd = Math.min(untilMs, yearEnd);
+  const maxCount = rrule.count ?? Infinity;
+
+  const exdateKeys = new Set((main.exdate ?? []).map(toDateKey));
+  const exceptionByKey = new Map(occurrences.map(occ => [toDateKey(occ.recurid), occ]));
+
+  // WEEKLY with byDay targets specific weekdays; otherwise the dtstart weekday.
+  const targetJsDays = rrule.frequency === 'WEEKLY' && rrule.byDay?.length
+    ? rrule.byDay.map(({ day }) => weekdayCodeToJsDay(day)).sort((a, b) => a - b)
+    : null;
+
+  const results = [];
+  let emitted = 0;
+  let cursor = startMs;
+  let safety = 0;
+
+  while (cursor <= hardEnd && emitted < maxCount && safety < MAX_ITER) {
+    safety += 1;
+
+    let candidates;
+    let nextCursor;
+
+    if (rrule.frequency === 'DAILY') {
+      candidates = [cursor];
+      nextCursor = cursor + interval * DAY_MS;
+    } else if (targetJsDays) {
+      // Walk the week of `cursor` (Monday-first) and emit each targeted day.
+      const cursorDate = new Date(cursor);
+      const cursorJsDay = cursorDate.getUTCDay();
+      const isoOffset = (cursorJsDay + 6) % 7; // days since Monday
+      const weekStart = cursor - isoOffset * DAY_MS;
+      candidates = targetJsDays.map(jsDay => weekStart + ((jsDay + 6) % 7) * DAY_MS);
+      nextCursor = weekStart + 7 * interval * DAY_MS;
+    } else {
+      candidates = [cursor];
+      nextCursor = cursor + 7 * interval * DAY_MS;
+    }
+
+    for (const dateMs of candidates.sort((a, b) => a - b)) {
+      if (emitted >= maxCount) break;
+      if (dateMs < startMs || dateMs > hardEnd) continue;
+
+      const key = toDateKey({ iso8601: isoAtUtcMidnight(dateMs) });
+
+      // Deleted occurrence: skipped, does not consume the count.
+      if (exdateKeys.has(key)) continue;
+
+      const exception = exceptionByKey.get(key);
+      if (exception) {
+        // Cancelled exception: skipped, does not consume the count.
+        if (exception.status === 'Cancelled') continue;
+
+        const from = exception.dtstart?.iso8601 ?? isoAtUtcMidnight(dateMs);
+        const days = exception.dtstart && exception.dtend
+          ? durationInDays(exception.dtstart, exception.dtend)
+          : masterDays;
+        results.push({ from, days });
+        emitted += 1;
+        continue;
+      }
+
+      results.push({ from: isoAtUtcMidnight(dateMs), days: masterDays });
+      emitted += 1;
+    }
+
+    cursor = nextCursor;
+  }
+
+  return results.sort(({ from: a }, { from: b }) => a.localeCompare(b));
+};
+
 export const getTTO = results => {
   const validResults = results.filter(({ displayName }) => displayName.match(/^TTO.*/i));
   return validResults.map(({ value: { main } }) => {
