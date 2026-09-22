@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import { wrapWithSentry } from './sentry.mjs';
-import fetchWithTimeout from './utils.mjs';
+import fetchWithTimeout, { isActiveRow } from './utils.mjs';
 
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
@@ -371,7 +371,7 @@ export const handleUpdate = async (deps) => {
   }
 
   const enabledUids = cacheTable
-    .filter(({ enabled, exclude }) => enabled && !exclude);
+    .filter(row => isActiveRow(row));
 
   /**
    * Do calendar search

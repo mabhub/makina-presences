@@ -17,4 +17,24 @@ const fetchWithTimeout = (url, options, ms, fetchFn = globalThis.fetch) => {
     .finally(() => clearTimeout(timer));
 };
 
+/**
+ * Tells whether a TT cache row must be processed and served.
+ *
+ * The two flags answer different questions. `exclude` describes the nature of
+ * the account: it permanently marks non-human entries (system accounts, service
+ * accounts, shared mailboxes, test accounts), which must never be processed
+ * whatever `enabled` says. `enabled` is the mutable switch deciding whether a
+ * human account is currently tracked; untracked people (former employees, staff
+ * outside the scope of the feature) are simply disabled, not excluded.
+ *
+ * Both the sync job and the front-facing list apply this same predicate, so an
+ * excluded row can never be served with stale data after an accidental enable.
+ *
+ * @param {Object} row - A TT cache row
+ * @param {boolean} [row.enabled] - Whether the human account is currently tracked
+ * @param {boolean} [row.exclude] - Whether the account is non-human
+ * @returns {boolean} True when the row is active
+ */
+export const isActiveRow = ({ enabled, exclude }) => Boolean(enabled) && !exclude;
+
 export default fetchWithTimeout;

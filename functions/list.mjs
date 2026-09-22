@@ -1,5 +1,5 @@
 import { wrapWithSentry } from './sentry.mjs';
-import fetchWithTimeout from './utils.mjs';
+import fetchWithTimeout, { isActiveRow } from './utils.mjs';
 
 const BASEROW_TIMEOUT_MS = 5000;
 
@@ -15,7 +15,7 @@ export const handleList = async (deps) => {
     [
       `${baserowTablePath}?`,
       'user_field_names=true',
-      'include=tri,total,enabled,tto,ttr',
+      'include=tri,total,enabled,exclude,tto,ttr',
       'size=200',
     ].join('&'),
     { headers: baserowHeaders },
@@ -34,7 +34,7 @@ export const handleList = async (deps) => {
   }
 
   const results = data.results
-    .filter(({ enabled }) => enabled)
+    .filter(row => isActiveRow(row))
     .map(({ tri, total, tto, ttr }) =>
       ({ tri, total, tto: JSON.parse(tto), ttr: JSON.parse(ttr) }));
 

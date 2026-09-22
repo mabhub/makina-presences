@@ -7,7 +7,7 @@ import {
   afterEach,
 } from 'vitest';
 
-import fetchWithTimeout from '../utils.mjs';
+import fetchWithTimeout, { isActiveRow } from '../utils.mjs';
 
 describe(fetchWithTimeout, () => {
   beforeEach(() => {
@@ -77,5 +77,33 @@ describe(fetchWithTimeout, () => {
 
     // oxlint-disable-next-line jest/prefer-called-with
     expect(clearTimeoutSpy).toHaveBeenCalled();
+  });
+});
+
+describe(isActiveRow, () => {
+  it('keeps a tracked human account', () => {
+    expect(isActiveRow({ enabled: true, exclude: false })).toBeTruthy();
+  });
+
+  it('rejects an untracked human account', () => {
+    expect(isActiveRow({ enabled: false, exclude: false })).toBeFalsy();
+  });
+
+  it('rejects a non-human account even when enabled', () => {
+    expect(isActiveRow({ enabled: true, exclude: true })).toBeFalsy();
+  });
+
+  it('rejects an account that is both disabled and non-human', () => {
+    expect(isActiveRow({ enabled: false, exclude: true })).toBeFalsy();
+  });
+
+  it('falls back on enabled when exclude is missing', () => {
+    // A row fetched without the exclude field must not be excluded by default.
+    expect(isActiveRow({ enabled: true })).toBeTruthy();
+    expect(isActiveRow({ enabled: false })).toBeFalsy();
+  });
+
+  it('returns a boolean when enabled is missing', () => {
+    expect(isActiveRow({})).toBeFalsy();
   });
 });

@@ -103,7 +103,7 @@ describe('list.mjs handler', () => {
     await handleList(deps);
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://api.baserow.io/api/database/rows/table/123?&user_field_names=true&include=tri,total,enabled,tto,ttr&size=200',
+      'https://api.baserow.io/api/database/rows/table/123?&user_field_names=true&include=tri,total,enabled,exclude,tto,ttr&size=200',
       expect.objectContaining({
         headers: {
           Authorization: 'Token test-token-123',
@@ -304,5 +304,40 @@ describe('list.mjs handler', () => {
     expect(body[0]).not.toHaveProperty('enabled');
     expect(body[0]).not.toHaveProperty('extraField');
     expect(body[0]).not.toHaveProperty('anotherField');
+  });
+
+  it('should skip excluded records even when enabled', async () => {
+    const mockResponse = {
+      results: [
+        {
+          tri: 'excluded',
+          total: 54,
+          enabled: true,
+          exclude: true,
+          tto: '[{"from":"2025-02-03","days":54}]',
+          ttr: '[1,2,4]',
+        },
+        {
+          tri: 'normal',
+          total: 5,
+          enabled: true,
+          exclude: false,
+          tto: '[]',
+          ttr: '[]',
+        },
+      ],
+    };
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      // oxlint-disable-next-line promise/prefer-await-to-then
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    const response = await handleList(deps);
+    const body = JSON.parse(await response.text());
+
+    expect(body).toHaveLength(1);
+    expect(body[0].tri).toBe('normal');
   });
 });
