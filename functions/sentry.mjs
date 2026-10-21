@@ -1,4 +1,21 @@
+import { readFileSync } from 'node:fs';
 import * as Sentry from '@sentry/node';
+
+/**
+ * Read the release stamped at build time by `npm run build` (output of
+ * `git describe`), so that functions and front report the same release.
+ * `COMMIT_REF` cannot be used: Netlify exposes it to the build only.
+ *
+ * @param {URL} [fileUrl] - Stamped version file, shipped via `included_files`.
+ * @returns {string} Sentry release, or `unknown` when no version was stamped.
+ */
+export const readRelease = (fileUrl = new URL('./release.txt', import.meta.url)) => {
+  try {
+    return `presences@${readFileSync(fileUrl, 'utf8').trim()}`;
+  } catch {
+    return 'unknown';
+  }
+};
 
 /**
  * État d'initialisation Sentry (module-scoped pour optimiser les cold starts)
@@ -25,7 +42,7 @@ export const initSentry = (functionName) => {
   Sentry.init({
     dsn: sentryDsn,
     environment: Netlify.env.get('CONTEXT') || 'production',
-    release: Netlify.env.get('COMMIT_REF') || 'unknown',
+    release: readRelease(),
 
     // Tracing pour les fonctions serverless
     tracesSampleRate: 1,

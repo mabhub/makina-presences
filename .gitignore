@@ -6,4 +6,7 @@
 
 # Local Netlify folder
 .netlify
+
+# Release stamped by `npm run build`, read by the functions
+/functions/release.txt
 .env

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "VITE_PROJECT_VERSION=`git describe` vite build",
+    "build": "git describe --always --dirty > functions/release.txt && VITE_PROJECT_VERSION=$(cat functions/release.txt) vite build",
     "lint": "oxlint",
     "serve": "vite preview",
     "start": "ntl dev",
