@@ -1007,7 +1007,7 @@ describe(handleUpdate, () => {
     expect(deps.fetchJson).toHaveBeenCalledTimes(3);
   });
 
-  it('should handle API errors gracefully', async () => {
+  it('should log a failed calendar search in the user row', async () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
@@ -1026,10 +1026,7 @@ describe(handleUpdate, () => {
         ],
       })
       .mockResolvedValueOnce(['test-uid'])
-      .mockResolvedValueOnce({
-        errorCode: 'CALENDAR_ERROR',
-        message: 'Calendar not found',
-      });
+      .mockRejectedValueOnce(new Error('HTTP 404'));
 
     mockFetch.mockResolvedValue({
       status: 200,
@@ -1043,11 +1040,69 @@ describe(handleUpdate, () => {
       expect.any(String),
       expect.objectContaining({
         method: 'PATCH',
-        body: expect.stringContaining('Calendar not found'),
+        body: expect.stringContaining('HTTP 404'),
       }),
     );
 
     expect(response.status).toBe(200);
+  });
+
+  it('should keep syncing other users when one calendar search fails', async () => {
+    const mockFetch = vi.fn();
+    const deps = createMockDeps(mockFetch);
+
+    vi.spyOn(deps, 'fetchJson')
+      .mockResolvedValueOnce({
+        results: [
+          { id: 1, uid: 'gone-uid', enabled: true, exclude: false, tri: 'gon', tto: '[]', ttr: '[]' },
+          { id: 2, uid: 'ok-uid', enabled: true, exclude: false, tri: 'oki', tto: '[]', ttr: '[]' },
+        ],
+      })
+      .mockResolvedValueOnce(['ok-uid'])
+      .mockRejectedValueOnce(new Error('HTTP 404'))
+      .mockResolvedValueOnce([
+        {
+          displayName: 'TTO - Leave',
+          value: {
+            main: {
+              dtstart: { iso8601: '2026-02-01T00:00:00Z' },
+              dtend: { iso8601: '2026-02-03T00:00:00Z' },
+            },
+          },
+        },
+      ]);
+
+    mockFetch.mockResolvedValue({ status: 200, json: async () => ({}) });
+
+    const response = await handleUpdate(deps);
+
+    expect(response.status).toBe(200);
+    const patchedIds = mockFetch.mock.calls
+      .filter(([, opts]) => opts?.method === 'PATCH')
+      .map(([, opts]) => JSON.parse(opts.body).id);
+    expect(patchedIds.toSorted()).toStrictEqual([1, 2]);
+  });
+
+  it('should report a failed calendar search with the user trigram', async () => {
+    const mockFetch = vi.fn();
+    const reportUserError = vi.fn();
+    const deps = { ...createMockDeps(mockFetch), reportUserError };
+    const error = new Error('HTTP 404');
+
+    vi.spyOn(deps, 'fetchJson')
+      .mockResolvedValueOnce({
+        results: [
+          { id: 1, uid: 'gone-uid', enabled: true, exclude: false, tri: 'gon', tto: '[]', ttr: '[]' },
+        ],
+      })
+      .mockResolvedValueOnce([])
+      .mockRejectedValueOnce(error);
+
+    mockFetch.mockResolvedValue({ status: 200, json: async () => ({}) });
+
+    await handleUpdate(deps);
+
+    expect(reportUserError).toHaveBeenCalledWith(error, 'gon');
   });
 
   it('should return list of updated user tris', async () => {
@@ -1159,16 +1214,11 @@ describe(handleUpdate, () => {
     stderrSpy.mockRestore();
   });
 
-  it('should throw an HTTP error when a dependency fetch returns non-ok response', async () => {
+  it('should throw an HTTP error when the cache table fetch fails', async () => {
     const mockFetch = vi.fn();
     const deps = createMockDeps(mockFetch);
 
-    // fetchJson should reject with HTTP error when response is not ok
-    vi.spyOn(deps, 'fetchJson').mockResolvedValueOnce({
-      results: [{ id: 1, uid: 'uid', enabled: true, tri: 'abc', tto: '[]', ttr: '[]' }],
-    })
-      .mockResolvedValueOnce(['uid'])
-      .mockRejectedValueOnce(new Error('HTTP 503'));
+    vi.spyOn(deps, 'fetchJson').mockRejectedValueOnce(new Error('HTTP 503'));
 
     await expect(handleUpdate(deps)).rejects.toThrow('HTTP 503');
   });

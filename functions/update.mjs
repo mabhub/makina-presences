@@ -322,6 +322,7 @@ export const handleUpdate = async (deps) => {
     bmApiPath,
     bmDomain,
     bmHeaders,
+    reportUserError = () => {},
   } = deps;
 
   const { results: cacheTable } = await fetchJson(
@@ -380,33 +381,35 @@ export const handleUpdate = async (deps) => {
   const limit = pLimit(7);
 
   const processUid = async uid => {
-    const results = await fetchJson(
-      `${bmApiPath}calendars/_search`,
-      {
-        headers: { ...bmHeaders, 'Content-Type': 'application/json' },
-        method: 'POST',
-        body: JSON.stringify({
-          containers: [`calendar:Default:${uid}`],
-          eventQuery: {
-            query: 'TTO || TTR',
-            ...getCurrentYearDateRange(),
-            size: 100,
-          },
-        }),
-      },
-    );
+    const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
 
     const data = {};
     const warnings = [];
 
-    if (results.errorCode) {
-      data.error = results;
-    } else {
+    try {
+      const results = await fetchJson(
+        `${bmApiPath}calendars/_search`,
+        {
+          headers: { ...bmHeaders, 'Content-Type': 'application/json' },
+          method: 'POST',
+          body: JSON.stringify({
+            containers: [`calendar:Default:${uid}`],
+            eventQuery: {
+              query: 'TTO || TTR',
+              ...getCurrentYearDateRange(),
+              size: 100,
+            },
+          }),
+        },
+      );
       data.tto = getTTO(results, { warnings });
       data.ttr = [...new Set(getTTR(results))];
+    } catch (error) {
+      // One user's failure (e.g. calendar removed from BlueMind) must not abort
+      // the whole sync: keep the error in the row log and report it.
+      data.error = error;
+      reportUserError(error, record.tri);
     }
-
-    const { updated, order, ...record } = cacheTable.find(({ uid: tUid }) => (tUid === uid));
 
     if (
       JSON.stringify(data.tto, null, 2) === record.tto
