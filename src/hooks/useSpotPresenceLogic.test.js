@@ -504,6 +504,63 @@ describe('useSpotPresenceLogic', () => {
     });
   });
 
+  describe('Unsubscribing from own spot', () => {
+    afterEach(async () => {
+      const calculations = await import('../utils/spotPresenceCalculations');
+      calculations.getCurrentTriPeriod.mockReturnValue(null);
+      calculations.getCurrentPresence.mockReturnValue({});
+      calculations.calculateSpotStates.mockReturnValue({
+        isLocked: false,
+        isOccupied: false,
+        isOwnSpot: false,
+        isConflict: false,
+        isCumulative: false,
+        canClick: true,
+      });
+    });
+
+    it('should only delete the presence, without a concurrent update', async () => {
+      const today = dayjs().format('YYYY-MM-DD');
+      const ownPresence = { id: 7, day: today, tri: 'abc', spot: 'A1', period: 'fullday' };
+      const mockSetPresence = vi.fn();
+      const mockDeletePresence = vi.fn();
+      const usePresencesMock = vi.mocked((await import('./usePresences')).default);
+
+      localStorageMock.setItem('tri', JSON.stringify('abc'));
+
+      usePresencesMock.mockReturnValue({
+        presences: [ownPresence],
+        setPresence: mockSetPresence,
+        deletePresence: mockDeletePresence,
+      });
+
+      const calculations = await import('../utils/spotPresenceCalculations');
+      calculations.getCurrentTriPeriod.mockReturnValue('fullday');
+      calculations.getCurrentPresence.mockReturnValue(ownPresence);
+      calculations.calculateSpotStates.mockReturnValue({
+        isLocked: false,
+        isOccupied: true,
+        isOwnSpot: true,
+        isConflict: false,
+        isCumulative: false,
+        canClick: true,
+      });
+
+      const { result } = renderHook(
+        () => useSpotPresenceLogic(mockSpot, mockOnConflict),
+        { wrapper: AllTheProviders },
+      );
+
+      act(() => {
+        result.current.handleClick('fullday');
+      });
+
+      expect(mockSetPresence).not.toHaveBeenCalled();
+      expect(mockDeletePresence).toHaveBeenCalledTimes(1);
+      expect(mockDeletePresence).toHaveBeenCalledWith(ownPresence);
+    });
+  });
+
   describe('Blocked spots', () => {
     it('should handle blocked spots in state calculation', async () => {
       const blockedSpot = { ...mockSpot, Bloqué: true };

@@ -137,6 +137,17 @@ const useSpotPresenceLogic = (spot, onConflict) => {
   }, [removePresence, triPeriod]);
 
   const handleClick = useCallback(p => {
+    const [previousPeriod = FULLDAY_PERIOD] = dayPresences
+      .filter(({ spot: s }) => !isCumulativeSpot(s))
+      .filter(({ tri: t }) => sameLowC(t, ownTri))
+      .map(({ period }) => period);
+
+    // Unsubscribing only needs the DELETE: a concurrent PATCH on the same row
+    // would race with it and fail with a 404 once the row is gone.
+    if (states.isOwnSpot && previousPeriod === p) {
+      return unsubscribe();
+    }
+
     if ((!states.isOccupied && !states.isLocked) || triPeriod) {
       const [firstId, ...extraneous] = dayPresences
         ?.filter(({ tri: t }) => sameLowC(t, ownTri)) // Keep only own points
@@ -154,15 +165,6 @@ const useSpotPresenceLogic = (spot, onConflict) => {
         period: p,
       });
       extraneous.forEach(i => deletePresence({ id: i }));
-    }
-
-    const [previousPeriod = FULLDAY_PERIOD] = dayPresences
-      .filter(({ spot: s }) => !isCumulativeSpot(s))
-      .filter(({ tri: t }) => sameLowC(t, ownTri))
-      .map(({ period }) => period);
-
-    if (states.isOwnSpot && previousPeriod === p) {
-      return unsubscribe();
     }
 
     return null;
