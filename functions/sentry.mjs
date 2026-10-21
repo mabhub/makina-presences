@@ -137,6 +137,17 @@ export const wrapWithSentry = (functionName, handler) => {
 };
 
 /**
+ * Capture an error caused by a given user's data, tagging the event with
+ * the user's trigram so Sentry can count and filter affected users.
+ * @param {Error} error - Error to report
+ * @param {string} tri - User trigram
+ * @returns {void}
+ */
+export const captureUserError = (error, tri) => {
+  Sentry.captureException(error, { user: { username: tri } });
+};
+
+/**
  * Empty Netlify handler — sentry.mjs is not a real lambda function.
  * Returns 204 No Content to avoid errors if the file is invoked directly.
  * @returns {Promise<Response>} 204 No Content response

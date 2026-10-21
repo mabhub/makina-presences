@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { wrapWithSentry } from './sentry.mjs';
+import { captureUserError, wrapWithSentry } from './sentry.mjs';
 import fetchWithTimeout, { isActiveRow } from './utils.mjs';
 
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
@@ -49,6 +49,7 @@ const getDefaultDeps = () => {
     bmHeaders: {
       'X-BM-ApiKey': Netlify.env.get('BM_APIKEY'),
     },
+    reportUserError: captureUserError,
   };
 };
 
