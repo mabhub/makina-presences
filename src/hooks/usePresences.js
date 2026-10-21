@@ -16,6 +16,16 @@ const headers = {
 };
 
 /**
+ * Tell whether a presence is the optimistic copy of a row whose creation is
+ * still pending: its id is then the temporary `key` string, unknown to
+ * Baserow, while real row ids are numbers.
+ *
+ * @param {Object} [presence] - Presence object.
+ * @returns {boolean} True while the presence has no Baserow id yet.
+ */
+const isPendingCreation = presence => typeof presence?.id === 'string';
+
+/**
  * React hook to manage presences for a given place.
  * Provides CRUD operations and fetches presences for a time span based on user preferences.
  *
@@ -156,14 +166,20 @@ const usePresences = place => {
     [createRow],
   );
 
+  // Changes to a presence still being created are dropped: Baserow would
+  // answer 404 on its temporary id.
   const deletePresence = React.useCallback(
-    presence => deleteRow.mutate(presence),
+    presence => (isPendingCreation(presence) ? null : deleteRow.mutate(presence)),
     [deleteRow],
   );
 
   const setPresence = React.useCallback(
     presence => {
       const { id, day, tri, plan, spot, period } = presence;
+      if (isPendingCreation(presence)) {
+        return null;
+      }
+
       if (id && !spot) {
         return deleteRow.mutate(presence);
       }

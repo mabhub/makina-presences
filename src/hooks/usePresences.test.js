@@ -466,6 +466,68 @@ describe('usePresences', () => {
   });
 
 
+  describe('Presence still being created', () => {
+    // Optimistic row with its temporary id, while the POST is still pending
+    const renderWithPendingCreation = async () => {
+      global.fetch
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ results: [] }) })
+        .mockReturnValueOnce(new Promise(() => {}));
+
+      const hook = renderHook(() => usePresences(mockPlace), {
+        wrapper: AllTheProviders,
+      });
+
+      await waitFor(() => {
+        expect(hook.result.current.presences).toEqual([]);
+      });
+
+      act(() => {
+        hook.result.current.createPresence('2024-06-15', 'abc', {
+          spot: 'A1',
+          plan: 'Toulouse',
+          period: 'fullday',
+        });
+      });
+
+      await waitFor(() => {
+        expect(hook.result.current.presences).toHaveLength(1);
+      });
+
+      return hook;
+    };
+
+    // Let react-query run the mutation function, which starts asynchronously
+    const settle = () => new Promise(resolve => { setTimeout(resolve, 20); });
+
+    const mutationCalls = () => global.fetch.mock.calls
+      .filter(([, options]) => ['PATCH', 'DELETE'].includes(options?.method));
+
+    it('should not send a DELETE for a presence whose creation is pending', async () => {
+      const { result } = await renderWithPendingCreation();
+      const [pending] = result.current.presences;
+
+      await act(async () => {
+        result.current.deletePresence(pending);
+        await settle();
+      });
+
+      expect(mutationCalls()).toEqual([]);
+      expect(result.current.presences).toHaveLength(1);
+    });
+
+    it('should not send a PATCH for a presence whose creation is pending', async () => {
+      const { result } = await renderWithPendingCreation();
+      const [pending] = result.current.presences;
+
+      await act(async () => {
+        result.current.setPresence({ ...pending, period: 'morning' });
+        await settle();
+      });
+
+      expect(mutationCalls()).toEqual([]);
+    });
+  });
+
   describe('Exported mutation hooks', () => {
     it('should export createRow, updateRow, deleteRow mutations', async () => {
       global.fetch.mockResolvedValueOnce({
