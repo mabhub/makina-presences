@@ -36,7 +36,13 @@ import PresencePage from './components/PresencePage';
 import ExpiredPrefPage, { expiredPref } from './components/ExpiredPrefPage';
 import TTCount from './components/TTCount';
 import DarkThemeProvider from './DarkThemeProvider';
+import useSentryUser from './hooks/useSentryUser';
 /* eslint-enable import/first */
+
+const SentryUser = () => {
+  useSentryUser();
+  return null;
+};
 
 const handleGlobalError = (error) => {
   toast.error(getErrorMessage(error));
@@ -56,6 +62,7 @@ const root = createRoot(container);
 
 root.render(
   <React.StrictMode>
+    <SentryUser />
     <QueryClientProvider client={queryClient}>
       <StyledEngineProvider injectFirst>
         <DarkThemeProvider>
