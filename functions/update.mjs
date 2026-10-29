@@ -4,16 +4,16 @@ import fetchWithTimeout, { isActiveRow } from './utils.mjs';
 
 const DAYS = 'MO,TU,WE,TH,FR,SA,SU'.split(',');
 
-const BLUEMING_TIMEOUT_MS = 8000;
+const FETCH_TIMEOUT_MS = 8000;
 
 /**
  * Crée une fonction fetchJson à partir d'une fonction fetch donnée.
  * Applique un timeout via AbortController et vérifie response.ok.
  * @param {Function} fetchFn - La fonction fetch à utiliser
- * @param {number} timeoutMs - Timeout en millisecondes (défaut BLUEMING_TIMEOUT_MS)
+ * @param {number} timeoutMs - Timeout en millisecondes (défaut FETCH_TIMEOUT_MS)
  * @returns {Function} Une fonction qui fait un fetch avec timeout et parse le JSON
  */
-export const createFetchJson = (fetchFn, timeoutMs = BLUEMING_TIMEOUT_MS) => {
+export const createFetchJson = (fetchFn, timeoutMs = FETCH_TIMEOUT_MS) => {
   /**
    * @param {string} url - URL to fetch
    * @param {RequestInit} [options] - Fetch options
