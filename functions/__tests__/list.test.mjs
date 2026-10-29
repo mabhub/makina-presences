@@ -234,7 +234,7 @@ describe('list.mjs handler', () => {
     const responsePromise = handleList(depsWithFetch);
     vi.advanceTimersByTime(200);
 
-    await expect(responsePromise).rejects.toThrow('aborted');
+    await expect(responsePromise).rejects.toThrow('Timeout after 100ms: api.baserow.io');
     vi.useRealTimers();
   });
 

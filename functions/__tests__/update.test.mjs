@@ -738,7 +738,7 @@ describe(createFetchJson, () => {
     const fetchPromise = fetchJson('https://example.com');
     vi.advanceTimersByTime(1001);
 
-    await expect(fetchPromise).rejects.toThrow('aborted');
+    await expect(fetchPromise).rejects.toThrow('Timeout after 1000ms: example.com');
     vi.useRealTimers();
   });
 

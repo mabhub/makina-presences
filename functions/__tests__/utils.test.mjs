@@ -9,6 +9,19 @@ import {
 
 import fetchWithTimeout, { isActiveRow } from '../utils.mjs';
 
+/**
+ * Build a fetch double that only settles when its signal aborts,
+ * then rejects the way undici does.
+ * @returns {import('vitest').Mock} Fetch double
+ */
+const createHangingFetch = () => vi.fn().mockImplementation(
+  (_url, { signal }) => new Promise((_resolve, reject) => {
+    signal.addEventListener('abort', () => {
+      reject(new DOMException('This operation was aborted', 'AbortError'));
+    });
+  }),
+);
+
 describe(fetchWithTimeout, () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -34,19 +47,31 @@ describe(fetchWithTimeout, () => {
     );
   });
 
-  it('aborts and throws when fetch exceeds timeout', async () => {
-    const mockFetch = vi.fn().mockImplementation(
-      (_url, { signal }) => new Promise((_resolve, reject) => {
-        signal.addEventListener('abort', () => {
-          reject(new DOMException('The operation was aborted.', 'AbortError'));
-        });
-      }),
+  it('names the host and the delay when the timeout fires', async () => {
+    const responsePromise = fetchWithTimeout(
+      'https://api.baserow.io/api/database/rows/table/42/?size=200',
+      {},
+      1000,
+      createHangingFetch(),
     );
-
-    const responsePromise = fetchWithTimeout('https://example.com', {}, 1000, mockFetch);
     vi.advanceTimersByTime(1001);
 
-    await expect(responsePromise).rejects.toThrow('aborted');
+    await expect(responsePromise).rejects.toThrow(/^Timeout after 1000ms: api\.baserow\.io$/);
+  });
+
+  it('keeps the abort error as the cause of a timeout', async () => {
+    const responsePromise = fetchWithTimeout('https://example.com', {}, 1000, createHangingFetch());
+    vi.advanceTimersByTime(1001);
+
+    await expect(responsePromise).rejects.toHaveProperty('cause.name', 'AbortError');
+  });
+
+  it('rethrows a failure unrelated to the timeout unchanged', async () => {
+    const networkError = new TypeError('fetch failed');
+    const mockFetch = vi.fn().mockRejectedValue(networkError);
+
+    await expect(fetchWithTimeout('https://example.com', {}, 1000, mockFetch))
+      .rejects.toBe(networkError);
   });
 
   it('passes additional options to fetch', async () => {
